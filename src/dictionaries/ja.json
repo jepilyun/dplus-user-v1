@@ -1,0 +1,17 @@
+{
+  "metadata": {
+    "title": "Trand ソウル - 地図を超えて",
+    "description": "Trand はソウルを探検するために必要なすべてを提供するスマートな旅行ガイドアプリです。",
+    "keywords": "Trand, ソウル, 旅行, 旅行ガイド, 地図, 旅行情報",
+    "og_title": "Trand ソウル - 地図を超えて",
+    "og_description": "Trand はソウルを探検するために必要なすべてを提供するスマートな旅行ガイドアプリです。",
+    "og_image": "https://trand.app/images/og-image.png",
+    "og_url": "https://trand.app/city/seoul",
+    "og_type": "website",
+    "og_locale": "ja_JP",
+    "og_site_name": "Trand",
+    "og_image_width": 1200,
+    "og_image_height": 630,
+    "og_image_alt": "Trand - 地図を超えて"
+  }
+}

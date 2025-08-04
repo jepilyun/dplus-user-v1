@@ -3,6 +3,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --white: #ffffff;
+  --black: #000000;
+  --key-color: #2DB0E0;
+  --key-color-light: #6FD8FE;
 }
 
 @theme inline {
@@ -23,4 +27,53 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.font-cherry-swash {
+  font-family: var(--font-cherry-swash);
+}
+
+.font-poppins {
+  font-family: var(--font-poppins);
+}
+
+.font-logo {
+  font-family: var(--font-cherry-swash);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.top-nav-city {
+  background: var(--black);
+  padding: 0.2rem 0.8rem;
+  border-radius: 0.4rem;
+  font-family: var(--font-cherry-swash);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--white);
+}
+
+.top-nav-city:hover {
+  background: var(--key-color);
+}
+
+.font-footer {
+  font-size: 1rem;
+}
+
+.main-tag-btn {
+  transition: all 0.3s ease;
+  background-color: var(--white);
+
+  h1 {
+    color: var(--black);
+  }
+}
+
+.main-tag-btn:hover {
+  background-color: var(--key-color-light);
+
+  h1 {
+    color: var(--white);
+  }
 }
