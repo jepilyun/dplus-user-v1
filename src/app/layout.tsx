@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { Cherry_Swash, Noto_Sans_KR, Poppins } from "next/font/google";
+import { Monoton, Noto_Sans_KR, Poppins } from "next/font/google";
 import { Suspense } from "react";
 import GoogleAnalytics from "@/components/google-analytics";
 
 
 export const metadata: Metadata = {
-  title: "Trand",
-  description: "Trand",
+  title: "dplus",
+  description: "dplus 놓치지 말아야 할 중요한 일정, 플러스하세요",
   icons: {
-    // 💡 rel="icon" 에 해당
     icon: [
       {
         url: '/icons/favicon-16x16.png',
@@ -63,11 +62,11 @@ const notoSansKR = Noto_Sans_KR({
   variable: "--font-noto-sans-kr", // CSS 변수로 사용
 });
 
-const cherrySwash = Cherry_Swash({
-  weight: ["400", "700"],
+const monoton = Monoton({
+  weight: ["400"],
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-cherry-swash", // CSS 변수로 사용
+  variable: "--font-monoton", // CSS 변수로 사용
 });
 
 const poppins = Poppins({
@@ -83,7 +82,7 @@ const poppins = Poppins({
  */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${notoSansKR.variable} ${cherrySwash.variable} ${poppins.variable} antialiased`}>
+    <html lang="ko" className={`${notoSansKR.variable} ${monoton.variable} ${poppins.variable} antialiased`}>
       <body>
         <Suspense fallback={null}>
           <GoogleAnalytics />

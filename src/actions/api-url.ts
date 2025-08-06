@@ -1,4 +1,4 @@
-import { LIST_LIMIT } from "trand_common_v1";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 /**
  * API URL 옵션 파라미터 타입

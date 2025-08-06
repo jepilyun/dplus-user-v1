@@ -2,91 +2,82 @@ import { NextRequest, NextResponse } from "next/server";
 import Negotiator from "negotiator";
 import { match } from "@formatjs/intl-localematcher";
 
-const locales = ["en", "cn", "ja", "id", "vi", "th", "tw"];
-const defaultLocale = "en";
-const defaultCity = "seoul";
+const locales = ["en", "cn", "ja", "id", "vi", "th", "tw", "es", "ko", "fr", "it"];
+const defaultLocale = "ko";
 
-/**
- * 현재 요청의 언어 코드를 반환
- * @param request 요청 객체
- * @returns 언어 코드
- */
 function getLocale(request: NextRequest): string {
   const headers: Record<string, string> = {};
-
   request.headers.forEach((value, key) => {
     headers[key] = value;
   });
 
   const languages = new Negotiator({ headers }).languages();
   const matched = match(languages, locales, defaultLocale);
-
-  // 명시적으로 fallback 처리
-  if (!locales.includes(matched)) {
-    return defaultLocale;
-  }
-
-  return matched;
+  return locales.includes(matched) ? matched : defaultLocale;
 }
 
-/**
- * 미들웨어 함수
- * @param request 요청 객체
- * @returns 응답 객체
- */
+// 각 경로 유형별로 "langCode가 와야 하는 정확한 위치" 정의
+const routePatterns: {
+  pattern: RegExp;
+  langIndex: number;
+}[] = [
+  { pattern: /^\/category\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/city\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/date\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/event\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/folder\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/pevent\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/stag\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/tag\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
+  { pattern: /^\/today(?:\/([^/]+))?$/, langIndex: 1 },
+  { pattern: /^\/week\/[^/]+\/[^/]+(?:\/([^/]+))?$/, langIndex: 3 },
+];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. 정적 경로 제외
+  // 1. 정적 요청 제외
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
-    pathname.includes(".") // favicon.ico, .css 등
+    pathname.includes(".")
   ) {
     return NextResponse.next();
   }
 
+  const segments = pathname.split("/").filter(Boolean);
   const locale = getLocale(request);
 
-  // 2. / → /{langCode}
-  if (pathname === "/") {
+  // 2. 루트 → 리디렉션
+  if (segments.length === 0) {
     return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
-  // 3. /city → /city/seoul/{langCode}
-  if (pathname === "/city") {
-    return NextResponse.redirect(new URL(`/city/${defaultCity}/${locale}`, request.url));
-  }
+  // 3. 각 route 패턴에 대해 검사
+  for (const { pattern, langIndex } of routePatterns) {
+    const match = pathname.match(pattern);
 
-  // 4. /city/seoul → /city/seoul/{langCode}
-  const cityMatch = pathname.match(/^\/city\/([^/]+)(\/)?$/);
+    if (match) {
+      const langCandidate = segments[langIndex];
 
-  if (cityMatch) {
-    const cityCode = cityMatch[1];
-    return NextResponse.redirect(new URL(`/city/${cityCode}/${locale}`, request.url));
-  }
+      // 언어 코드가 없거나, 잘못된 경우 → 리디렉션
+      if (!langCandidate || !locales.includes(langCandidate)) {
+        const correctedSegments = segments.slice(0, langIndex).concat(locale);
+        const correctedPath = "/" + correctedSegments.join("/");
 
-  // 5. /city/seoul/en → 유효하면 통과, 아니면 리디렉션
-  const cityLangMatch = pathname.match(/^\/city\/([^/]+)\/([^/]+)/);
+        return NextResponse.redirect(new URL(correctedPath, request.url));
+      }
 
-  if (cityLangMatch) {
-    const cityCode = cityLangMatch[1];
-    const langCode = cityLangMatch[2];
-
-    if (locales.includes(langCode)) {
-      return NextResponse.next();
+      return NextResponse.next(); // 올바른 언어 코드가 있을 경우
     }
-
-    // 언어 코드가 유효하지 않으면 리디렉션
-    return NextResponse.redirect(new URL(`/city/${cityCode}/${defaultLocale}`, request.url));
   }
 
-  // 6. /en, /ja 등 메인 페이지 접근 → OK
-  if (locales.some((lng) => pathname === `/${lng}` || pathname.startsWith(`/${lng}/`))) {
+  // 4. /ko, /en 등은 통과
+  if (locales.includes(segments[0])) {
     return NextResponse.next();
   }
 
-  // 7. 예외 처리
+  // 5. 그 외 루트 → /ko로
   return NextResponse.redirect(new URL(`/${locale}`, request.url));
 }
 

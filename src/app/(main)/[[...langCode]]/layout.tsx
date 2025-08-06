@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
     openGraph: {
       title: dict.metadata.og_title,
       description: dict.metadata.og_description,
-      images: dict.metadata.og_image,
+      images: dict.metadata.og_image, 
     },
     alternates: {
       canonical: `https://trand.app/city/seoul`,

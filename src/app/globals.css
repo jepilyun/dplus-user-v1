@@ -29,8 +29,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.font-cherry-swash {
-  font-family: var(--font-cherry-swash);
+.font-monoton {
+  font-family: var(--font-monoton);
 }
 
 .font-poppins {
@@ -38,7 +38,7 @@ body {
 }
 
 .font-logo {
-  font-family: var(--font-cherry-swash);
+  font-family: var(--font-monoton);
   font-size: 2rem;
   font-weight: 700;
 }
@@ -47,7 +47,7 @@ body {
   background: var(--black);
   padding: 0.2rem 0.8rem;
   border-radius: 0.4rem;
-  font-family: var(--font-cherry-swash);
+  font-family: var(--font-monoton);
   font-weight: 700;
   font-size: 1.2rem;
   color: var(--white);
