@@ -16,12 +16,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
   background: var(--background);
@@ -35,6 +35,10 @@ body {
 
 .font-poppins {
   font-family: var(--font-poppins);
+}
+
+.font-jost {
+  font-family: var(--font-jost);
 }
 
 .font-logo {

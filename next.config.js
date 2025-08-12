@@ -12,11 +12,10 @@ const nextConfig = {
       },
     ],
     domains: [
-      "aheyxxwhjwzgakynwmxj.supabase.co",
+      "gzfnhzdqyqzfytxkzceu.supabase.co",
       "i.ytimg.com",
     ],
   },
 };
 
 module.exports = nextConfig;
-// export default nextConfig;

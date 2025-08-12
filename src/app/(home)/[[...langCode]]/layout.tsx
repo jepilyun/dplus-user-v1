@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
   };
 }
 
-export default function MainLayout({
+export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

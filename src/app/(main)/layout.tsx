@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { getDictionary } from "@/utils/get-dictionary";
+import TopNavMain from "@/components/top-nav/top-nav-main";
 
 /**
  * Generate metadata for the page
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
     openGraph: {
       title: dict.metadata.og_title,
       description: dict.metadata.og_description,
-      images: dict.metadata.og_image,
+      images: dict.metadata.og_image, 
     },
     alternates: {
       canonical: `https://trand.app/city/seoul`,
@@ -26,15 +27,13 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
   };
 }
 
-/**
- * CityLayout
- * @param children - 자식 컴포넌트
- * @returns 
- */
-export default function CityLayout({
+export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return <>
+    <TopNavMain />
+    {children}
+  </>;
 }

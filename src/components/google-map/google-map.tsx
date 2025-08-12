@@ -148,7 +148,7 @@ export default function GoogleMap({
       )}
 
       {/* 클릭 힌트 오버레이 */}
-      {!mapLoading && !mapError && showClickHint && (
+      {!mapLoading && !mapError && showClickHint && clickHintText.length > 0 && (
         <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-70 text-white text-xs p-2 rounded">
           {clickHintText}
         </div>

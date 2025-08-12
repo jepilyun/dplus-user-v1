@@ -3,7 +3,7 @@ import { IconMap } from "@/icons/icon-map";
 import { IconYoutube } from "@/icons/icon-youtube";
 import { generateStreetImageUrl } from "@/utils/generate-image-url";
 import { TStreetDetail } from "trand_common_v1";
-import { LinkForHeader } from "../links-for-header";
+import { LinkForHeader } from "../link-for-detail";
 import GoogleMap from "../google-map/google-map";
 
 export default function StreetHeader({ streetDetail }: { streetDetail: TStreetDetail }) {

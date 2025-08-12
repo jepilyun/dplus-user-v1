@@ -4,7 +4,7 @@ import { IconWebsite } from "@/icons/icon-website";
 import { IconYoutube } from "@/icons/icon-youtube";
 import { generateCityImageUrl } from "@/utils/generate-image-url";
 import { TCityDetail, TRelatedI18n } from "trand_common_v1";
-import { LinkForHeader } from "../links-for-header";
+import { LinkForHeader } from "../link-for-detail";
 
 
 export default function CityHeader({ cityDetail, i18n }: { cityDetail: TCityDetail, i18n: TRelatedI18n | null }) {

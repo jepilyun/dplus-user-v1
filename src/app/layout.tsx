@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Monoton, Noto_Sans_KR, Poppins } from "next/font/google";
+import { Monoton, Noto_Sans_KR, Poppins, Jost } from "next/font/google";
 import { Suspense } from "react";
 import GoogleAnalytics from "@/components/google-analytics";
 
@@ -76,13 +76,20 @@ const poppins = Poppins({
   variable: "--font-poppins", // CSS 변수로 사용
 });
 
+const jost = Jost({
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-jost", // CSS 변수로 사용
+});
+
 /**
  * RootLayout
  * @param children - 자식 컴포넌트
  */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${notoSansKR.variable} ${monoton.variable} ${poppins.variable} antialiased`}>
+    <html lang="ko" className={`${notoSansKR.variable} ${monoton.variable} ${poppins.variable} ${jost.variable} antialiased`}>
       <body>
         <Suspense fallback={null}>
           <GoogleAnalytics />
