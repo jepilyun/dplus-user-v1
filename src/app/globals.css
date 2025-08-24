@@ -81,3 +81,19 @@ body {
     color: var(--white);
   }
 }
+
+
+.bg-tag-country {
+  @apply bg-rose-500 text-white rounded-md px-2 py-1 font-bold;
+  /* 또는 커스텀 핫핑크: */
+  /* background-color: #e91e63; */
+}
+.bg-tag-city {
+  @apply bg-sky-500 text-white rounded-md px-2 py-1 font-bold;
+}
+.bg-tag-repeat {
+  @apply bg-teal-500 text-white rounded-md px-2 py-1 font-bold;
+}
+.bg-tag-category {
+  @apply bg-fuchsia-500 text-white rounded-md px-2 py-1 font-bold;
+}

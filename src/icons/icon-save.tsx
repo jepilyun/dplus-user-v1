@@ -39,7 +39,7 @@ export const IconSave = (props: SVGProps<SVGSVGElement>) => {
             fillRule: "nonzero",
             opacity: 1,
           }} 
-          transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
+          transform=" matrix(1 0 0 1 0 0) " strokeLinecap="round"/>
       </g>
     </svg>
   )

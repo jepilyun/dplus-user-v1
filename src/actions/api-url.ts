@@ -60,8 +60,8 @@ export const apiUrlEvent = (
 
   switch (type) {
     case "detailGet":
-      if (optionalParams?.eventId) {
-        path = `/api/event/detail/get/${optionalParams?.eventId}`;
+      if (optionalParams?.eventId && optionalParams?.langCode) {
+        path = `/api/event/detail/get/${optionalParams?.eventId}/${optionalParams?.langCode}`;
       } else {
         console.error(`Invalid optional params: [optionalParams?.eventId] ${optionalParams?.eventId}`);
       }

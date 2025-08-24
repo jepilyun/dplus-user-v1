@@ -11,8 +11,9 @@ import { apiUrlEvent } from "./api-url";
  */
 export const reqGetEventDetail = async (
   eventId: string,
+  langCode: string,
 ): Promise<ResponseDplusAPI<ResponseEventDetailForUserFront>> => {
-  const res = await fetch(apiUrlEvent("detailGet", { eventId }), {
+  const res = await fetch(apiUrlEvent("detailGet", { eventId, langCode }), {
     method: "GET",
     credentials: "include",
   });

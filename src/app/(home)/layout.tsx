@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import TopNavMain from "@/components/comp-top-nav/top-nav-main";
-import CompFooter from "@/components/comp-common/comp-footer";
 
 /**
  * Generate metadata for the page
@@ -28,14 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
   };
 }
 
-export default function MainLayout({
+export default function HomeLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>
-    <TopNavMain />
-    {children}
-    <CompFooter />
-  </>;
+  return <>{children}</>;
 }

@@ -1,86 +1,131 @@
 import { NextRequest, NextResponse } from "next/server";
 import Negotiator from "negotiator";
-import { match } from "@formatjs/intl-localematcher";
+import { match as localeMatch } from "@formatjs/intl-localematcher";
 
+// 지원하는 언어 목록
 const locales = ["en", "cn", "ja", "id", "vi", "th", "tw", "es", "ko", "fr", "it"];
 const defaultLocale = "ko";
+const LOCALE_COOKIE = "full-locale";
 
-function getLocale(request: NextRequest): string {
+/**
+ * Accept-Language 헤더를 기반으로 기본 언어 코드를 추출
+ * @param request - NextRequest 객체
+ * @returns 기본 언어 코드 (예: "ko", "en")
+ */
+const getBaseLocale = (request: NextRequest): string => {
+  // 쿠키에서 언어 설정 확인 (사용자가 명시적으로 선택한 언어가 있다면 우선 사용)
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  if (cookieLocale) {
+    try {
+      const baseFromCookie = new Intl.Locale(cookieLocale).language;
+      if (locales.includes(baseFromCookie)) {
+        return baseFromCookie;
+      }
+    } catch {
+      // 쿠키 값이 유효하지 않은 경우 무시하고 헤더로 진행
+    }
+  }
+
+  // Accept-Language 헤더에서 언어 추출
   const headers: Record<string, string> = {};
-  request.headers.forEach((value, key) => {
-    headers[key] = value;
-  });
-
+  request.headers.forEach((value, key) => (headers[key] = value));
   const languages = new Negotiator({ headers }).languages();
-  const matched = match(languages, locales, defaultLocale);
+  const matched = localeMatch(languages, locales, defaultLocale);
+
   return locales.includes(matched) ? matched : defaultLocale;
 }
 
-// 각 경로 유형별로 "langCode가 와야 하는 정확한 위치" 정의
-const routePatterns: {
-  pattern: RegExp;
-  langIndex: number;
-}[] = [
-  { pattern: /^\/category\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/city\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/date\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/event\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/folder\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/pevent\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/stag\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/tag\/[^/]+(?:\/([^/]+))?$/, langIndex: 2 },
-  { pattern: /^\/today(?:\/([^/]+))?$/, langIndex: 1 },
-  { pattern: /^\/week\/[^/]+\/[^/]+(?:\/([^/]+))?$/, langIndex: 3 },
-];
+/**
+ * Accept-Language 헤더에서 전체 로케일 정보 추출 (언어-지역 코드)
+ * @param request - NextRequest 객체
+ * @returns 전체 로케일 코드 (예: "ko-KR", "en-US")
+ */
+const getFullLocale = (request: NextRequest): string => {
+  // 쿠키에서 전체 로케일 확인
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  if (cookieLocale) {
+    try {
+      return new Intl.Locale(cookieLocale).toString();
+    } catch {
+      // 쿠키 값이 유효하지 않은 경우 헤더로 진행
+    }
+  }
 
-export function middleware(request: NextRequest) {
+  // Accept-Language 헤더에서 전체 로케일 추출
+  const headers: Record<string, string> = {};
+  request.headers.forEach((value, key) => (headers[key] = value));
+  const languages = new Negotiator({ headers }).languages(); // 예: ["ko-KR","en-US",...]
+  const first = languages[0] || "ko-KR";
+  
+  try {
+    // 정규화 (예: "ko-kr" → "ko-KR")
+    return new Intl.Locale(first).toString();
+  } catch {
+    return first;
+  }
+}
+
+/**
+ * 요청 헤더에 로케일 정보를 추가하여 새로운 헤더 객체 생성
+ * @param request - 원본 NextRequest 객체
+ * @param fullLocale - 전체 로케일 코드
+ * @param baseLocale - 기본 언어 코드
+ * @returns 로케일 헤더가 추가된 Headers 객체
+ */
+const buildRequestHeaders = (request: NextRequest, fullLocale: string, baseLocale: string): Headers => {
+  const headers = new Headers(request.headers);
+  headers.set("x-full-locale", fullLocale);  // 전체 로케일 (ko-KR, en-US 등)
+  headers.set("x-lang", baseLocale);         // 기본 언어 (ko, en 등)
+  headers.set("x-locale-source", "header");  // 로케일 소스 표시 (디버깅용)
+  return headers;
+}
+
+/**
+ * 미들웨어 메인 함수
+ * URL 경로는 그대로 유지하고 헤더에만 로케일 정보를 추가
+ */
+export const middleware = (request: NextRequest): NextResponse => {
   const { pathname } = request.nextUrl;
 
-  // 1. 정적 요청 제외
+  // 정적 파일, API 엔드포인트, Next.js 내부 경로는 미들웨어 처리 제외
   if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.includes(".")
+    pathname.startsWith("/_next") ||     // Next.js 내부 파일
+    pathname.startsWith("/api") ||       // API 라우트
+    pathname.includes(".") ||            // 정적 파일 (이미지, CSS, JS 등)
+    pathname.startsWith("/favicon")      // 파비콘
   ) {
     return NextResponse.next();
   }
 
-  const segments = pathname.split("/").filter(Boolean);
-  const locale = getLocale(request);
+  // 브라우저의 Accept-Language 헤더 또는 쿠키에서 로케일 정보 추출
+  const baseLocale = getBaseLocale(request);  // 예: "ko"
+  const fullLocale = getFullLocale(request);  // 예: "ko-KR"
 
-  // 2. 루트 → 리디렉션
-  if (segments.length === 0) {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
-  }
+  // 요청 헤더에 로케일 정보 추가하여 페이지/API에서 사용할 수 있도록 설정
+  const requestHeaders = buildRequestHeaders(request, fullLocale, baseLocale);
+  
+  // 응답 생성 (URL 경로는 변경하지 않고 헤더만 추가)
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 
-  // 3. 각 route 패턴에 대해 검사
-  for (const { pattern, langIndex } of routePatterns) {
-    const match = pathname.match(pattern);
+  // 사용자의 로케일 설정을 쿠키에 저장 (30일 유지)
+  response.cookies.set(LOCALE_COOKIE, fullLocale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30, // 30일
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production", // 프로덕션에서만 secure 쿠키
+  });
 
-    if (match) {
-      const langCandidate = segments[langIndex];
-
-      // 언어 코드가 없거나, 잘못된 경우 → 리디렉션
-      if (!langCandidate || !locales.includes(langCandidate)) {
-        const correctedSegments = segments.slice(0, langIndex).concat(locale);
-        const correctedPath = "/" + correctedSegments.join("/");
-
-        return NextResponse.redirect(new URL(correctedPath, request.url));
-      }
-
-      return NextResponse.next(); // 올바른 언어 코드가 있을 경우
-    }
-  }
-
-  // 4. /ko, /en 등은 통과
-  if (locales.includes(segments[0])) {
-    return NextResponse.next();
-  }
-
-  // 5. 그 외 루트 → /ko로
-  return NextResponse.redirect(new URL(`/${locale}`, request.url));
+  return response;
 }
 
+// 미들웨어가 실행될 경로 패턴 설정
 export const config = {
-  matcher: ["/((?!_next|favicon.ico|.*\\..*).*)"],
+  matcher: [
+    // 다음 경로들을 제외한 모든 경로에서 미들웨어 실행
+    "/((?!_next|favicon.ico|.*\\..*|api).*)"
+  ],
 };
