@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetEventDetail } from "@/actions/action";
+import { reqGetPeventDetail } from "@/actions/action";
 import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import GoogleMap from "@/components/comp-google-map/google-map";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
@@ -15,7 +15,7 @@ import { IconYoutubeRound } from "@/icons/icon-youtube-round";
 import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODE_TYPE } from "dplus_common_v1";
+import { ResponsePeventDetailForUserFront, SUPPORT_LANG_CODE_TYPE } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { InfoItem } from "@/components/info-item";
@@ -25,23 +25,23 @@ import { IconApple } from "@/icons/icon-apple";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import CompCommonDatetime from "../comp-common/comp-common-datetime";
 import { CompDatesInDetail } from "../comp-common/comp-dates-in-detail";
-import { getEventImageUrls } from "@/utils/set-image-urls";
+import { getPeventImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 
 
 /**
- * 이벤트 상세 페이지
+ * P(ublic) 이벤트 상세 페이지
  * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
- * @returns 이벤트 상세 페이지
+ * @returns P(ublic) 이벤트 상세 페이지
  */
-export default function CompEventDetailPage({ eventId, langCode, fullLocale }: { eventId: string, langCode: string, fullLocale: string }) {
+export default function CompPeventDetailPage({ peventId, langCode, fullLocale }: { peventId: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
-  const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(null);
+  const [peventDetail, setPeventDetail] = useState<ResponsePeventDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-  const fetchEventDetail = async () => {
+  const fetchPeventDetail = async () => {
     try {
-      const res = await reqGetEventDetail(eventId, langCode);
+      const res = await reqGetPeventDetail(peventId, langCode);
       const db = res?.dbResponse;
 
       const isEmptyObj =
@@ -49,22 +49,22 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
 
       // ❗데이터 없으면 에러 페이지로
       if (!res?.success || isEmptyObj || !db?.content) {
-        router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
+        router.replace(`/error/content-not-found?type=pevent&lang=${encodeURIComponent(langCode)}`);
         return;
       }
 
-      setEventDetail(db);
-      setImageUrls(getEventImageUrls(db.content));
+      setPeventDetail(db);
+      setImageUrls(getPeventImageUrls(db.content));
     } catch (e) {
-      router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
+      router.replace(`/error/content-not-found?type=pevent&lang=${encodeURIComponent(langCode)}`);
     }
   };
   
   // 공유 기능 핸들러
   const handleShareClick = async () => {
     const shareData = {
-      title: eventDetail?.content.title || '이벤트 공유',
-      text: eventDetail?.content.description || '이벤트 정보를 확인해보세요!',
+      title: peventDetail?.content.title || 'P이벤트 공유',
+      text: peventDetail?.content.description || 'P이벤트 정보를 확인해보세요!',
       url: window.location.href,
     };
 
@@ -85,58 +85,57 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
   };
 
   const handleMapClick = () => {
-    if (eventDetail?.content.google_map_url) {
-      window.open(eventDetail?.content.google_map_url, '_blank');
+    if (peventDetail?.content.google_map_url) {
+      window.open(peventDetail?.content.google_map_url, '_blank');
     }
   };
 
   const handleMarkerClick = () => {
-    if (eventDetail?.content.google_map_url) {
-      window.open(eventDetail?.content.google_map_url, '_blank');
+    if (peventDetail?.content.google_map_url) {
+      window.open(peventDetail?.content.google_map_url, '_blank');
     }
   };
 
   useEffect(() => {
-    fetchEventDetail();
-  }, [eventId]);
+    fetchPeventDetail();
+  }, [peventId]);
 
   return (
     <div className="flex flex-col gap-8">
       <div className="text-center font-jost font-extrabold text-8xl">
-        {eventDetail?.content.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.content.date)) : ''}
+        {peventDetail?.content.date ? getDdayLabel(calculateDaysFromToday(peventDetail?.content.date)) : ''}
       </div>
       <CompCommonDatetime 
-        datetime={eventDetail?.content.date ?? null}
+        datetime={peventDetail?.content.date ?? null}
         fullLocale={fullLocale}
-        time={eventDetail?.content.time ?? null}
-        isRepeatAnnually={eventDetail?.content.is_repeat_annually ?? false}
+        time={peventDetail?.content.time ?? null}
+        isRepeatAnnually={peventDetail?.content.is_repeat_annually ?? false}
       />
       <HeadlineTagsDetail
-        targetCountryCode={eventDetail?.content.target_country_code || null}
-        targetCountryName={eventDetail?.content.target_country_native || null}
-        targetCityCode={eventDetail?.content.target_city_code || null}
-        targetCityName={eventDetail?.content.target_city_name_native || null}
-        categories={eventDetail?.mapCategoryEvent?.map(item => item.category_name || '') ?? null}
+        targetCountryCode={peventDetail?.content.target_country_code || null}
+        targetCountryName={peventDetail?.content.target_country_native || null}
+        targetCityCode={peventDetail?.content.target_city_code || null}
+        targetCityName={peventDetail?.content.target_city_name_native || null}
         langCode={langCode as SUPPORT_LANG_CODE_TYPE}
       />
       <div id="event-title" className="text-center font-extrabold text-3xl"
-        data-event-id={eventDetail?.content.event_id} 
-        data-event-code={eventDetail?.content.event_code}
+        data-event-id={peventDetail?.content.pevent_id} 
+        data-event-code={peventDetail?.content.pevent_code}
       >
-        {eventDetail?.content.title}
+        {peventDetail?.content.title}
       </div>
       <div className="flex gap-4 justify-center">
         <BtnWithIcon01 
           title="Calendar" 
           icon={<IconGoogleColor />} 
-          onClick={() => addToGoogleCalendar(generateGoogleCalendarEvent(eventDetail?.content ?? null))} 
+          onClick={() => addToGoogleCalendar(generateGoogleCalendarEvent(peventDetail?.content ?? null))} 
           width={22} 
           height={22} 
           minWidth={180} />
         <BtnWithIcon01
           title="Calendar"
           icon={<IconApple />}
-          onClick={() => addToAppleCalendarFromDetail(eventDetail?.content ?? null)}
+          onClick={() => addToAppleCalendarFromDetail(peventDetail?.content ?? null)}
           width={22}
           height={22}
           minWidth={180}
@@ -147,20 +146,9 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
         imageUrls={imageUrls}
         className="m-auto w-full flex max-w-[1440px]"
       />
-      {eventDetail?.content.description && (
-        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1440px] whitespace-pre-line">{eventDetail?.content.description}</div>
+      {peventDetail?.content.description && (
+        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1440px] whitespace-pre-line">{peventDetail?.content.description}</div>
       )}
-      {eventDetail?.mapStagEvent?.map(item => (
-        <div key={item.event_id}>
-          <div>{item.stag_native}</div>
-          <div>{item.stag_name_i18n}</div>
-        </div>
-      ))}
-      {eventDetail?.mapTagEvent?.map(item => (
-        <div key={item.tag_code}>
-          <div>{item.tag_code}</div>
-        </div>
-      ))}
       <div className="m-auto w-full max-w-[1280px]">
         <div className="rounded-xl bg-white/70 p-8 sm:p-12">
           <ul
@@ -170,91 +158,91 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
             "
             aria-label="event contact & links"
           >
-          {eventDetail?.content.address_native && (
+          {peventDetail?.content.address_native && (
             <InfoItem
               icon={<IconMapPinRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.content.address_native}
+              text={peventDetail.content.address_native}
               // 위도경도 있으면 지도 연결, 없으면 주소 검색
               href={
-                eventDetail.content.latitude && eventDetail.content.longitude
-                  ? `https://maps.google.com/?q=${eventDetail.content.latitude},${eventDetail.content.longitude}`
-                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventDetail.content.address_native)}`
+                peventDetail.content.latitude && peventDetail.content.longitude
+                  ? `https://maps.google.com/?q=${peventDetail.content.latitude},${peventDetail.content.longitude}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(peventDetail.content.address_native)}`
               }
               breakWords // 주소는 줄바꿈 허용
             />
           )}
-          {eventDetail?.content.phone && (
+          {peventDetail?.content.phone && (
             <InfoItem
               icon={<IconPhoneRound className="h-12 w-12 text-gray-700" />}
-              text={`+${eventDetail.content.phone_country_code} ${eventDetail.content.phone}`}
-              href={toTelUrl(eventDetail.content.phone)}
+              text={`+${peventDetail.content.phone_country_code} ${peventDetail.content.phone}`}
+              href={toTelUrl(peventDetail.content.phone)}
             />
           )}
-          {eventDetail?.content.homepage && (
+          {peventDetail?.content.homepage && (
             <InfoItem
               icon={<IconHomepageRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.content.homepage.replace(/^https?:\/\//i, "")}
-              href={toAbsoluteUrl(eventDetail.content.homepage)}
+              text={peventDetail.content.homepage.replace(/^https?:\/\//i, "")}
+              href={toAbsoluteUrl(peventDetail.content.homepage)}
             />
           )}
-          {eventDetail?.content.email && (
+          {peventDetail?.content.email && (
             <InfoItem
               icon={<IconEmailRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.content.email}
-              href={toMailUrl(eventDetail.content.email)}
+              text={peventDetail.content.email}
+              href={toMailUrl(peventDetail.content.email)}
             />
           )}
 
-          {eventDetail?.content.youtube_ch_id && (
+          {peventDetail?.content.youtube_ch_id && (
             <InfoItem
               icon={<IconYoutubeRound className="h-12 w-12 text-gray-700" />}
               text="Youtube"
-              href={toYoutubeChannelUrl(eventDetail.content.youtube_ch_id)}
+              href={toYoutubeChannelUrl(peventDetail.content.youtube_ch_id)}
             />
           )}
 
-          {eventDetail?.content.instagram_id && (
+          {peventDetail?.content.instagram_id && (
             <InfoItem
               icon={<IconInstagramRound className="h-12 w-12 text-gray-700" />}
               text="Instagram"
-              href={toInstagramUrl(eventDetail.content.instagram_id)}
+              href={toInstagramUrl(peventDetail.content.instagram_id)}
             />
           )}
 
           {/* 기존 LinkForDetail도 리스트 아이템로 포함 */}
-          {eventDetail?.content.url && (
+          {peventDetail?.content.url && (
             <InfoItem
               icon={<IconWebsiteRound className="h-12 w-12 text-gray-700" />}
               text="URL"
-              href={eventDetail.content.url}
+              href={peventDetail.content.url}
             />
           )}
           </ul>
         </div>
       </div>
-      {eventDetail?.content.latitude && eventDetail?.content.longitude && (
+      {peventDetail?.content.latitude && peventDetail?.content.longitude && (
         <div className="m-auto w-full max-w-[1440px] h-96 bg-red-500 overflow-hidden">
           <GoogleMap 
-            latitude={eventDetail?.content.latitude || 0}
-            longitude={eventDetail?.content.longitude || 0}
-            title={eventDetail?.content.title}
+            latitude={peventDetail?.content.latitude || 0}
+            longitude={peventDetail?.content.longitude || 0}
+            title={peventDetail?.content.title}
             zoom={15}
             className="w-full h-full"
             style={{ minHeight: '384px' }}
             onMapClick={handleMapClick}
             onMarkerClick={handleMarkerClick}
             // showClickHint={true}
-            clickHintText={eventDetail?.content.address_native ?? ''}
+            clickHintText={peventDetail?.content.address_native ?? ''}
           />
         </div>
       )}
       {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
       <div className="flex gap-4 justify-center">
-        <CompLabelCount01 title="Views" count={eventDetail?.content.view_count ?? 0} minWidth={160} minHeight={160} />
-        <CompLabelCount01 title="Saved" count={eventDetail?.content.saved_count ?? 0} minWidth={160} minHeight={160} />
-        <CompLabelCount01 title="Shared" count={eventDetail?.content.shared_count ?? 0} minWidth={160} minHeight={160} />
+        <CompLabelCount01 title="Views" count={peventDetail?.content.view_count ?? 0} minWidth={160} minHeight={160} />
+        <CompLabelCount01 title="Saved" count={peventDetail?.content.saved_count ?? 0} minWidth={160} minHeight={160} />
+        <CompLabelCount01 title="Shared" count={peventDetail?.content.shared_count ?? 0} minWidth={160} minHeight={160} />
       </div>
-      <CompDatesInDetail createdAt={eventDetail?.content.created_at} updatedAt={eventDetail?.content.updated_at} fullLocale={fullLocale} />
+      <CompDatesInDetail createdAt={peventDetail?.content.created_at} updatedAt={peventDetail?.content.updated_at} fullLocale={fullLocale} />
     </div>
   );
 }

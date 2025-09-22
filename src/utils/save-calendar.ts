@@ -1,4 +1,4 @@
-import { TEventDetail } from "dplus_common_v1";
+import { TEventDetail, TPeventDetail } from "dplus_common_v1";
 import { ICalendarEvent, ISODateInput } from "@/types";
 // date-utils에서 필요한 함수들을 정확하게 임포트합니다.
 import { addDaysToDate, addMinutes, toDate, formatDateToICS, formatDateAllDay } from "./date-utils";
@@ -44,7 +44,7 @@ const toGoogleDate = (date: ISODateInput, allDay = false): string => {
  * const googleEvent = generateGoogleCalendarEvent(detail);
  * // => { title: "팀 미팅", startDate: Date 객체, endDate: Date 객체, ... }
  */
-export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | null): ICalendarEvent => {
+export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | TPeventDetail | null): ICalendarEvent => {
   if (!eventDetail) throw new Error("이벤트 정보가 없습니다.");
 
   let startDate: Date;
@@ -282,6 +282,22 @@ const buildICSFromICalendarEvent = (
   return lines.join("\r\n") + "\r\n";
 };
 
+function pickUid(
+  d: TEventDetail | TPeventDetail,
+  prefer?: string
+): string {
+  if (prefer) return prefer;
+  if ("event_id" in d && d.event_id) return d.event_id as string;
+  if ("pevent_id" in d && d.pevent_id) return d.pevent_id as string;
+
+  // 서버라면 node:crypto 권장
+  // return randomUUID();
+
+  return (typeof crypto !== "undefined" && "randomUUID" in crypto)
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 // ── Apple 전용 어댑터: TEventDetail → ICalendarEvent → ICS ─────────────────────
 /**
  * TEventDetail을 받아 Apple Calendar(및 모든 ICS 지원 캘린더)에 추가 가능한
@@ -291,7 +307,7 @@ const buildICSFromICalendarEvent = (
  * 그 결과를 ICS로 직렬화합니다.
  */
 export const generateAppleCalendarEvent = (
-  detail: TEventDetail,
+  detail: TEventDetail | TPeventDetail,
   opts?: Partial<GenerateICSOptions>,
 ): { icsText: string; filename: string } => {
   // 1) 기존 정규화 로직 재사용
@@ -305,12 +321,14 @@ export const generateAppleCalendarEvent = (
       : null;
 
   // 3) ICS 생성
+  const uid = pickUid(detail, opts?.uid);
+
   const icsText = buildICSFromICalendarEvent(baseEvent, {
     rrule,
     geo,
     useTZID: !!baseEvent.timezone && (opts?.useTZID ?? false),
     prodId: opts?.prodId,
-    uid: opts?.uid ?? detail.event_id,
+    uid,
   });
 
   // 4) 파일명
@@ -319,7 +337,7 @@ export const generateAppleCalendarEvent = (
 };
 
 
-export const addToAppleCalendarFromDetail = (detail: TEventDetail | null) => {
+export const addToAppleCalendarFromDetail = (detail: TEventDetail | TPeventDetail | null) => {
   if (!detail) return;
 
   const { icsText, filename } = generateAppleCalendarEvent(detail, { useTZID: true });

@@ -14,7 +14,7 @@ export const HeadlineTagsDetail = ({
   targetCountryName: string | null;
   targetCityCode: string | null;
   targetCityName: string | null;
-  categories: string[] | null;
+  categories?: string[] | null;
   langCode: SUPPORT_LANG_CODE_TYPE;
 }) =>  {
   const i18n = getDplusI18n(langCode);

@@ -1,8 +1,7 @@
 "use client";
 
-import { reqGetEventDetail } from "@/actions/action";
+import { reqGetFolderDetail } from "@/actions/action";
 import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
-import GoogleMap from "@/components/comp-google-map/google-map";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import { IconEmailRound } from "@/icons/icon-email-round";
 import { IconHomepageRound } from "@/icons/icon-homepage-round";
@@ -15,7 +14,7 @@ import { IconYoutubeRound } from "@/icons/icon-youtube-round";
 import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODE_TYPE } from "dplus_common_v1";
+import { ResponseFolderDetailForUserFront, SUPPORT_LANG_CODE_TYPE } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { InfoItem } from "@/components/info-item";
@@ -25,7 +24,7 @@ import { IconApple } from "@/icons/icon-apple";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import CompCommonDatetime from "../comp-common/comp-common-datetime";
 import { CompDatesInDetail } from "../comp-common/comp-dates-in-detail";
-import { getEventImageUrls } from "@/utils/set-image-urls";
+import { getFolderImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 
 
@@ -34,37 +33,38 @@ import { useRouter } from "next/navigation";
  * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */
-export default function CompEventDetailPage({ eventId, langCode, fullLocale }: { eventId: string, langCode: string, fullLocale: string }) {
+export default function CompFolderDetailPage({ folderId, langCode, fullLocale }: { folderId: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
-  const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(null);
+  const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-  const fetchEventDetail = async () => {
+  const fetchFolderDetail = async () => {
     try {
-      const res = await reqGetEventDetail(eventId, langCode);
+      const res = await reqGetFolderDetail(folderId, 0, 10);
       const db = res?.dbResponse;
 
       const isEmptyObj =
         !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
 
-      // ❗데이터 없으면 에러 페이지로
+      // ❗ 콘텐츠 없을 때 에러 화면으로 이동
       if (!res?.success || isEmptyObj || !db?.content) {
-        router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
+        router.replace(`/error/content-not-found?type=folder&lang=${encodeURIComponent(langCode)}`);
         return;
       }
 
-      setEventDetail(db);
-      setImageUrls(getEventImageUrls(db.content));
+      setFolderDetail(db);
+      setImageUrls(getFolderImageUrls(db.content));
     } catch (e) {
-      router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
+      // 네트워크/예외도 에러 페이지로
+      router.replace(`/error/content-not-found?type=folder&lang=${encodeURIComponent(langCode)}`);
     }
   };
   
   // 공유 기능 핸들러
   const handleShareClick = async () => {
     const shareData = {
-      title: eventDetail?.content.title || '이벤트 공유',
-      text: eventDetail?.content.description || '이벤트 정보를 확인해보세요!',
+      title: folderDetail?.content.title || '이벤트 세트 공유',
+      text: folderDetail?.content.description || '이벤트 세트 정보를 확인해보세요!',
       url: window.location.href,
     };
 
@@ -84,26 +84,15 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
     }
   };
 
-  const handleMapClick = () => {
-    if (eventDetail?.content.google_map_url) {
-      window.open(eventDetail?.content.google_map_url, '_blank');
-    }
-  };
-
-  const handleMarkerClick = () => {
-    if (eventDetail?.content.google_map_url) {
-      window.open(eventDetail?.content.google_map_url, '_blank');
-    }
-  };
-
   useEffect(() => {
-    fetchEventDetail();
-  }, [eventId]);
+    fetchFolderDetail();
+  }, [folderId]);
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="text-center font-jost font-extrabold text-8xl">
-        {eventDetail?.content.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.content.date)) : ''}
+      {JSON.stringify(folderDetail)}
+      {/* <div className="text-center font-jost font-extrabold text-8xl">
+        {folderDetail?.content.date ? getDdayLabel(calculateDaysFromToday(folderDetail?.content.date)) : ''}
       </div>
       <CompCommonDatetime 
         datetime={eventDetail?.content.date ?? null}
@@ -222,39 +211,23 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
           )}
 
           {/* 기존 LinkForDetail도 리스트 아이템로 포함 */}
-          {eventDetail?.content.url && (
+          {/* {eventDetail?.content.url && (
             <InfoItem
               icon={<IconWebsiteRound className="h-12 w-12 text-gray-700" />}
               text="URL"
               href={eventDetail.content.url}
             />
           )}
-          </ul>
-        </div>
-      </div>
-      {eventDetail?.content.latitude && eventDetail?.content.longitude && (
-        <div className="m-auto w-full max-w-[1440px] h-96 bg-red-500 overflow-hidden">
-          <GoogleMap 
-            latitude={eventDetail?.content.latitude || 0}
-            longitude={eventDetail?.content.longitude || 0}
-            title={eventDetail?.content.title}
-            zoom={15}
-            className="w-full h-full"
-            style={{ minHeight: '384px' }}
-            onMapClick={handleMapClick}
-            onMarkerClick={handleMarkerClick}
-            // showClickHint={true}
-            clickHintText={eventDetail?.content.address_native ?? ''}
-          />
-        </div>
-      )}
+          </ul> */}
+        {/* </div> */}
+      {/* </div> */}
       {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
-      <div className="flex gap-4 justify-center">
+      {/* <div className="flex gap-4 justify-center">
         <CompLabelCount01 title="Views" count={eventDetail?.content.view_count ?? 0} minWidth={160} minHeight={160} />
         <CompLabelCount01 title="Saved" count={eventDetail?.content.saved_count ?? 0} minWidth={160} minHeight={160} />
         <CompLabelCount01 title="Shared" count={eventDetail?.content.shared_count ?? 0} minWidth={160} minHeight={160} />
-      </div>
-      <CompDatesInDetail createdAt={eventDetail?.content.created_at} updatedAt={eventDetail?.content.updated_at} fullLocale={fullLocale} />
+      </div> */}
+      {/* <CompDatesInDetail createdAt={eventDetail?.content.created_at} updatedAt={eventDetail?.content.updated_at} fullLocale={fullLocale} /> */}
     </div>
   );
 }

@@ -19,7 +19,9 @@ export type APIUrlOptionalParams = {
   date?: string | null;
   page?: number | null;
   size?: number | null;
-  
+  start?: number | null;
+  limit?: number | null;
+  tz?: string | null;
 
   // langCode?: string | null;
   // categoryCode?: string | null;
@@ -73,6 +75,70 @@ export const apiUrlEvent = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
+
+
+
+/**
+ * API Routes: Pevent Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { peventId, langCode }
+ * @returns 경로
+ */
+export const apiUrlPevent = (
+  type: "detailGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet":
+      if (optionalParams?.peventId && optionalParams?.langCode) {
+        path = `/api/pevent/detail/get/${optionalParams?.peventId}/${optionalParams?.langCode}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.peventId] ${optionalParams?.peventId}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
+
+/**
+ * API Routes: Folder Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { folderId, langCode }
+ * @returns 경로
+ */
+export const apiUrlFolder = (
+  type: "detailGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.folderId && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderId)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.folderId] ${optionalParams?.folderId}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
+
+
 
 
 

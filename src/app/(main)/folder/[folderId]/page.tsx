@@ -1,11 +1,11 @@
 import { getRequestLocale } from "@/utils/get-req-locale";
-import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트
+import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 
-export default async function EventDetailPage({
+export default async function FolderDetailPage({
   params,
   searchParams,
 }: {
-  params: { eventId: string; langCode?: string[] };
+  params: { folderId: string };
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
@@ -14,10 +14,10 @@ export default async function EventDetailPage({
   // const data = await fetch(...);
 
   return (
-    <CompEventDetailPage
-      eventId={params.eventId}
+    <CompFolderDetailPage
+      folderId={params.folderId}
       fullLocale={fullLocale}
-      langCode={params.langCode?.[0] ?? langCode}
+      langCode={langCode}
     />
   );
 }
