@@ -29,7 +29,7 @@ import { useRouter } from "next/navigation";
 
 
 /**
- * 이벤트 상세 페이지
+ * 폴더 상세 페이지
  * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */

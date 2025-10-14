@@ -23,14 +23,11 @@ export const addDaysToDate = (date: Date, days: number): Date => {
 };
 
 /**
- * Date 객체에 시간을 설정합니다. (HH:MM 또는 HH:MM:SS)
- * null이면 00:00:00으로 초기화합니다.
+ * Date 객체에 시간을 설정 (HH:MM 또는 HH:MM:SS)
+ * null이면 건드리지 않음 (정오 고정은 generateDdayDatetime에서 수행)
  */
 export const parseAndSetTime = (date: Date, time: string | null): void => {
-  if (!time) {
-    date.setHours(0, 0, 0, 0);
-    return;
-  }
+  if (!time) return;
 
   const [hours, minutes, seconds = 0] = time.split(":").map(Number);
   if (
@@ -48,35 +45,74 @@ export const parseAndSetTime = (date: Date, time: string | null): void => {
 };
 
 /**
- * Date 객체를 읽기 쉬운 형태의 문자열로 포맷합니다.
- * locale, timezone, UTC offset 모두 지원합니다.
+ * Date 객체를 읽기 쉬운 문자열로 포맷
+ * - includeTime이 false면 날짜만
+ * - style이 short면 더 짧게
  */
 export const formatDateTime = (
   date: Date,
   locale: string = "ko-KR",
   tz?: string | null,
-  utcMinutes?: number | null
+  utcMinutes?: number | null,
+  opts?: {
+    includeTime?: boolean;
+    style?: "long" | "short";
+    timeFormat?: "locale" | "12h";  // ★ 추가
+    compactTime?: boolean;          // ★ 추가
+  }
 ): string => {
-  let targetDate = new Date(date);
+  const { includeTime = true, style = "long", timeFormat = "locale", compactTime = true } = opts ?? {};
 
-  // 1) UTC offset 적용
+  let targetDate = new Date(date);
   if (typeof utcMinutes === "number") {
     targetDate = new Date(targetDate.getTime() + utcMinutes * 60 * 1000);
   }
 
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    hourCycle: "h12",
-  };
-  if (tz) options.timeZone = tz;
+  // 날짜 파트 (locale 유지)
+  const dateOptsLong: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+  const dateOptsShort: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
+  const dateFmt = new Intl.DateTimeFormat(locale, {
+    ...(style === "short" ? dateOptsShort : dateOptsLong),
+    ...(tz ? { timeZone: tz } : {}),
+  });
+  const dateStr = dateFmt.format(targetDate);
 
-  return new Intl.DateTimeFormat(locale, options).format(targetDate);
+  if (!includeTime) return dateStr;
+
+  // 시간 파트
+  let timeStr: string;
+  if (timeFormat === "12h") {
+    // en-US로 12시간 AM/PM 생성
+    const t = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      ...(tz ? { timeZone: tz } : {}),
+    }).format(targetDate); // 예: "04:00 PM" / "04:30 PM"
+
+    if (compactTime) {
+      // ":00"이면 분 제거, 공백 제거 → "4PM"
+      // 분이 있으면 "4:30PM"
+      const [hm, ap] = t.split(" "); // ["04:00", "PM"]
+      const [h, m] = hm.split(":");
+      const hour = String(Number(h)); // 앞의 0 제거
+      timeStr = (m === "00") ? `${hour}${ap}` : `${hour}:${m}${ap}`;
+    } else {
+      timeStr = t; // "04:00 PM"
+    }
+  } else {
+    // 기존 로컬 포맷 (ko-KR이면 오후 4:00)
+    const use24h = locale.toLowerCase().startsWith("ko");
+    timeStr = new Intl.DateTimeFormat(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: !use24h,
+      ...(tz ? { timeZone: tz } : {}),
+    }).format(targetDate);
+  }
+
+  // 날짜 + 시간 결합
+  return `${dateStr} ${timeStr}`;
 };
 
 /**

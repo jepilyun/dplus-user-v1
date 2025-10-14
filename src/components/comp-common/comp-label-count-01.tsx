@@ -19,8 +19,8 @@ export default function CompLabelCount01({
       }}
     >
       <div className="flex flex-col gap-2 items-center justify-center">
-        <div className="text-4xl font-bold">{count}</div>
-        <div className="text-sm text-gray-500">{title}</div>
+        <div className="text-2xl font-bold">{count}</div>
+        <div className="text-xs text-gray-500 font-poppins uppercase">{title}</div>
       </div>
     </div>
   );

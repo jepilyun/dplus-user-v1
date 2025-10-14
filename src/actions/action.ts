@@ -2,9 +2,8 @@ import {
   ResponseDplusAPI,
   ResponseEventDetailForUserFront,
   ResponseFolderDetailForUserFront,
-  ResponsePeventDetailForUserFront,
 } from "dplus_common_v1";
-import { apiUrlEvent, apiUrlFolder, apiUrlPevent } from "./api-url";
+import { apiUrlEvent, apiUrlFolder } from "./api-url";
 
 /**
  * Event 상세 화면 조회 for User Front
@@ -16,23 +15,6 @@ export const reqGetEventDetail = async (
   langCode: string,
 ): Promise<ResponseDplusAPI<ResponseEventDetailForUserFront>> => {
   const res = await fetch(apiUrlEvent("detailGet", { eventId, langCode }), {
-    method: "GET",
-    credentials: "include",
-  });
-
-  return res.json();
-};
-
-/**
- * Pevent 상세 화면 조회 for User Front
- * @param peventId
- * @returns ResponseDplusAPI<ResponsePeventDetailForUserFront>
- */
-export const reqGetPeventDetail = async (
-  peventId: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponsePeventDetailForUserFront>> => {
-  const res = await fetch(apiUrlPevent("detailGet", { peventId, langCode }), {
     method: "GET",
     credentials: "include",
   });

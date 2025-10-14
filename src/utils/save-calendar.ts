@@ -1,4 +1,4 @@
-import { TEventDetail, TPeventDetail } from "dplus_common_v1";
+import { TEventDetail } from "dplus_common_v1";
 import { ICalendarEvent, ISODateInput } from "@/types";
 // date-utils에서 필요한 함수들을 정확하게 임포트합니다.
 import { addDaysToDate, addMinutes, toDate, formatDateToICS, formatDateAllDay } from "./date-utils";
@@ -44,7 +44,7 @@ const toGoogleDate = (date: ISODateInput, allDay = false): string => {
  * const googleEvent = generateGoogleCalendarEvent(detail);
  * // => { title: "팀 미팅", startDate: Date 객체, endDate: Date 객체, ... }
  */
-export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | TPeventDetail | null): ICalendarEvent => {
+export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | null): ICalendarEvent => {
   if (!eventDetail) throw new Error("이벤트 정보가 없습니다.");
 
   let startDate: Date;
@@ -283,7 +283,7 @@ const buildICSFromICalendarEvent = (
 };
 
 function pickUid(
-  d: TEventDetail | TPeventDetail,
+  d: TEventDetail,
   prefer?: string
 ): string {
   if (prefer) return prefer;
@@ -307,7 +307,7 @@ function pickUid(
  * 그 결과를 ICS로 직렬화합니다.
  */
 export const generateAppleCalendarEvent = (
-  detail: TEventDetail | TPeventDetail,
+  detail: TEventDetail,
   opts?: Partial<GenerateICSOptions>,
 ): { icsText: string; filename: string } => {
   // 1) 기존 정규화 로직 재사용
@@ -337,7 +337,7 @@ export const generateAppleCalendarEvent = (
 };
 
 
-export const addToAppleCalendarFromDetail = (detail: TEventDetail | TPeventDetail | null) => {
+export const addToAppleCalendarFromDetail = (detail: TEventDetail | null) => {
   if (!detail) return;
 
   const { icsText, filename } = generateAppleCalendarEvent(detail, { useTZID: true });

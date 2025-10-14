@@ -14,8 +14,13 @@ export default function CompCommonDatetime({ datetime, fullLocale, time, isRepea
           {getDplusI18n(fullLocale).repeat_annually}
         </div>
       )}
-      <div className="text-center font-jost font-extrabold text-2xl">
-        {generateDdayDatetime(datetime, fullLocale, time ?? undefined)}
+      <div className="text-center font-poppins font-extrabold text-2xl">
+        {generateDdayDatetime(datetime, fullLocale, time ?? null, {
+          style: "long",
+          timeFormat: "12h",   // ★ "4PM" 스타일
+          compactTime: true,   // ★ ":00"이면 분 생략 + 공백 제거
+          // tz: "Asia/Seoul",
+        })}
       </div>
     </div>
   );

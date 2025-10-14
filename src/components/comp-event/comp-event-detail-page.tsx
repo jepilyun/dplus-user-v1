@@ -34,27 +34,27 @@ import { useRouter } from "next/navigation";
  * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */
-export default function CompEventDetailPage({ eventId, langCode, fullLocale }: { eventId: string, langCode: string, fullLocale: string }) {
+export default function CompEventDetailPage({ eventCode, langCode, fullLocale }: { eventCode: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   const fetchEventDetail = async () => {
     try {
-      const res = await reqGetEventDetail(eventId, langCode);
+      const res = await reqGetEventDetail(eventCode, langCode);
       const db = res?.dbResponse;
 
       const isEmptyObj =
         !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
 
       // ❗데이터 없으면 에러 페이지로
-      if (!res?.success || isEmptyObj || !db?.content) {
+      if (!res?.success || isEmptyObj || !db?.event) {
         router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
         return;
       }
 
       setEventDetail(db);
-      setImageUrls(getEventImageUrls(db.content));
+      setImageUrls(getEventImageUrls(db.event));
     } catch (e) {
       router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
     }
@@ -63,8 +63,8 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
   // 공유 기능 핸들러
   const handleShareClick = async () => {
     const shareData = {
-      title: eventDetail?.content.title || '이벤트 공유',
-      text: eventDetail?.content.description || '이벤트 정보를 확인해보세요!',
+      title: eventDetail?.event.title || '이벤트 공유',
+      text: eventDetail?.event.description || '이벤트 정보를 확인해보세요!',
       url: window.location.href,
     };
 
@@ -85,58 +85,58 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
   };
 
   const handleMapClick = () => {
-    if (eventDetail?.content.google_map_url) {
-      window.open(eventDetail?.content.google_map_url, '_blank');
+    if (eventDetail?.event.google_map_url) {
+      window.open(eventDetail?.event.google_map_url, '_blank');
     }
   };
 
   const handleMarkerClick = () => {
-    if (eventDetail?.content.google_map_url) {
-      window.open(eventDetail?.content.google_map_url, '_blank');
+    if (eventDetail?.event.google_map_url) {
+      window.open(eventDetail?.event.google_map_url, '_blank');
     }
   };
 
   useEffect(() => {
     fetchEventDetail();
-  }, [eventId]);
+  }, [eventCode]);
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="text-center font-jost font-extrabold text-8xl">
-        {eventDetail?.content.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.content.date)) : ''}
+      <div className="text-center font-poppins font-extrabold text-8xl">
+        {eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
       </div>
       <CompCommonDatetime 
-        datetime={eventDetail?.content.date ?? null}
+        datetime={eventDetail?.event.date ?? null}
         fullLocale={fullLocale}
-        time={eventDetail?.content.time ?? null}
-        isRepeatAnnually={eventDetail?.content.is_repeat_annually ?? false}
+        time={eventDetail?.event.time ?? null}
+        isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
       />
       <HeadlineTagsDetail
-        targetCountryCode={eventDetail?.content.target_country_code || null}
-        targetCountryName={eventDetail?.content.target_country_native || null}
-        targetCityCode={eventDetail?.content.target_city_code || null}
-        targetCityName={eventDetail?.content.target_city_name_native || null}
-        categories={eventDetail?.mapCategoryEvent?.map(item => item.category_name || '') ?? null}
+        targetCountryCode={eventDetail?.event.target_country_code || null}
+        targetCountryName={eventDetail?.event.target_country_native || null}
+        targetCityCode={eventDetail?.event.target_city_code || null}
+        targetCityName={eventDetail?.event.target_city_native || null}
+        categories={eventDetail?.mapCategoryEvent?.items.map(item => item.category_info?.name || '') ?? null}
         langCode={langCode as SUPPORT_LANG_CODE_TYPE}
       />
       <div id="event-title" className="text-center font-extrabold text-3xl"
-        data-event-id={eventDetail?.content.event_id} 
-        data-event-code={eventDetail?.content.event_code}
+        data-event-id={eventDetail?.event.event_id} 
+        data-event-code={eventDetail?.event.event_code}
       >
-        {eventDetail?.content.title}
+        {eventDetail?.event.title}
       </div>
       <div className="flex gap-4 justify-center">
         <BtnWithIcon01 
           title="Calendar" 
           icon={<IconGoogleColor />} 
-          onClick={() => addToGoogleCalendar(generateGoogleCalendarEvent(eventDetail?.content ?? null))} 
+          onClick={() => addToGoogleCalendar(generateGoogleCalendarEvent(eventDetail?.event ?? null))} 
           width={22} 
           height={22} 
           minWidth={180} />
         <BtnWithIcon01
           title="Calendar"
           icon={<IconApple />}
-          onClick={() => addToAppleCalendarFromDetail(eventDetail?.content ?? null)}
+          onClick={() => addToAppleCalendarFromDetail(eventDetail?.event ?? null)}
           width={22}
           height={22}
           minWidth={180}
@@ -147,18 +147,17 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
         imageUrls={imageUrls}
         className="m-auto w-full flex max-w-[1440px]"
       />
-      {eventDetail?.content.description && (
-        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1440px] whitespace-pre-line">{eventDetail?.content.description}</div>
+      {eventDetail?.event.description && (
+        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1440px] whitespace-pre-line">{eventDetail?.event.description}</div>
       )}
-      {eventDetail?.mapStagEvent?.map(item => (
+      {eventDetail?.mapStagEvent?.items.map(item => (
         <div key={item.event_id}>
-          <div>{item.stag_native}</div>
-          <div>{item.stag_name_i18n}</div>
+          <div>{item.stag_info?.stag_native}</div>
         </div>
       ))}
-      {eventDetail?.mapTagEvent?.map(item => (
-        <div key={item.tag_code}>
-          <div>{item.tag_code}</div>
+      {eventDetail?.mapTagEvent?.items.map(item => (
+        <div key={item.tag_info?.tag_code}>
+          <div>{item.tag_info?.tag_code}</div>
         </div>
       ))}
       <div className="m-auto w-full max-w-[1280px]">
@@ -170,91 +169,88 @@ export default function CompEventDetailPage({ eventId, langCode, fullLocale }: {
             "
             aria-label="event contact & links"
           >
-          {eventDetail?.content.address_native && (
+          {eventDetail?.event.address_native && (
             <InfoItem
               icon={<IconMapPinRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.content.address_native}
+              text={eventDetail.event.address_native}
               // 위도경도 있으면 지도 연결, 없으면 주소 검색
               href={
-                eventDetail.content.latitude && eventDetail.content.longitude
-                  ? `https://maps.google.com/?q=${eventDetail.content.latitude},${eventDetail.content.longitude}`
-                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventDetail.content.address_native)}`
+                eventDetail.event.latitude && eventDetail.event.longitude
+                  ? `https://maps.google.com/?q=${eventDetail.event.latitude},${eventDetail.event.longitude}`
+                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventDetail.event.address_native)}`
               }
               breakWords // 주소는 줄바꿈 허용
             />
           )}
-          {eventDetail?.content.phone && (
+          {eventDetail?.event.phone && (
             <InfoItem
               icon={<IconPhoneRound className="h-12 w-12 text-gray-700" />}
-              text={`+${eventDetail.content.phone_country_code} ${eventDetail.content.phone}`}
-              href={toTelUrl(eventDetail.content.phone)}
+              text={`+${eventDetail.event.phone_country_code} ${eventDetail.event.phone}`}
+              href={toTelUrl(eventDetail.event.phone)}
             />
           )}
-          {eventDetail?.content.homepage && (
+          {eventDetail?.event.homepage && (
             <InfoItem
               icon={<IconHomepageRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.content.homepage.replace(/^https?:\/\//i, "")}
-              href={toAbsoluteUrl(eventDetail.content.homepage)}
+              text={eventDetail.event.homepage.replace(/^https?:\/\//i, "")}
+              href={toAbsoluteUrl(eventDetail.event.homepage)}
             />
           )}
-          {eventDetail?.content.email && (
+          {eventDetail?.event.email && (
             <InfoItem
               icon={<IconEmailRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.content.email}
-              href={toMailUrl(eventDetail.content.email)}
+              text={eventDetail.event.email}
+              href={toMailUrl(eventDetail.event.email)}
             />
           )}
-
-          {eventDetail?.content.youtube_ch_id && (
+          {eventDetail?.event.youtube_ch_id && (
             <InfoItem
               icon={<IconYoutubeRound className="h-12 w-12 text-gray-700" />}
               text="Youtube"
-              href={toYoutubeChannelUrl(eventDetail.content.youtube_ch_id)}
+              href={toYoutubeChannelUrl(eventDetail.event.youtube_ch_id)}
             />
           )}
-
-          {eventDetail?.content.instagram_id && (
+          {eventDetail?.event.instagram_id && (
             <InfoItem
               icon={<IconInstagramRound className="h-12 w-12 text-gray-700" />}
               text="Instagram"
-              href={toInstagramUrl(eventDetail.content.instagram_id)}
+              href={toInstagramUrl(eventDetail.event.instagram_id)}
             />
           )}
-
           {/* 기존 LinkForDetail도 리스트 아이템로 포함 */}
-          {eventDetail?.content.url && (
+          {eventDetail?.event.url && (
             <InfoItem
               icon={<IconWebsiteRound className="h-12 w-12 text-gray-700" />}
               text="URL"
-              href={eventDetail.content.url}
+              href={eventDetail.event.url}
             />
           )}
           </ul>
         </div>
       </div>
-      {eventDetail?.content.latitude && eventDetail?.content.longitude && (
-        <div className="m-auto w-full max-w-[1440px] h-96 bg-red-500 overflow-hidden">
+      {eventDetail?.event.latitude && eventDetail?.event.longitude && (
+        <div className="m-auto w-full max-w-[1440px] h-48 bg-red-500 overflow-hidden">
           <GoogleMap 
-            latitude={eventDetail?.content.latitude || 0}
-            longitude={eventDetail?.content.longitude || 0}
-            title={eventDetail?.content.title}
+            latitude={eventDetail?.event.latitude || 0}
+            longitude={eventDetail?.event.longitude || 0}
+            title={eventDetail?.event.title}
             zoom={15}
             className="w-full h-full"
-            style={{ minHeight: '384px' }}
+            style={{ minHeight: '192px' }}
             onMapClick={handleMapClick}
             onMarkerClick={handleMarkerClick}
             // showClickHint={true}
-            clickHintText={eventDetail?.content.address_native ?? ''}
+            clickHintText={eventDetail?.event.address_native ?? ''}
           />
         </div>
       )}
       {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
-      <div className="flex gap-4 justify-center">
-        <CompLabelCount01 title="Views" count={eventDetail?.content.view_count ?? 0} minWidth={160} minHeight={160} />
-        <CompLabelCount01 title="Saved" count={eventDetail?.content.saved_count ?? 0} minWidth={160} minHeight={160} />
-        <CompLabelCount01 title="Shared" count={eventDetail?.content.shared_count ?? 0} minWidth={160} minHeight={160} />
+      <div className="flex gap-4 justify-center flex-wrap">
+        <CompLabelCount01 title="Views" count={eventDetail?.event.view_count ?? 0} minWidth={120} minHeight={120} />
+        <CompLabelCount01 title="Saved" count={eventDetail?.event.saved_count ?? 0} minWidth={120} minHeight={120} />
+        <CompLabelCount01 title="Shared" count={eventDetail?.event.shared_count ?? 0} minWidth={120} minHeight={120} />
       </div>
-      <CompDatesInDetail createdAt={eventDetail?.content.created_at} updatedAt={eventDetail?.content.updated_at} fullLocale={fullLocale} />
+      <CompDatesInDetail createdAt={eventDetail?.event.created_at} updatedAt={eventDetail?.event.updated_at} fullLocale={fullLocale} />
     </div>
   );
 }

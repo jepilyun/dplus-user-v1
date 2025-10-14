@@ -11,7 +11,7 @@ export default async function EventDetailPage({
   params,
   searchParams,
 }: {
-  params: { eventId: string };
+  params: { eventCode: string };
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
@@ -21,7 +21,7 @@ export default async function EventDetailPage({
 
   return (
     <CompEventDetailPage
-      eventId={params.eventId}
+      eventCode={params.eventCode}
       fullLocale={fullLocale}
       langCode={langCode}
     />

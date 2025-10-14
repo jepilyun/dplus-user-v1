@@ -1,4 +1,3 @@
-// theme.ts 또는 theme.js
 import { createTheme } from "@mui/material/styles";
 
 
