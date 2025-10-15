@@ -4,30 +4,20 @@ import { reqGetEventDetail } from "@/actions/action";
 import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import GoogleMap from "@/components/comp-google-map/google-map";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
-import { IconEmailRound } from "@/icons/icon-email-round";
-import { IconHomepageRound } from "@/icons/icon-homepage-round";
-import { IconInstagramRound } from "@/icons/icon-instagram-round";
-import { IconMapPinRound } from "@/icons/icon-map-pin-round";
-import { IconPhoneRound } from "@/icons/icon-phone-round";
 import { IconShare } from "@/icons/icon-share";
-import { IconWebsiteRound } from "@/icons/icon-website-round";
-import { IconYoutubeRound } from "@/icons/icon-youtube-round";
 import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODE_TYPE } from "dplus_common_v1";
 import { useEffect, useState } from "react";
-import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
-import { InfoItem } from "@/components/info-item";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import { IconGoogleColor } from "@/icons/icon-google-color";
 import { IconApple } from "@/icons/icon-apple";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import CompCommonDatetime from "../comp-common/comp-common-datetime";
-import { CompDatesInDetail } from "../comp-common/comp-dates-in-detail";
 import { getEventImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
-
+import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
 
 /**
  * 이벤트 상세 페이지
@@ -101,7 +91,11 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
   }, [eventCode]);
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8"
+      data-event-code={eventDetail?.event.event_code}
+      date-created-at={eventDetail?.event.created_at}
+      date-updated-at={eventDetail?.event.updated_at}
+    >
       <div className="text-center font-poppins font-extrabold text-8xl">
         {eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
       </div>
@@ -160,74 +154,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
           <div>{item.tag_info?.tag_code}</div>
         </div>
       ))}
-      <div className="m-auto w-full max-w-[1280px]">
-        <div className="rounded-xl bg-white/70 p-8 sm:p-12">
-          <ul
-            className="
-              grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3
-              gap-x-6 gap-y-6
-            "
-            aria-label="event contact & links"
-          >
-          {eventDetail?.event.address_native && (
-            <InfoItem
-              icon={<IconMapPinRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.event.address_native}
-              // 위도경도 있으면 지도 연결, 없으면 주소 검색
-              href={
-                eventDetail.event.latitude && eventDetail.event.longitude
-                  ? `https://maps.google.com/?q=${eventDetail.event.latitude},${eventDetail.event.longitude}`
-                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventDetail.event.address_native)}`
-              }
-              breakWords // 주소는 줄바꿈 허용
-            />
-          )}
-          {eventDetail?.event.phone && (
-            <InfoItem
-              icon={<IconPhoneRound className="h-12 w-12 text-gray-700" />}
-              text={`+${eventDetail.event.phone_country_code} ${eventDetail.event.phone}`}
-              href={toTelUrl(eventDetail.event.phone)}
-            />
-          )}
-          {eventDetail?.event.homepage && (
-            <InfoItem
-              icon={<IconHomepageRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.event.homepage.replace(/^https?:\/\//i, "")}
-              href={toAbsoluteUrl(eventDetail.event.homepage)}
-            />
-          )}
-          {eventDetail?.event.email && (
-            <InfoItem
-              icon={<IconEmailRound className="h-12 w-12 text-gray-700" />}
-              text={eventDetail.event.email}
-              href={toMailUrl(eventDetail.event.email)}
-            />
-          )}
-          {eventDetail?.event.youtube_ch_id && (
-            <InfoItem
-              icon={<IconYoutubeRound className="h-12 w-12 text-gray-700" />}
-              text="Youtube"
-              href={toYoutubeChannelUrl(eventDetail.event.youtube_ch_id)}
-            />
-          )}
-          {eventDetail?.event.instagram_id && (
-            <InfoItem
-              icon={<IconInstagramRound className="h-12 w-12 text-gray-700" />}
-              text="Instagram"
-              href={toInstagramUrl(eventDetail.event.instagram_id)}
-            />
-          )}
-          {/* 기존 LinkForDetail도 리스트 아이템로 포함 */}
-          {eventDetail?.event.url && (
-            <InfoItem
-              icon={<IconWebsiteRound className="h-12 w-12 text-gray-700" />}
-              text="URL"
-              href={eventDetail.event.url}
-            />
-          )}
-          </ul>
-        </div>
-      </div>
+      <CompEventContactLinks event={eventDetail?.event} />
       {eventDetail?.event.latitude && eventDetail?.event.longitude && (
         <div className="m-auto w-full max-w-[1440px] h-48 bg-red-500 overflow-hidden">
           <GoogleMap 
@@ -250,7 +177,6 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         <CompLabelCount01 title="Saved" count={eventDetail?.event.saved_count ?? 0} minWidth={120} minHeight={120} />
         <CompLabelCount01 title="Shared" count={eventDetail?.event.shared_count ?? 0} minWidth={120} minHeight={120} />
       </div>
-      <CompDatesInDetail createdAt={eventDetail?.event.created_at} updatedAt={eventDetail?.event.updated_at} fullLocale={fullLocale} />
     </div>
   );
 }
