@@ -10,9 +10,8 @@ export type APIUrlOptionalParams = {
   cityCode?: string | null;
   stagCode?: string | null;
   tagCode?: string | null;
-  eventId?: string | null;
-  peventId?: string | null;
-  folderId?: string | null;
+  eventCode?: string | null;
+  folderCode?: string | null;
   keywordCode?: string | null;
   year?: number | null;
   weekNo?: number | null;
@@ -62,10 +61,10 @@ export const apiUrlEvent = (
 
   switch (type) {
     case "detailGet":
-      if (optionalParams?.eventId && optionalParams?.langCode) {
-        path = `/api/event/detail/get/${optionalParams?.eventId}/${optionalParams?.langCode}`;
+      if (optionalParams?.eventCode && optionalParams?.langCode) {
+        path = `/api/event/detail/get/${optionalParams?.eventCode}/${optionalParams?.langCode}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.eventId] ${optionalParams?.eventId}`);
+        console.error(`Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`);
       }
       break;
     default:
@@ -76,35 +75,6 @@ export const apiUrlEvent = (
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
 
-
-
-/**
- * API Routes: Pevent Detail 경로 생성
- * @param type 경로 타입
- * @param optionalParams { peventId, langCode }
- * @returns 경로
- */
-export const apiUrlPevent = (
-  type: "detailGet",
-  optionalParams?: APIUrlOptionalParams,
-) => {
-  let path = "";
-
-  switch (type) {
-    case "detailGet":
-      if (optionalParams?.peventId && optionalParams?.langCode) {
-        path = `/api/pevent/detail/get/${optionalParams?.peventId}/${optionalParams?.langCode}`;
-      } else {
-        console.error(`Invalid optional params: [optionalParams?.peventId] ${optionalParams?.peventId}`);
-      }
-      break;
-    default:
-      console.error(`Invalid route: ${type}`);
-      break;
-  }
-
-  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
-};
 
 
 
@@ -122,10 +92,10 @@ export const apiUrlFolder = (
 
   switch (type) {
     case "detailGet": 
-      if (optionalParams?.folderId && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderId)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (optionalParams?.folderCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.folderId] ${optionalParams?.folderId}`);
+        console.error(`Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`);
       }
       break;
     default:

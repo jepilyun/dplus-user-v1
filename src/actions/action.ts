@@ -7,14 +7,14 @@ import { apiUrlEvent, apiUrlFolder } from "./api-url";
 
 /**
  * Event 상세 화면 조회 for User Front
- * @param eventId
+ * @param eventCode
  * @returns ResponseDplusAPI<ResponseEventDetailForUserFront>
  */
 export const reqGetEventDetail = async (
-  eventId: string,
+  eventCode: string,
   langCode: string,
 ): Promise<ResponseDplusAPI<ResponseEventDetailForUserFront>> => {
-  const res = await fetch(apiUrlEvent("detailGet", { eventId, langCode }), {
+  const res = await fetch(apiUrlEvent("detailGet", { eventCode, langCode }), {
     method: "GET",
     credentials: "include",
   });
@@ -24,17 +24,17 @@ export const reqGetEventDetail = async (
 
 /**
  * Folder 상세 화면 조회 for User Front
- * @param folderId
+ * @param folderCode
  * @param start 
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetFolderDetail = async (
-  folderId: string,
+  folderCode: string,
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseFolderDetailForUserFront>> => {
-  const res = await fetch(apiUrlFolder("detailGet", { folderId, start, limit }), {
+  const res = await fetch(apiUrlFolder("detailGet", { folderCode, start, limit }), {
     method: "GET",
     credentials: "include",
   });

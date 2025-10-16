@@ -8,7 +8,7 @@ import { IconShare } from "@/icons/icon-share";
 import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODE_TYPE } from "dplus_common_v1";
+import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import { IconGoogleColor } from "@/icons/icon-google-color";
@@ -111,10 +111,9 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         targetCityCode={eventDetail?.event.target_city_code || null}
         targetCityName={eventDetail?.event.target_city_native || null}
         categories={eventDetail?.mapCategoryEvent?.items.map(item => item.category_info?.name || '') ?? null}
-        langCode={langCode as SUPPORT_LANG_CODE_TYPE}
+        langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
       <div id="event-title" className="text-center font-extrabold text-3xl"
-        data-event-id={eventDetail?.event.event_id} 
         data-event-code={eventDetail?.event.event_code}
       >
         {eventDetail?.event.title}
@@ -138,14 +137,15 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         <BtnWithIcon01 title="Share" icon={<IconShare />} onClick={handleShareClick} width={22} height={22} minWidth={180} />
       </div>
       <HeroImageSlider
+        bucket="events"
         imageUrls={imageUrls}
         className="m-auto w-full flex max-w-[1440px]"
       />
       {eventDetail?.event.description && (
-        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1440px] whitespace-pre-line">{eventDetail?.event.description}</div>
+        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">{eventDetail?.event.description}</div>
       )}
       {eventDetail?.mapStagEvent?.items.map(item => (
-        <div key={item.event_id}>
+        <div key={item.stag_info?.stag_code}>
           <div>{item.stag_info?.stag_native}</div>
         </div>
       ))}

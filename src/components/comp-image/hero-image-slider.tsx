@@ -1,6 +1,6 @@
 "use client";
 
-import { generateEventImageUrl } from "@/utils/generate-image-url";
+import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import Image from "next/image";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
@@ -8,11 +8,12 @@ import ChevronRight from "@mui/icons-material/ChevronRight";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type HeroImageSliderProps = {
+  bucket: string;
   imageUrls?: string[] | null;
   className?: string;
 };
 
-export function HeroImageSlider({ imageUrls, className }: HeroImageSliderProps) {
+export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSliderProps) {
   const urls = useMemo(
     () => (imageUrls ?? []).filter(Boolean) as string[],
     [imageUrls]
@@ -108,7 +109,7 @@ export function HeroImageSlider({ imageUrls, className }: HeroImageSliderProps) 
                 <div className="absolute inset-0">
                   <Image
                     className="w-full h-full object-cover"
-                    src={generateEventImageUrl(src) ?? ""}
+                    src={generateStorageImageUrl(bucket, src) ?? ""}
                     alt={`Hero Image ${idx + 1}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -248,7 +249,7 @@ export function HeroImageSlider({ imageUrls, className }: HeroImageSliderProps) 
 
           <div className="relative w-[92%] md:w-[88%] max-w-6xl h-[80vh]">
             <Image
-              src={generateEventImageUrl(urls[selectedIndex]) ?? ""}
+              src={generateStorageImageUrl(bucket, urls[selectedIndex]) ?? ""}
               alt={`Enlarged hero image ${selectedIndex + 1}`}
               fill
               style={{ objectFit: "contain" }}

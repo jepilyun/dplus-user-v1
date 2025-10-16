@@ -1,11 +1,18 @@
 import { getRequestLocale } from "@/utils/get-req-locale";
 import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 
+
+/**
+ * 폴더 상세 페이지
+ * @param params - 이벤트 ID
+ * @param searchParams - 검색 파라미터
+ * @returns 이벤트 상세 페이지
+ */
 export default async function FolderDetailPage({
   params,
   searchParams,
 }: {
-  params: { folderId: string };
+  params: { folderCode: string };
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
@@ -15,7 +22,7 @@ export default async function FolderDetailPage({
 
   return (
     <CompFolderDetailPage
-      folderId={params.folderId}
+      folderCode={params.folderCode}
       fullLocale={fullLocale}
       langCode={langCode}
     />
