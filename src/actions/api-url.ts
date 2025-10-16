@@ -4,6 +4,7 @@ import { LIST_LIMIT } from "dplus_common_v1";
  * API URL 옵션 파라미터 타입
  */
 export type APIUrlOptionalParams = {
+  dateString?: string | null;
   langCode?: string | null;
   categoryCode?: string | null;
   countryCode?: string | null;
@@ -85,7 +86,7 @@ export const apiUrlEvent = (
  * @returns 경로
  */
 export const apiUrlFolder = (
-  type: "detailGet",
+  type: "detailGet" | "eventsGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
@@ -96,6 +97,46 @@ export const apiUrlFolder = (
         path =`/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(`Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (optionalParams?.folderCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/folder/events/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
+
+
+
+
+/**
+ * API Routes: Date Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { dateString, start, limit }
+ * @returns 경로
+ */
+export const apiUrlDate = (
+  type: "detailGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.dateString && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/date/detail/get/${encodeURIComponent(optionalParams?.dateString)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.dateString] ${optionalParams?.dateString}`);
       }
       break;
     default:

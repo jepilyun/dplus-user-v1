@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetFolderDetail, reqGetFolderEvents } from "@/actions/action";
+import { reqGetDateDetail, reqGetFolderDetail, reqGetFolderEvents } from "@/actions/action";
 import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import { IconEmailRound } from "@/icons/icon-email-round";
@@ -14,7 +14,7 @@ import { IconYoutubeRound } from "@/icons/icon-youtube-round";
 import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseFolderDetailForUserFront, SUPPORT_LANG_CODES, TMapFolderEventWithEventInfo } from "dplus_common_v1";
+import { ResponseFolderDetailForUserFront, SUPPORT_LANG_CODES, TCategoryLabelInfo, TCityLabelInfo, TEventCard, TEventCardForDateDetail, TFolderSummaryInfo, TGroupLabelInfo, TMapFolderEventWithEventInfo, TStagLabelInfo, TTagLabelInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { InfoItem } from "@/components/info-item";
@@ -31,17 +31,15 @@ import { CompLoadMore } from "../comp-common/comp-load-more";
 
 
 /**
- * 폴더 상세 페이지
- * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
+ * Date 상세 페이지
+ * @param param0 - 날짜, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */
-export default function CompFolderDetailPage({ folderCode, langCode, fullLocale }: { folderCode: string, langCode: string, fullLocale: string }) {
+export default function CompDateDetailPage({ dateString, langCode, fullLocale }: { dateString: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
-  const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   // 기존 상태들 아래에 추가
-  const [events, setEvents] = useState<TMapFolderEventWithEventInfo[]>(folderDetail?.folderEvent?.items ?? []);
+  const [events, setEvents] = useState<TEventCardForDateDetail[]>([]);
   const [eventsStart, setEventsStart] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -51,45 +49,32 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
 
   const EVENTS_LIMIT = 10;
 
-  const fetchFolderDetail = async () => {
+  const fetchDateDetail = async () => {
     try {
-      const res = await reqGetFolderDetail(folderCode, 0, EVENTS_LIMIT);
-      const db = res?.dbResponse;
-
-      const isEmptyObj =
-        !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
-
-      // ❗ 콘텐츠 없을 때 에러 화면으로 이동
-      if (!res?.success || isEmptyObj || !db?.folder) {
-        router.replace(`/error/content-not-found?type=folder&lang=${encodeURIComponent(langCode)}`);
-        return;
-      }
-
-      setFolderDetail(db);
-      setImageUrls(getFolderImageUrls(db.folder));
+      const res = await reqGetDateDetail(dateString, 0, EVENTS_LIMIT);
 
       // ✅ 이벤트 초기화
-      const initItems = db?.folderEvent?.items ?? [];
+      const initItems = res?.dbResponse?.items ?? [];
       setEvents(initItems);
       setEventsStart(initItems.length);
-      setEventsHasMore(Boolean(db?.folderEvent?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
 
       // 중복 방지 Set 채우기
       for (const it of initItems) {
-        const code = it?.event_info?.event_code ?? it?.event_code;
+        const code = it?.event_code;
         if (code) seenEventCodes.add(code);
       }
     } catch (e) {
       // 네트워크/예외도 에러 페이지로
-      router.replace(`/error/content-not-found?type=folder&lang=${encodeURIComponent(langCode)}`);
+      router.replace(`/error/content-not-found?type=date&lang=${encodeURIComponent(langCode)}`);
     }
   };
 
   // 공유 기능 핸들러
   const handleShareClick = async () => {
     const shareData = {
-      title: folderDetail?.folder.title || '이벤트 세트 공유',
-      text: folderDetail?.folder.description || '이벤트 세트 정보를 확인해보세요!',
+      title: dateString || '이벤트 세트 공유',
+      text: `${dateString} 이벤트 세트 정보를 확인해보세요!`,
       url: window.location.href,
     };
 
@@ -109,16 +94,15 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
     }
   };
 
-
   const loadMoreEvents = async () => {
-    if (eventsLoading || !eventsHasMore) return;
+    if (eventsLoading) return;
     setEventsLoading(true);
 
     try {
-      const res = await reqGetFolderEvents(folderCode, eventsStart, EVENTS_LIMIT);
-      const page = res?.dbResponse?.folderEvent;
-      const newItems = (page?.items ?? []).filter((it: TMapFolderEventWithEventInfo) => {
-        const code = it?.event_info?.event_code ?? it?.event_code;
+      const res = await reqGetDateDetail(dateString, eventsStart, EVENTS_LIMIT);
+      const events = res?.dbResponse?.items ?? [];
+      const newItems = events.filter((it: TEventCardForDateDetail) => {
+        const code = it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);
         return true;
@@ -126,55 +110,55 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
 
       setEvents(prev => prev.concat(newItems));
       setEventsStart(eventsStart + (newItems.length || 0));
-      setEventsHasMore(Boolean(page?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchFolderDetail();
-  }, [folderCode]);
+    fetchDateDetail();
+  }, [dateString]);
 
   return (
     <div className="flex flex-col gap-8">
-      {/* {JSON.stringify(folderDetail)} */}
+      {JSON.stringify(events)}
       {/* {JSON.stringify(folderDetail?.folderEvent?.items[1])} */}
-      <HeadlineTagsDetail
+      {/* <HeadlineTagsDetail
         targetCountryCode={folderDetail?.folder.target_country_code || null}
         targetCountryName={folderDetail?.folder.target_country_native || null}
         targetCityCode={folderDetail?.folder.target_city_code || null}
         targetCityName={folderDetail?.folder.target_city_native || null}
         categories={folderDetail?.mapCategoryFolder?.items.map(item => item.category_info?.name || '') ?? null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
-      />
-      <div id="folder-title" className="text-center font-extrabold text-3xl"
+      /> */}
+      {/* <div id="folder-title" className="text-center font-extrabold text-3xl"
         data-folder-code={folderDetail?.folder.folder_code}
       >
         {folderDetail?.folder.title}
-      </div>
-      <HeroImageSlider
+      </div> */}
+      {/* <HeroImageSlider
         bucket="folders"
         imageUrls={imageUrls}
         className="m-auto w-full flex max-w-[1440px]"
-      />
-      {folderDetail?.folder.description && (
+      /> */}
+      {/* {folderDetail?.folder.description && (
         <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">{folderDetail?.folder.description}</div>
-      )}
-      <div className="flex gap-4 justify-center">
+      )} */}
+      {/* <div className="flex gap-4 justify-center">
         <CompLabelCount01 title="Views" count={folderDetail?.folder.view_count ?? 0} minWidth={120} minHeight={120} />
         <CompLabelCount01 title="Shared" count={folderDetail?.folder.shared_count ?? 0} minWidth={120} minHeight={120} />
-      </div>
-      {events?.length ? (
+      </div> */}
+      {/* {events?.length ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {events.map(item => (
             <CompCommonDdayItem key={item.event_info?.event_code} event={item} fullLocale={fullLocale} />
           ))}
 
           {/* 더보기 버튼 */}
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} />}
+          {/* {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} />}
         </div>
-      ) : null}
+      ) : null} */}
 
       {/* 
       {folderDetail?.mapStagFolder?.map(item => (
