@@ -1,7 +1,11 @@
 import "server-only";
 import { headers, cookies } from "next/headers";
 
-export function getRequestLocale() {
+/**
+ * Get the request locale
+ * @returns { fullLocale: string, langCode: string, baseLang: string, countryCode: string }
+ */
+export function getRequestLocale(): { fullLocale: string, langCode: string, baseLang: string, countryCode: string } {
   const h = headers();
   const c = cookies();
 
@@ -15,5 +19,12 @@ export function getRequestLocale() {
       ? (lower.includes("tw") || lower.includes("hk") || lower.includes("mo") ? "tw" : "cn")
       : baseFromHeader;
 
-  return { fullLocale, langCode, baseLang: baseFromHeader };
+  // ✅ countryCode 추출
+  const countryCode =
+    h.get("x-country") ??
+    c.get("country")?.value ??
+    (fullLocale.includes("-") ? fullLocale.split("-")[1].toUpperCase() : undefined) ??
+    "KR";
+
+  return { fullLocale, langCode, baseLang: baseFromHeader, countryCode };
 }

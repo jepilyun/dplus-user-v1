@@ -1,4 +1,4 @@
-import { getRequestLocale } from "@/utils/get-req-locale";
+import { getRequestLocale } from "@/utils/get-request-locale";
 import CompDateDetailPage from "@/components/comp-date/comp-date-detail-page";
 
 

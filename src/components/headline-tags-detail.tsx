@@ -10,12 +10,12 @@ export const HeadlineTagsDetail = ({
   categories,
   langCode,
 }: {
-  targetCountryCode: string | null;
-  targetCountryName: string | null;
-  targetCityCode: string | null;
-  targetCityName: string | null;
+  targetCountryCode?: string | null;
+  targetCountryName?: string | null;
+  targetCityCode?: string | null;
+  targetCityName?: string | null;
   categories?: string[] | null;
-  langCode: (typeof SUPPORT_LANG_CODES)[number];
+  langCode?: (typeof SUPPORT_LANG_CODES)[number];
 }) =>  {
   const i18n = getDplusI18n(langCode);
 

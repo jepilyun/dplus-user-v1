@@ -152,6 +152,40 @@ export const apiUrlDate = (
 
 
 
+/**
+ * API Routes: City Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { cityCode, start, limit }
+ * @returns 경로
+ */
+export const apiUrlCity = (
+  type: "detailGet" | "eventsGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.cityCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/city/detail/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (optionalParams?.cityCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/city/events/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
 
 
 

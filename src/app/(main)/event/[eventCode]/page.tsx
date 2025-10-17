@@ -1,4 +1,4 @@
-import { getRequestLocale } from "@/utils/get-req-locale";
+import { getRequestLocale } from "@/utils/get-request-locale";
 import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트
 
 /**

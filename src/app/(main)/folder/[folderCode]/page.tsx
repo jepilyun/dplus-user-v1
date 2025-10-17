@@ -1,4 +1,4 @@
-import { getRequestLocale } from "@/utils/get-req-locale";
+import { getRequestLocale } from "@/utils/get-request-locale";
 import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 
 

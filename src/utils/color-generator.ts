@@ -1,6 +1,3 @@
-// ======================
-// schedule-colors.ts
-// ======================
 
 /**
  * 브랜드/선명 팔레트 기반 일정 컬러 선택기
@@ -13,7 +10,6 @@
  * - 다다음달: 선명한 색상 D
  * - 그 외: 동일한 중립 컬러
  */
-
 export type TScheduleColorOptions = {
   brandHex?: string;          // D-Day 기준 컬러
   weekStartsOn?: 0 | 1;       // 0: Sunday, 1: Monday (기본 1)
@@ -32,6 +28,13 @@ export type TScheduleColorOptions = {
   };
 };
 
+/**
+ * Generate a schedule color for a given date
+ * @param date - The date to generate a color for
+ * @param todayInput - The today's date
+ * @param opts - The options for the color generation
+ * @returns The schedule color
+ */
 export function scheduleColorForDate(
   date: Date | string | number,
   todayInput: Date | string | number = new Date(),
@@ -109,8 +112,11 @@ export function scheduleColorForDate(
 /**
  * 텍스트 가독성 색상 (배경 대비)
  * - 배경이 밝으면 짙은 회색, 어두우면 흰색
+ * @param bg - The background color
+ * @param fallback - The fallback color
+ * @returns The readable text color
  */
-export function readableTextColor(bg: string, fallback = "#111827") {
+export function readableTextColor(bg: string, fallback: string = "#111827") {
   try {
     const { r, g, b } = toRGB(bg);
     const L = relLuminance(r, g, b);
@@ -120,9 +126,13 @@ export function readableTextColor(bg: string, fallback = "#111827") {
   }
 }
 
-/* ----------------- 내부 유틸 (색/날짜) ----------------- */
 
-function toRGB(input: string) {
+/**
+ * Convert a color to RGB
+ * @param input - The color to convert
+ * @returns The RGB color
+ */
+function toRGB(input: string): { r: number; g: number; b: number } {
   const s = String(input).trim().toLowerCase();
 
   // hsl(h s% l%) or hsl(h, s%, l%)
@@ -167,7 +177,15 @@ function toRGB(input: string) {
   return toRGB("#FD00B5");
 }
 
-function rgbToHsl(r: number, g: number, b: number) {
+
+/**
+ * Convert RGB to HSL
+ * @param r - The red component
+ * @param g - The green component
+ * @param b - The blue component
+ * @returns The HSL color
+ */
+function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
   r /= 255; g /= 255; b /= 255;
   const max = Math.max(r,g,b), min = Math.min(r,g,b);
   let h = 0, s = 0; 
@@ -186,7 +204,14 @@ function rgbToHsl(r: number, g: number, b: number) {
   return { h, s, l };
 }
 
-function hslToHex(h: number, s: number, l: number) {
+/**
+ * Convert HSL to hex
+ * @param h - The hue component
+ * @param s - The saturation component
+ * @param l - The lightness component
+ * @returns The hex color
+ */
+function hslToHex(h: number, s: number, l: number): string {
   // h:[0,360), s,l:[0,1]
   const C = (1 - Math.abs(2 * l - 1)) * s;
   const X = C * (1 - Math.abs(((h / 60) % 2) - 1));
@@ -204,7 +229,14 @@ function hslToHex(h: number, s: number, l: number) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-function adjustHslLightness(hexOrHslOrRgb: string, deltaLPercent: number) {
+
+/**
+ * Adjust the lightness of a color
+ * @param hexOrHslOrRgb - The color to adjust
+ * @param deltaLPercent - The amount to adjust the lightness
+ * @returns The adjusted color
+ */
+function adjustHslLightness(hexOrHslOrRgb: string, deltaLPercent: number): string {
   const { r, g, b } = toRGB(hexOrHslOrRgb);
   const { h, s, l } = rgbToHsl(r, g, b);
   const newL = clamp01(l * 100 + deltaLPercent) / 100;
@@ -213,7 +245,15 @@ function adjustHslLightness(hexOrHslOrRgb: string, deltaLPercent: number) {
   return hslToHex(h, newS, newL);
 }
 
-function relLuminance(r: number, g: number, b: number) {
+
+/**
+ * Calculate the relative luminance of a color
+ * @param r - The red component
+ * @param g - The green component
+ * @param b - The blue component
+ * @returns The relative luminance
+ */
+function relLuminance(r: number, g: number, b: number): number {
   const lin = [r, g, b].map(v =>
     (v /= 255) <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
   );
@@ -240,4 +280,38 @@ function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth()+1, 
 function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth()+n, d.getDate()); }
 function daysBetween(a: Date, b: Date) {
   return Math.round((b.getTime() - a.getTime()) / (1000*60*60*24));
+}
+
+
+type BadgeColors = { bg: string; fg: string };
+
+/**
+ * Compute the badge colors for a given date
+ * @param dateStr - The date to generate a color for
+ * @param explicitBg - The explicit background color
+ * @param explicitFg - The explicit foreground color
+ * @returns The badge colors
+ */
+export function computeBadgeColors(
+  dateStr?: string | null,
+  explicitBg?: string | null,
+  explicitFg?: string | null,
+): BadgeColors {
+  // 1) 명시 색상 우선
+  if (explicitBg) {
+    const fg = explicitFg ?? readableTextColor(explicitBg);
+    return { bg: explicitBg, fg };
+  }
+  // 2) 규칙 기반 배경색
+  const bg = scheduleColorForDate(
+    dateStr ? new Date(dateStr) : new Date(), // 대상 날짜
+    new Date(),                               // 오늘
+    {
+      brandHex: "#FD00B5", // D-Day 기준 브랜드 컬러
+      weekStartsOn: 1,     // 월요일 시작 (원하면 0으로)
+      // 필요 시 palette/tweaks 커스터마이즈 가능
+    }
+  );
+  const fg = readableTextColor(bg);
+  return { bg, fg };
 }
