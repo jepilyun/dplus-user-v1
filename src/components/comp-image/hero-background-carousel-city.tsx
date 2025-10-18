@@ -8,7 +8,7 @@ import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { HeadlineTagsDetail } from "../headline-tags-detail";
 import { SUPPORT_LANG_CODES, TCityDetail } from "dplus_common_v1";
 
-export function HeroImageBackgroundCarousel({ bucket, imageUrls = [], interval = 5000, cityDetail, langCode }: {
+export function HeroImageBackgroundCarouselCity({ bucket, imageUrls = [], interval = 5000, cityDetail, langCode }: {
   bucket: string;
   imageUrls: string[];
   interval?: number;

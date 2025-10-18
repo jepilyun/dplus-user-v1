@@ -10,6 +10,8 @@ export type APIUrlOptionalParams = {
   countryCode?: string | null;
   cityCode?: string | null;
   stagCode?: string | null;
+  groupCode?: string | null;
+  tagId?: number | null;
   tagCode?: string | null;
   eventCode?: string | null;
   folderCode?: string | null;
@@ -133,9 +135,10 @@ export const apiUrlDate = (
 
   switch (type) {
     case "detailGet": 
-      if (optionalParams?.dateString && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/date/detail/get/${encodeURIComponent(optionalParams?.dateString)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (optionalParams?.countryCode && optionalParams?.dateString && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/date/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.dateString)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
+        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
         console.error(`Invalid optional params: [optionalParams?.dateString] ${optionalParams?.dateString}`);
       }
       break;
@@ -188,5 +191,120 @@ export const apiUrlCity = (
 };
 
 
+
+
+
+
+/**
+ * API Routes: Stag Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { stagCode, start, limit }
+ * @returns 경로
+ */
+export const apiUrlStag = (
+  type: "detailGet" | "eventsGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.stagCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/stag/detail/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (optionalParams?.stagCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/stag/events/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
+
+
+/**
+ * API Routes: Group Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { groupCode, start, limit }
+ * @returns 경로
+ */
+export const apiUrlGroup = (
+  type: "detailGet" | "eventsGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.groupCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/group/detail/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (optionalParams?.groupCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/group/events/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
+
+
+
+/**
+ * API Routes: Tag Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { tagId, start, limit }
+ * @returns 경로
+ */
+export const apiUrlTag = (
+  type: "detailGet" | "eventsGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.tagCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/tag/detail/get/${encodeURIComponent(optionalParams?.tagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.tagCode] ${optionalParams?.tagCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (typeof optionalParams?.tagId === "number" && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/tag/events/get/${optionalParams?.tagId}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.tagId] ${optionalParams?.tagId}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
 
 

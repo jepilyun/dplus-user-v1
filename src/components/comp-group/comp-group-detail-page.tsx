@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCityDetail, reqGetCityEvents, reqGetFolderDetail, reqGetFolderEvents } from "@/actions/action";
+import { reqGetCityDetail, reqGetCityEvents, reqGetFolderDetail, reqGetFolderEvents, reqGetGroupDetail, reqGetGroupEvents, reqGetStagDetail, reqGetStagEvents } from "@/actions/action";
 import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import { IconEmailRound } from "@/icons/icon-email-round";
@@ -14,7 +14,7 @@ import { IconYoutubeRound } from "@/icons/icon-youtube-round";
 import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseCityDetailForUserFront, ResponseFolderDetailForUserFront, SUPPORT_LANG_CODES, TMapCityEventWithEventInfo, TMapFolderEventWithEventInfo } from "dplus_common_v1";
+import { ResponseCityDetailForUserFront, ResponseFolderDetailForUserFront, ResponseGroupDetailForUserFront, ResponseStagDetailForUserFront, SUPPORT_LANG_CODES, TMapCityEventWithEventInfo, TMapFolderEventWithEventInfo, TMapGroupEventWithEventInfo, TMapStagEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { InfoItem } from "@/components/info-item";
@@ -24,25 +24,27 @@ import { IconApple } from "@/icons/icon-apple";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import CompCommonDatetime from "../comp-common/comp-common-datetime";
 import { CompDatesInDetail } from "../comp-common/comp-dates-in-detail";
-import { getCityImageUrls, getFolderImageUrls } from "@/utils/set-image-urls";
+import { getCityImageUrls, getFolderImageUrls, getGroupImageUrls, getStagImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-carousel-city";
+import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-carousel-stag";
+import { HeroImageBackgroundCarouselGroup } from "../comp-image/hero-background-carousel-group";
 
 
 /**
- * 폴더 상세 페이지
- * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
+ * Group 상세 페이지
+ * @param param0 - Group Code, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */
-export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: { cityCode: string, langCode: string, fullLocale: string }) {
+export default function CompGroupDetailPage({ groupCode, langCode, fullLocale }: { groupCode: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
-  const [cityDetail, setCityDetail] = useState<ResponseCityDetailForUserFront | null>(null);
+  const [groupDetail, setGroupDetail] = useState<ResponseGroupDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   // 기존 상태들 아래에 추가
-  const [events, setEvents] = useState<TMapCityEventWithEventInfo[]>(cityDetail?.mapCityEvent?.items ?? []);
+  const [events, setEvents] = useState<TMapGroupEventWithEventInfo[]>(groupDetail?.mapGroupEvent?.items ?? []);
   const [eventsStart, setEventsStart] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -52,27 +54,27 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
 
   const EVENTS_LIMIT = 10;
 
-  const fetchCityDetail = async () => {
+  const fetchGroupDetail = async () => {
     try {
-      const res = await reqGetCityDetail(cityCode, 0, EVENTS_LIMIT);
+      const res = await reqGetGroupDetail(groupCode, 0, EVENTS_LIMIT);
 
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
 
       // ❗ 콘텐츠 없을 때 에러 화면으로 이동
-      if (!res?.success || isEmptyObj || !res?.dbResponse?.city) {
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.group) {
         // router.replace(`/error/content-not-found?type=city&lang=${encodeURIComponent(langCode)}`);
         return;
       }
 
-      setCityDetail(res?.dbResponse);
-      setImageUrls(getCityImageUrls(res?.dbResponse?.city));
+      setGroupDetail(res?.dbResponse);
+      setImageUrls(getGroupImageUrls(res?.dbResponse?.group));
 
       // ✅ 이벤트 초기화
-      const initItems = res?.dbResponse?.mapCityEvent?.items ?? [];
+      const initItems = res?.dbResponse?.mapGroupEvent?.items ?? [];
       setEvents(initItems);
       setEventsStart(initItems.length);
-      setEventsHasMore(Boolean(res?.dbResponse?.mapCityEvent?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.mapGroupEvent?.hasMore));
 
       // 중복 방지 Set 채우기
       for (const it of initItems) {
@@ -81,15 +83,15 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
       }
     } catch (e) {
       // 네트워크/예외도 에러 페이지로
-      // router.replace(`/error/content-not-found?type=city&lang=${encodeURIComponent(langCode)}`);
+      // router.replace(`/error/content-not-found?type=stag&lang=${encodeURIComponent(langCode)}`);
     }
   };
 
   // 공유 기능 핸들러
   const handleShareClick = async () => {
     const shareData = {
-      title: cityDetail?.city.name || '이벤트 세트 공유',
-      text: cityDetail?.city.name || '이벤트 세트 정보를 확인해보세요!',
+      title: groupDetail?.group.name || '이벤트 세트 공유',
+      text: groupDetail?.group.name_native || '이벤트 세트 정보를 확인해보세요!',
       url: window.location.href,
     };
 
@@ -115,9 +117,9 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCityEvents(cityCode, eventsStart, EVENTS_LIMIT);
-      const page = res?.dbResponse?.mapCityEvent;
-      const newItems = (page?.items ?? []).filter((it: TMapCityEventWithEventInfo) => {
+      const res = await reqGetGroupEvents(groupCode, eventsStart, EVENTS_LIMIT);
+      const page = res?.dbResponse?.mapGroupEvent;
+      const newItems = (page?.items ?? []).filter((it: TMapGroupEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);
@@ -133,16 +135,16 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
   };
 
   useEffect(() => {
-    fetchCityDetail();
-  }, [cityCode]);
+    fetchGroupDetail();
+  }, [groupCode]);
 
   return (
     <div className="flex flex-col gap-8">
-      <HeroImageBackgroundCarouselCity
-        bucket="cities"
+      <HeroImageBackgroundCarouselGroup
+        bucket="groups"
         imageUrls={imageUrls}
         interval={5000}
-        cityDetail={cityDetail?.city || null}
+        groupDetail={groupDetail?.group || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
       {events?.length ? (

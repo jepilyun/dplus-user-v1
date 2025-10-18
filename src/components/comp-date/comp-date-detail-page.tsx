@@ -15,10 +15,12 @@ import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-
  */
 export default function CompDateDetailPage({ 
   dateString, 
+  countryCode,
   langCode, 
   fullLocale 
 }: { 
   dateString: string;
+  countryCode: string;
   langCode: string;
   fullLocale: string;
 }) {
@@ -35,7 +37,7 @@ export default function CompDateDetailPage({
 
   const fetchDateDetail = async () => {
     try {
-      const res = await reqGetDateDetail(dateString, 0, EVENTS_LIMIT);
+      const res = await reqGetDateDetail(countryCode, dateString, 0, EVENTS_LIMIT);
 
       const initItems = res?.dbResponse?.items ?? [];
       setEvents(initItems);
@@ -47,7 +49,7 @@ export default function CompDateDetailPage({
         if (code) seenEventCodes.add(code);
       }
     } catch (e) {
-      router.replace(`/error/content-not-found?type=date&lang=${encodeURIComponent(langCode)}`);
+      // router.replace(`/error/content-not-found?type=date&lang=${encodeURIComponent(langCode)}`);
     }
   };
 
@@ -56,7 +58,7 @@ export default function CompDateDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetDateDetail(dateString, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetDateDetail(countryCode, dateString, eventsStart, EVENTS_LIMIT);
       const events = res?.dbResponse?.items ?? [];
       const newItems = events.filter((it: TEventCardForDateDetail) => {
         const code = it?.event_code;

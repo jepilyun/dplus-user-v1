@@ -12,7 +12,7 @@ export default async function DateDetailPage({
   params,
   searchParams,
 }: {
-  params: { date: string };
+  params: { date: string, countryCode: string };
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
@@ -23,6 +23,7 @@ export default async function DateDetailPage({
   return (
     <CompDateDetailPage
       dateString={params.date}
+      countryCode={params.countryCode}
       fullLocale={fullLocale}
       langCode={langCode}
     />

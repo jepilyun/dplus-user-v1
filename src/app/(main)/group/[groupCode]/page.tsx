@@ -1,18 +1,18 @@
 import { getRequestLocale } from "@/utils/get-request-locale";
-import CompTagDetailPage from "@/components/comp-tag/comp-tag-detail-page";
+import CompGroupDetailPage from "@/components/comp-group/comp-group-detail-page";
 
 
 /**
- * Tag 상세 페이지
- * @param params - Tag Code
+ * Group 상세 페이지
+ * @param params - Group Code
  * @param searchParams - 검색 파라미터
  * @returns 이벤트 상세 페이지
  */
-export default async function TagDetailPage({
+export default async function StagDetailPage({
   params,
   searchParams,
 }: {
-  params: { tagCode: string };
+  params: { groupCode: string };
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
@@ -21,8 +21,8 @@ export default async function TagDetailPage({
   // const data = await fetch(...);
 
   return (
-    <CompTagDetailPage
-      tagCode={params.tagCode}
+    <CompGroupDetailPage
+      groupCode={params.groupCode}
       fullLocale={fullLocale}
       langCode={langCode}
     />
