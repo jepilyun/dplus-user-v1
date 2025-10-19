@@ -308,3 +308,75 @@ export const apiUrlTag = (
 };
 
 
+
+
+
+/**
+ * API Routes: Category Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { countryCode, categoryCode, start, limit }
+ * @returns 경로
+ */
+export const apiUrlCategory = (
+  type: "detailGet" | "eventsGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.countryCode && optionalParams?.categoryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number" && optionalParams?.langCode) {
+        path =`/api/category/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+        console.error(`Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (optionalParams?.countryCode && optionalParams?.categoryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/category/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+        console.error(`Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
+
+
+/**
+ * API Routes: Today Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { countryCode, start, limit }
+ * @returns 경로
+ */
+export const apiUrlToday = (
+  type: "detailGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.countryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/today/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+

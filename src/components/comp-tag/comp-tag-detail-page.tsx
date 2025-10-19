@@ -55,13 +55,13 @@ export default function CompTagDetailPage({ tagCode, langCode, fullLocale }: { t
   const fetchTagDetail = async () => {
     try {
       const res = await reqGetTagDetail(tagCode, 0, EVENTS_LIMIT);
-console.log('res', res);
+
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
 
       // ❗ 콘텐츠 없을 때 에러 화면으로 이동
       if (!res?.success || isEmptyObj || !res?.dbResponse?.tag) {
-        // router.replace(`/error/content-not-found?type=city&lang=${encodeURIComponent(langCode)}`);
+        router.replace(`/error/content-not-found?type=tag&lang=${encodeURIComponent(langCode)}`);
         return;
       }
 
@@ -80,7 +80,7 @@ console.log('res', res);
       }
     } catch (e) {
       // 네트워크/예외도 에러 페이지로
-      // router.replace(`/error/content-not-found?type=stag&lang=${encodeURIComponent(langCode)}`);
+      router.replace(`/error/content-not-found?type=tag&lang=${encodeURIComponent(langCode)}`);
     }
   };
 

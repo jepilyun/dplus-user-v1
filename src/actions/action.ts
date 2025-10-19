@@ -1,5 +1,6 @@
 import {
   DplusGetListDataResponse,
+  ResponseCategoryDetailForUserFront,
   ResponseCityDetailForUserFront,
   ResponseDplusAPI,
   ResponseEventDetailForUserFront,
@@ -9,7 +10,7 @@ import {
   ResponseTagDetailForUserFront,
   TEventCardForDateDetail,
 } from "dplus_common_v1";
-import { apiUrlCity, apiUrlDate, apiUrlEvent, apiUrlFolder, apiUrlGroup, apiUrlStag, apiUrlTag } from "./api-url";
+import { apiUrlCategory, apiUrlCity, apiUrlDate, apiUrlEvent, apiUrlFolder, apiUrlGroup, apiUrlStag, apiUrlTag, apiUrlToday } from "./api-url";
 
 /**
  * Event 상세 화면 조회 for User Front
@@ -79,7 +80,7 @@ export const reqGetFolderEvents = async (
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
-export const reqGetDateDetail = async (
+export const reqGetDateList = async (
   countryCode: string,
   dateString: string,
   start: number,
@@ -257,6 +258,81 @@ export const reqGetTagEvents = async (
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseTagDetailForUserFront>> => {
   const res = await fetch(apiUrlTag("eventsGet", { tagId, start, limit }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
+
+
+
+
+
+
+
+/**
+ * Category 상세 화면 조회 for User Front
+ * @param countryCode
+ * @param categoryCode
+ * @param start 
+ * @param limit
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
+ */
+export const reqGetCategoryDetail = async (
+  countryCode: string,
+  categoryCode: string,
+  start: number,
+  limit: number,
+  langCode: string = "en",
+): Promise<ResponseDplusAPI<ResponseCategoryDetailForUserFront>> => {
+  const res = await fetch(apiUrlCategory("detailGet", { countryCode, categoryCode, start, limit, langCode }), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return res.json();
+};
+
+
+/**
+ * Category 상세 화면 Events 더보기 조회 for User Front
+ * @param countryCode
+ * @param categoryCode
+ * @param start 
+ * @param limit
+ * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
+ */
+export const reqGetCategoryEvents = async (
+  countryCode: string,
+  categoryCode: string,
+  start: number,
+  limit: number,
+): Promise<ResponseDplusAPI<ResponseCategoryDetailForUserFront>> => {
+  const res = await fetch(apiUrlCategory("eventsGet", { countryCode, categoryCode, start, limit }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
+
+
+
+
+
+/**
+ * Today 상세 화면 조회 for User Front
+ * @param countryCode
+ * @param start 
+ * @param limit
+ * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
+ */
+export const reqGetTodayList = async (
+  countryCode: string,
+  start: number,
+  limit: number,
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>> => {
+  const res = await fetch(apiUrlToday("detailGet", { countryCode, start, limit }), {
     method: "GET",
     credentials: "include",
   });

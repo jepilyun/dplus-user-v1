@@ -54,6 +54,17 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/date/${date}/${country}`, request.url));
   }
 
+  if (firstSeg === "category" && segs.length === 2) {
+    const category = segs[1];
+    const country = getCountryCode(request);
+    return NextResponse.redirect(new URL(`/category/${category}/${country}`, request.url));
+  }
+
+  if (firstSeg === "today" && segs.length === 1) {
+    const country = getCountryCode(request);
+    return NextResponse.redirect(new URL(`/today/${country}`, request.url));
+  }
+
   if (firstSeg === "city") {
     return NextResponse.next();
   }
