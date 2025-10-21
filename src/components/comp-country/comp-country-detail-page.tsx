@@ -146,6 +146,21 @@ console.log("res", res);
         countryDetail={countryDetail?.country || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
+      {countryDetail?.categories?.items.map(item => (
+        <div key={item.category_code}>
+          <div>{item.name}</div>
+        </div>
+      ))}
+      {countryDetail?.cities?.items.map(item => (
+        <div key={item.city_code}>
+          <div>{item.name}</div>
+        </div>
+      ))}
+      {countryDetail?.stags?.items.map(item => (
+        <div key={item.stag_code}>
+          <div>{item.stag}</div>
+        </div>
+      ))}
       {events?.length ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {events.map(item => (
