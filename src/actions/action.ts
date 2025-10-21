@@ -2,6 +2,7 @@ import {
   DplusGetListDataResponse,
   ResponseCategoryDetailForUserFront,
   ResponseCityDetailForUserFront,
+  ResponseCountryDetailForUserFront,
   ResponseDplusAPI,
   ResponseEventDetailForUserFront,
   ResponseFolderDetailForUserFront,
@@ -10,7 +11,7 @@ import {
   ResponseTagDetailForUserFront,
   TEventCardForDateDetail,
 } from "dplus_common_v1";
-import { apiUrlCategory, apiUrlCity, apiUrlDate, apiUrlEvent, apiUrlFolder, apiUrlGroup, apiUrlStag, apiUrlTag, apiUrlToday } from "./api-url";
+import { apiUrlCategory, apiUrlCity, apiUrlCountry, apiUrlDate, apiUrlEvent, apiUrlFolder, apiUrlGroup, apiUrlStag, apiUrlTag, apiUrlToday } from "./api-url";
 
 /**
  * Event 상세 화면 조회 for User Front
@@ -338,3 +339,46 @@ export const reqGetTodayList = async (
   });
   return res.json();
 };
+
+
+
+
+/**
+ * Country 상세 화면 조회 for User Front
+ * @param dateString
+ * @param start 
+ * @param limit
+ * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
+ */
+export const reqGetCountryDetail = async (
+  countryCode: string,
+  start: number,
+  limit: number,
+): Promise<ResponseDplusAPI<ResponseCountryDetailForUserFront>> => {
+  const res = await fetch(apiUrlCountry("detailGet", { countryCode, start, limit }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
+
+
+/**
+ * Country 상세 화면 Events 더보기 조회 for User Front
+ * @param countryCode
+ * @param start 
+ * @param limit
+ * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
+ */
+export const reqGetCountryEvents = async (
+  countryCode: string,
+  start: number,
+  limit: number,
+): Promise<ResponseDplusAPI<ResponseCountryDetailForUserFront>> => {
+  const res = await fetch(apiUrlCountry("eventsGet", { countryCode, start, limit }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
+

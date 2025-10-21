@@ -380,3 +380,42 @@ export const apiUrlToday = (
 };
 
 
+
+
+
+/**
+ * API Routes: Country Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { countryCode, start, limit }
+ * @returns 경로
+ */
+export const apiUrlCountry = (
+  type: "detailGet" | "eventsGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet": 
+      if (optionalParams?.countryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/country/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+      }
+      break;
+    case "eventsGet":
+      if (optionalParams?.countryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
+        path =`/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
+
