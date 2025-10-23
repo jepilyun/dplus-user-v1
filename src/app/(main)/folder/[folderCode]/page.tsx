@@ -1,11 +1,12 @@
+// 이 라우트 기본 재생성 주기: 24시간
+export const revalidate = 86400; // 24시간 × 60분 × 60초 = 86400초
+
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { reqGetFolderMetadata } from "@/actions/action";
-
-
+import { reqGetFolderCodeList, reqGetFolderMetadata } from "@/actions/action";
 
 /**
  * Generate metadata for the page
@@ -57,6 +58,20 @@ export async function generateMetadata(
   };
 }
 
+
+// ✅ 항상 배열을 반환하도록 방어 코딩
+export async function generateStaticParams() {
+  try {
+    const res = await reqGetFolderCodeList(100);
+    const list = res?.dbResponse ?? []; // 없으면 빈 배열
+
+    return list.map((folder: { folder_code: string }) => ({
+      folderCode: folder.folder_code,
+    }));
+  } catch {
+    return []; // 실패해도 배열 반환
+  }
+}
 
 /**
  * 폴더 상세 페이지

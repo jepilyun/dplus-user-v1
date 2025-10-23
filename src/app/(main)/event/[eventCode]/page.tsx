@@ -1,8 +1,11 @@
+// 이 라우트 기본 재생성 주기: 24시간
+export const revalidate = 86400; // 24시간 × 60분 × 60초 = 86400초
+
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트
 import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import { reqGetEventMetadata } from "@/actions/action";
+import { reqGetEventCodeList, reqGetEventMetadata } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 
 
@@ -56,6 +59,20 @@ export async function generateMetadata(
   };
 }
 
+
+// ✅ 항상 배열을 반환하도록 방어 코딩
+export async function generateStaticParams() {
+  try {
+    const res = await reqGetEventCodeList(100);
+    const list = res?.dbResponse ?? []; // 없으면 빈 배열
+
+    return list.map((event: { event_code: string }) => ({
+      eventCode: event.event_code,
+    }));
+  } catch {
+    return []; // 실패해도 배열 반환
+  }
+}
 
 /**
  * 이벤트 상세 페이지

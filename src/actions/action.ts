@@ -44,6 +44,28 @@ export const reqGetEventDetail = async (
 };
 
 /**
+ * Event 코드 목록 조회 for User Front
+ * @param limit
+ * @param backDays
+ * @param countryCode
+ * @param cityCode
+ * @returns ResponseDplusAPI<{ event_code: string }[]>
+ */
+export const reqGetEventCodeList = async (
+  limit: number = 300,
+  backDays: number = 1,
+  countryCode: string | null = null,
+  cityCode: string | null = null,
+): Promise<ResponseDplusAPI<{ event_code: string }[]>> => {
+  const res = await fetch(apiUrlEvent("upcomingCodeListGet", { limit, backDays, countryCode, cityCode }), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return res.json();
+};
+
+/**
  * Event 메타데이터 조회 for User Front
  * @param eventCode
  * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
@@ -79,6 +101,26 @@ export const reqGetFolderDetail = async (
       credentials: "include",
     },
   );
+
+  return res.json();
+};
+
+/**
+ * Folder 코드 목록 조회 for User Front
+ * @param limit
+ * @param countryCode
+ * @param cityCode
+ * @returns ResponseDplusAPI<{ event_code: string }[]>
+ */
+export const reqGetFolderCodeList = async (
+  limit: number = 100,
+  countryCode: string | null = null,
+  cityCode: string | null = null,
+): Promise<ResponseDplusAPI<{ folder_code: string }[]>> => {
+  const res = await fetch(apiUrlFolder("recentCodeListGet", { limit, countryCode, cityCode }), {
+    method: "GET",
+    credentials: "include",
+  });
 
   return res.json();
 };
@@ -191,7 +233,9 @@ export const reqGetCityEvents = async (
  * City 코드 목록 조회 for User Front
  * @returns ResponseDplusAPI<string[]>
  */
-export const reqGetCityCodes = async (): Promise<
+export const reqGetCityCodes = async (
+  limit: number = 100,
+): Promise<
   ResponseDplusAPI<{ city_code: string }[]>
 > => {
   const res = await fetch(apiUrlCity("getCityCodes"), {
@@ -232,6 +276,20 @@ export const reqGetStagDetail = async (
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseStagDetailForUserFront>> => {
   const res = await fetch(apiUrlStag("detailGet", { stagCode, start, limit }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
+
+/**
+ * Stag 코드 목록 조회 for User Front
+ * @returns ResponseDplusAPI<string[]>
+ */
+export const reqGetStagCodes = async (
+  limit: number = 100,
+): Promise<ResponseDplusAPI<{ stag_code: string }[]>> => {
+  const res = await fetch(apiUrlStag("getStagCodes", { limit }), {
     method: "GET",
     credentials: "include",
   });
@@ -322,10 +380,12 @@ export const reqGetGroupEvents = async (
  * Group 코드 목록 조회 for User Front
  * @returns ResponseDplusAPI<ResponseGroupDetailForUserFront>
  */
-export const reqGetGroupCodes = async (): Promise<
+export const reqGetGroupCodes = async (
+  limit: number = 100,
+): Promise<
   ResponseDplusAPI<{ group_code: string }[]>
 > => {
-  const res = await fetch(apiUrlGroup("getGroupCodes"), {
+  const res = await fetch(apiUrlGroup("getGroupCodes", { limit }), {
     method: "GET",
     credentials: "include",
   });
@@ -450,10 +510,12 @@ export const reqGetCategoryEvents = async (
  * Category 코드 목록 조회 for User Front
  * @returns ResponseDplusAPI<string[]>
  */
-export const reqGetCategoryCodes = async (): Promise<
+export const reqGetCategoryCodes = async (
+  limit: number = 200,
+): Promise<
   ResponseDplusAPI<{ category_code: string }[]>
 > => {
-  const res = await fetch(apiUrlCategory("getCategoryCodes"), {
+  const res = await fetch(apiUrlCategory("getCategoryCodes", { limit }), {
     method: "GET",
     credentials: "include",
   });
@@ -546,6 +608,21 @@ export const reqGetCountryEvents = async (
       credentials: "include",
     },
   );
+  return res.json();
+};
+
+/**
+ * Country 코드 목록 조회 for User Front
+ * @returns ResponseDplusAPI<string[]>
+ */
+export const reqGetCountryCodes = async (): Promise<
+  ResponseDplusAPI<{ country_code: string }[]>
+> => {
+  const res = await fetch(apiUrlCountry("getCountryCodes"), {
+    method: "GET",
+    credentials: "include",
+  });
+
   return res.json();
 };
 

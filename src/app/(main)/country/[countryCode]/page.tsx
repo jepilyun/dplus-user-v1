@@ -5,7 +5,7 @@ import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
 import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import { reqGetCountryMetadata } from "@/actions/action";
+import { reqGetCountryCodes, reqGetCountryMetadata } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 
 
@@ -59,6 +59,20 @@ export async function generateMetadata(
   };
 }
 
+
+// ✅ 항상 배열을 반환하도록 방어 코딩
+export async function generateStaticParams() {
+  try {
+    const res = await reqGetCountryCodes();
+    const list = res?.dbResponse ?? []; // 없으면 빈 배열
+
+    return list.map((country: { country_code: string }) => ({
+      countryCode: country.country_code,
+    }));
+  } catch {
+    return []; // 실패해도 배열 반환
+  }
+}
 
 /**
  * Country 상세 페이지

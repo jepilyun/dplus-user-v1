@@ -22,6 +22,7 @@ export type APIUrlOptionalParams = {
   start?: number | null;
   limit?: number | null;
   tz?: string | null;
+  backDays?: number | null;
 
   // langCode?: string | null;
   // categoryCode?: string | null;
@@ -54,7 +55,7 @@ export type APIUrlOptionalParams = {
  * @returns 경로
  */
 export const apiUrlEvent = (
-  type: "detailGet" | "metadataGet",
+  type: "detailGet" | "upcomingCodeListGet" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
@@ -68,6 +69,34 @@ export const apiUrlEvent = (
           `Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`,
         );
       }
+      break;
+    case "upcomingCodeListGet":
+      const qp = new URLSearchParams();
+
+      // limit: 숫자면 추가 (원하면 clampInt로 범위 제한)
+      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+
+      // backDays: 숫자면 추가
+      if (typeof optionalParams?.backDays === "number" && Number.isFinite(optionalParams.backDays)) {
+        qp.set("backDays", String(optionalParams.backDays));
+      }
+
+      // countryCode: 문자열이면 2자 대문자만 허용
+      if (typeof optionalParams?.countryCode === "string") {
+        const cc = optionalParams.countryCode.trim().toUpperCase();
+        if (/^[A-Z]{2}$/.test(cc)) qp.set("countryCode", cc);
+      }
+
+      // cityCode: 문자열이면 공백 아닌 경우만
+      if (typeof optionalParams?.cityCode === "string") {
+        const city = optionalParams.cityCode.trim();
+        if (city) qp.set("cityCode", city);
+      }
+
+      const qs = qp.toString();
+      path = `/api/event/get/codes/upcoming${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
       if (optionalParams?.eventCode && optionalParams?.langCode) {
@@ -94,7 +123,7 @@ export const apiUrlEvent = (
  * @returns 경로
  */
 export const apiUrlFolder = (
-  type: "detailGet" | "eventsGet" | "metadataGet",
+  type: "detailGet" | "eventsGet" | "recentCodeListGet" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
@@ -125,6 +154,30 @@ export const apiUrlFolder = (
           `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
         );
       }
+      break;
+    case "recentCodeListGet":
+      const qp = new URLSearchParams();
+
+      // limit: 숫자면 추가 (원하면 clampInt로 범위 제한)
+      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+        // const lim = clampInt(optionalParams.limit, 100, 1, 1000); // 범위 제한이 필요하면 사용
+        qp.set("limit", String(optionalParams.limit));
+      }
+
+      // countryCode: 2자 대문자만 허용
+      if (typeof optionalParams?.countryCode === "string") {
+        const cc = optionalParams.countryCode.trim().toUpperCase();
+        if (/^[A-Z]{2}$/.test(cc)) qp.set("countryCode", cc);
+      }
+
+      // cityCode: 공백 아닌 문자열만
+      if (typeof optionalParams?.cityCode === "string") {
+        const city = optionalParams.cityCode.trim();
+        if (city) qp.set("cityCode", city);
+      }
+
+      const qs = qp.toString();
+      path = `/api/folder/get/codes/recent${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
       if (
@@ -225,7 +278,12 @@ export const apiUrlCity = (
       }
       break;
     case "getCityCodes":
-      path = `/api/city/get/code/list`;
+      const qp = new URLSearchParams();
+      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+      const qs = qp.toString();
+      path = `/api/city/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
       if (
@@ -257,7 +315,7 @@ export const apiUrlCity = (
  * @returns 경로
  */
 export const apiUrlStag = (
-  type: "detailGet" | "eventsGet" | "metadataGet",
+  type: "detailGet" | "eventsGet" | "getStagCodes" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
@@ -288,6 +346,14 @@ export const apiUrlStag = (
           `Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`,
         );
       }
+      break;
+    case "getStagCodes":
+      const qp = new URLSearchParams();
+      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+      const qs = qp.toString();
+      path = `/api/group/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
       if (
@@ -352,7 +418,12 @@ export const apiUrlGroup = (
       }
       break;
     case "getGroupCodes":
-      path = `/api/group/get/code/list`;
+      const qp = new URLSearchParams();
+      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+      const qs = qp.toString();
+      path = `/api/group/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
       if (
@@ -473,7 +544,12 @@ export const apiUrlCategory = (
       }
       break;
     case "getCategoryCodes":
-      path = `/api/category/get/code/list`;
+      const qp = new URLSearchParams();
+      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+      const qs = qp.toString();
+      path = `/api/category/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
       if (
@@ -539,7 +615,7 @@ export const apiUrlToday = (
  * @returns 경로
  */
 export const apiUrlCountry = (
-  type: "detailGet" | "eventsGet" | "metadataGet",
+  type: "detailGet" | "eventsGet" | "getCountryCodes" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
@@ -571,6 +647,9 @@ export const apiUrlCountry = (
           `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
         );
       }
+      break;
+    case "getCountryCodes":
+      path = `/api/country/get/code/list`;
       break;
     case "metadataGet":
       if (
