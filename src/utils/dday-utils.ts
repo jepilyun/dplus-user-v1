@@ -1,4 +1,4 @@
-import { parseAndSetTime, formatDateTime } from "./date-utils";
+import { formatDateTime, parseAndSetTime } from "./date-utils";
 
 /**
  * D-Day 표시용 날짜/시간 문자열을 생성합니다.
@@ -18,11 +18,17 @@ export const generateDdayDatetime = (
     tz?: string | null;
     utcMinutes?: number | null;
     style?: "long" | "short";
-    timeFormat?: "locale" | "12h";   // ★ 추가
-    compactTime?: boolean;           // ★ 추가
-  }
+    timeFormat?: "locale" | "12h"; // ★ 추가
+    compactTime?: boolean; // ★ 추가
+  },
 ): string => {
-  const { tz = null, utcMinutes = null, style = "long", timeFormat = "locale", compactTime = true } = options ?? {};
+  const {
+    tz = null,
+    utcMinutes = null,
+    style = "long",
+    timeFormat = "locale",
+    compactTime = true,
+  } = options ?? {};
   const hasTime = !!time;
 
   const baseDateTime = new Date(date);
@@ -40,7 +46,6 @@ export const generateDdayDatetime = (
   });
 };
 
-
 /**
  * 타임존/UTC 오프셋을 적용한 D-Day 날짜/시간 문자열을 생성합니다.
  */
@@ -49,7 +54,7 @@ export const generateDdayDatetimeWithTimezone = (
   locale: string = "ko-KR",
   tz: string | null = null,
   utcMinutes: number | null = null,
-  time: string | null = null
+  time: string | null = null,
 ): string => {
   const baseDateTime = new Date(date);
   parseAndSetTime(baseDateTime, time);

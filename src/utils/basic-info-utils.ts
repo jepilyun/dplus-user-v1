@@ -34,7 +34,8 @@ export const toInstagramUrl = (id: string) => {
  * @param phone 전화번호
  * @returns 전화번호 링크
  */
-export const toTelUrl = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
+export const toTelUrl = (phone: string) =>
+  `tel:${phone.replace(/[^\d+]/g, "")}`;
 
 /**
  * 이메일 링크 생성

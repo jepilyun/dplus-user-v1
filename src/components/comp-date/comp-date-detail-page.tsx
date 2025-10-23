@@ -26,6 +26,9 @@ export default function CompDateDetailPage({
 }) {
   const router = useRouter();
 
+  const [error, setError] = useState<'not-found' | 'network' | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [events, setEvents] = useState<TEventCardForDateDetail[]>([]);
   const [eventsStart, setEventsStart] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(false);
@@ -39,6 +42,13 @@ export default function CompDateDetailPage({
     try {
       const res = await reqGetDateList(countryCode, dateString, 0, EVENTS_LIMIT);
 
+      // 응답은 있지만 데이터가 없는 경우 (404)
+      if (!res?.dbResponse || !res?.dbResponse?.items) {
+        setError('not-found');
+        setLoading(false);
+        return;
+      }
+
       const initItems = res?.dbResponse?.items ?? [];
       setEvents(initItems);
       setEventsStart(initItems.length);
@@ -48,8 +58,14 @@ export default function CompDateDetailPage({
         const code = it?.event_code;
         if (code) seenEventCodes.add(code);
       }
+
+      setError(null);
     } catch (e) {
-      // router.replace(`/error/content-not-found?type=date&lang=${encodeURIComponent(langCode)}`);
+      // 네트워크 에러나 서버 에러
+      console.error('Failed to fetch date detail:', e);
+      setError('network');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,6 +95,55 @@ export default function CompDateDetailPage({
     fetchDateDetail();
   }, [dateString]);
 
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // 날짜를 찾을 수 없는 경우 - 인라인 에러 표시
+  if (error === 'not-found') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Date Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            해당 날짜의 이벤트를 찾을 수 없습니다.
+          </p>
+          <button
+            onClick={() => router.push(`/${langCode}`)}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            홈 화면으로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 네트워크 에러 - 재시도 옵션 제공
+  if (error === 'network') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
+          <p className="text-gray-600 mb-6">
+            Failed to load date details. Please try again.
+          </p>
+          <button
+            onClick={() => fetchDateDetail()}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="flex flex-col gap-8">
       {/* 날짜 네비게이션 컴포넌트 추가 */}

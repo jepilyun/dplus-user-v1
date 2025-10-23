@@ -1,8 +1,14 @@
-import { TEventDetail } from "dplus_common_v1";
 import { ICalendarEvent, ISODateInput } from "@/types";
-// date-utils에서 필요한 함수들을 정확하게 임포트합니다.
-import { addDaysToDate, addMinutes, toDate, formatDateToICS, formatDateAllDay } from "./date-utils";
+import { TEventDetail } from "dplus_common_v1";
 
+// date-utils에서 필요한 함수들을 정확하게 임포트합니다.
+import {
+  addDaysToDate,
+  addMinutes,
+  formatDateAllDay,
+  formatDateToICS,
+  toDate,
+} from "./date-utils";
 
 /**
  * 날짜를 Google Calendar 형식으로 변환 (YYYYMMDD 또는 YYYYMMDDTHHMMSSZ)
@@ -44,7 +50,9 @@ const toGoogleDate = (date: ISODateInput, allDay = false): string => {
  * const googleEvent = generateGoogleCalendarEvent(detail);
  * // => { title: "팀 미팅", startDate: Date 객체, endDate: Date 객체, ... }
  */
-export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | null): ICalendarEvent => {
+export const generateGoogleCalendarEvent = (
+  eventDetail: TEventDetail | null,
+): ICalendarEvent => {
   if (!eventDetail) throw new Error("이벤트 정보가 없습니다.");
 
   let startDate: Date;
@@ -75,7 +83,6 @@ export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | null): I
   return event;
 };
 
-
 /**
  * Google Calendar 이벤트 추가 URL을 생성합니다.
  * endDate가 명시되지 않은 경우, 종일 이벤트는 익일로, 시간 이벤트는 30분 후로 자동 설정됩니다.
@@ -87,7 +94,7 @@ export const generateGoogleCalendarEvent = (eventDetail: TEventDetail | null): I
  * startDate: new Date('2025-08-28T12:00:00'),
  * allDay: false
  * };
- * createGoogleCalendarUrl(event); 
+ * createGoogleCalendarUrl(event);
  * // => "https://www.google.com/calendar/render?action=TEMPLATE&text=%EC%A0%90%EC%8B%AC+%EC%8B%9D%EC%82%AC&dates=20250828T030000Z/20250828T033000Z"
  */
 export const createGoogleCalendarUrl = (event: ICalendarEvent): string => {
@@ -98,8 +105,8 @@ export const createGoogleCalendarUrl = (event: ICalendarEvent): string => {
     event.endDate != null
       ? toDate(event.endDate) // endDate도 ISODateInput 타입일 수 있으므로 toDate로 변환
       : event.allDay
-      ? addDaysToDate(start, 1)   // 종일 이벤트는 구글 규격상 종료일 '익일'
-      : addMinutes(start, 30); // 시간 이벤트 기본 30분 후
+        ? addDaysToDate(start, 1) // 종일 이벤트는 구글 규격상 종료일 '익일'
+        : addMinutes(start, 30); // 시간 이벤트 기본 30분 후
 
   const startDateStr = toGoogleDate(start, !!event.allDay);
   const endDateStr = toGoogleDate(effectiveEnd, !!event.allDay);
@@ -113,11 +120,11 @@ export const createGoogleCalendarUrl = (event: ICalendarEvent): string => {
   if (event.location) params.set("location", event.location);
   if (event.timezone) params.set("ctz", event.timezone);
   if (event.busy === false) params.set("trp", "false"); // 기본 바쁨(true)로 가정, false일 때만 명시
-  
+
   if (event.guests?.length) {
     params.set("add", event.guests.join(","));
   }
-  
+
   if (event.website) {
     params.set("sprop", `website:${event.website.url}`);
     params.append("sprop", `name:${event.website.name}`);
@@ -125,7 +132,6 @@ export const createGoogleCalendarUrl = (event: ICalendarEvent): string => {
 
   return `${baseUrl}&${params.toString()}`;
 };
-
 
 /**
  * 새 탭으로 Google Calendar 이벤트 추가 URL을 엽니다 (브라우저 전용).
@@ -141,16 +147,16 @@ export function addToGoogleCalendar(event: ICalendarEvent): void {
   }
 }
 
-
-
-
 // ── helpers ───────────────────────────────────────────────────────────────────
 const pad = (n: number) => String(n).padStart(2, "0");
 const formatLocalICS = (d: Date) =>
   `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}` +
   `T${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`; // no 'Z'
 const formatUtcICS = (d: Date) =>
-  d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z"); // YYYYMMDDTHHMMSSZ
+  d
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}Z$/, "Z"); // YYYYMMDDTHHMMSSZ
 const formatDateOnlyICS = (d: Date) =>
   `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
 
@@ -213,8 +219,8 @@ const normalizeForICS = (event: ICalendarEvent) => {
     event.endDate != null
       ? toDate(event.endDate)
       : allDay
-      ? addDaysToDate(start, 1)
-      : addMinutes(start, 30);
+        ? addDaysToDate(start, 1)
+        : addMinutes(start, 30);
   return { start, end, allDay };
 };
 
@@ -264,9 +270,15 @@ const buildICSFromICalendarEvent = (
     dtStartLine,
     dtEndLine,
     `SUMMARY:${icsEscape(event.title)}`,
-    ...(event.description ? [foldLine(`DESCRIPTION:${icsEscape(event.description)}`)] : []),
-    ...(event.location ? [foldLine(`LOCATION:${icsEscape(event.location)}`)] : []),
-    ...(event.website?.url ? [`URL;VALUE=URI:${icsEscape(event.website.url)}`] : []),
+    ...(event.description
+      ? [foldLine(`DESCRIPTION:${icsEscape(event.description)}`)]
+      : []),
+    ...(event.location
+      ? [foldLine(`LOCATION:${icsEscape(event.location)}`)]
+      : []),
+    ...(event.website?.url
+      ? [`URL;VALUE=URI:${icsEscape(event.website.url)}`]
+      : []),
     ...(rrule ? [`RRULE:${rrule}`] : []),
     ...(geo ? [`GEO:${geo.lat};${geo.lon}`] : []),
     // 투명도(=바쁨) 매핑: true(바쁨)=OPAQUE, false=TRANSPARENT
@@ -282,10 +294,7 @@ const buildICSFromICalendarEvent = (
   return lines.join("\r\n") + "\r\n";
 };
 
-function pickUid(
-  d: TEventDetail,
-  prefer?: string
-): string {
+function pickUid(d: TEventDetail, prefer?: string): string {
   if (prefer) return prefer;
   if ("event_id" in d && d.event_id) return d.event_id as string;
   if ("pevent_id" in d && d.pevent_id) return d.pevent_id as string;
@@ -293,7 +302,7 @@ function pickUid(
   // 서버라면 node:crypto 권장
   // return randomUUID();
 
-  return (typeof crypto !== "undefined" && "randomUUID" in crypto)
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
@@ -336,11 +345,12 @@ export const generateAppleCalendarEvent = (
   return { icsText, filename };
 };
 
-
 export const addToAppleCalendarFromDetail = (detail: TEventDetail | null) => {
   if (!detail) return;
 
-  const { icsText, filename } = generateAppleCalendarEvent(detail, { useTZID: true });
+  const { icsText, filename } = generateAppleCalendarEvent(detail, {
+    useTZID: true,
+  });
   const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 

@@ -7,6 +7,6 @@ export const devLogResponse = (apiResponse: object) => {
   const sizeInBytes = new TextEncoder().encode(jsonStr).length;
   const sizeInKB = (sizeInBytes / 1024).toFixed(2);
 
-  console.log('📦 API Response Size:', sizeInKB + ' KB');
-  console.log('📝 API Response:', apiResponse);
-}
+  console.log("📦 API Response Size:", sizeInKB + " KB");
+  console.log("📝 API Response:", apiResponse);
+};

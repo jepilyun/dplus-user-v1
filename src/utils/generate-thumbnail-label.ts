@@ -1,6 +1,5 @@
 // import { LABEL_ACCOMMODATION_I18N, LABEL_ACTIVITY_I18N, LABEL_ASIAN_FOOD_I18N, LABEL_ATTRACTION_I18N, LABEL_BAR_I18N, LABEL_BEAUTY_I18N, LABEL_BRUNCH_I18N, LABEL_BTS_I18N, LABEL_CAFE_I18N, LABEL_CHINESE_FOOD_I18N, LABEL_DESSERT_I18N, LABEL_EVENT_I18N, LABEL_EXHIBITION_I18N, LABEL_EXPERIENCE_I18N, LABEL_FASHION_I18N, LABEL_FESTIVAL_I18N, LABEL_FINE_DINING_I18N, LABEL_FOOD_I18N, LABEL_GALLERY_I18N, LABEL_HOT_I18N, LABEL_ITALIAN_FOOD_I18N, LABEL_JAPANESE_FOOD_I18N, LABEL_KOREAN_FOOD_I18N, LABEL_KPOP_I18N, LABEL_LIST, LABEL_MUSEUM_I18N, LABEL_NIGHTLIFE_I18N, LABEL_PARK_I18N, LABEL_POPULAR_I18N, LABEL_POPUP_STORE_I18N, LABEL_SHOPPING_I18N, LABEL_SHOPPING_MALL_I18N, LABEL_SIGHTSEEING_I18N, LABEL_THEMEPARK_I18N, LABEL_TOUR_I18N } from "dplus_common_v1";
 
-
 // export const generateThumbnailLabel = (label: typeof LABEL_LIST[number], langCode: string | null) => {
 //   switch (label) {
 //     case "shopping":
@@ -76,7 +75,6 @@
 //   }
 // }
 
-
 // /**
 //  * https://mui.com/material-ui/customization/color/
 //  */
@@ -91,13 +89,13 @@
 //   "#b71c1c", // Material Red 900
 //   "#e53935", // Material Red 600
 //   "#ad1457", // Pink 800
-  
+
 //   // Pink 계열
 //   "#c2185b", // Pink 700
 //   "#880e4f", // Pink 900
 //   "#e91e63", // Pink 500
 //   "#a0004d", // Deep Pink
-  
+
 //   // Purple 계열
 //   "#7b1fa2", // Purple 700
 //   "#6a1b9a", // Purple 800
@@ -106,7 +104,7 @@
 //   "#512da8", // Deep Purple 700
 //   "#4527a0", // Deep Purple 800
 //   "#311b92", // Deep Purple 900
-  
+
 //   // Indigo & Blue 계열
 //   "#303f9f", // Indigo 700
 //   "#283593", // Indigo 800
@@ -116,7 +114,7 @@
 //   "#0d47a1", // Blue 900
 //   "#0277bd", // Light Blue 800
 //   "#01579b", // Light Blue 900
-  
+
 //   // Teal & Green 계열
 //   "#00695c", // Teal 800
 //   "#004d40", // Teal 900
@@ -127,7 +125,7 @@
 //   "#689f38", // Light Green 700
 //   "#558b2f", // Light Green 800
 //   "#33691e", // Light Green 900
-  
+
 //   // Yellow & Orange 계열 (어두운 톤)
 //   "#f57f17", // Yellow 800
 //   "#e65100", // Orange 900
@@ -135,7 +133,7 @@
 //   "#f57c00", // Orange 700
 //   "#ff8f00", // Amber 800
 //   "#ff6f00", // Amber 900
-  
+
 //   // Brown & Grey 계열
 //   "#5d4037", // Brown 700
 //   "#4e342e", // Brown 800
@@ -144,7 +142,7 @@
 //   "#212121", // Grey 900
 //   "#37474f", // Blue Grey 800
 //   "#263238", // Blue Grey 900
-  
+
 //   // 추가 다크 톤
 //   "#1a1a2e", // Dark Navy
 //   "#16213e", // Midnight Blue
@@ -152,7 +150,6 @@
 //   "#e65100", // Vibrant Orange
 //   "#4a4a4a"  // Charcoal
 // ];
-
 
 // // // 유틸 함수: 배열에서 랜덤 색상 선택
 // // export const getLabelBGColor = (label: typeof LABEL_LIST[number]) => {

@@ -26,6 +26,10 @@ import CompEventContactLinks from "@/components/comp-event/comp-event-contact-li
  */
 export default function CompEventDetailPage({ eventCode, langCode, fullLocale }: { eventCode: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
+
+  const [error, setError] = useState<'not-found' | 'network' | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
@@ -37,16 +41,22 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       const isEmptyObj =
         !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
 
-      // ❗데이터 없으면 에러 페이지로
+      // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.success || isEmptyObj || !db?.event) {
-        router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
+        setError('not-found');
+        setLoading(false);
         return;
-      }
+      } 
 
       setEventDetail(db);
       setImageUrls(getEventImageUrls(db.event));
+      setError(null);
     } catch (e) {
-      router.replace(`/error/content-not-found?type=event&lang=${encodeURIComponent(langCode)}`);
+      // 네트워크 에러나 서버 에러
+      console.error('Failed to fetch event detail:', e);
+      setError('network');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -89,6 +99,55 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
   useEffect(() => {
     fetchEventDetail();
   }, [eventCode]);
+
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // 이벤트를 찾을 수 없는 경우 - 인라인 에러 표시
+  if (error === 'not-found') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Event Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            해당 이벤트는 존재하지 않습니다.
+          </p>
+          <button
+            onClick={() => router.push(`/${langCode}`)}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            홈 화면으로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 네트워크 에러 - 재시도 옵션 제공
+  if (error === 'network') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
+          <p className="text-gray-600 mb-6">
+            Failed to load event details. Please try again.
+          </p>
+          <button
+            onClick={() => fetchEventDetail()}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8"

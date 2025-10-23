@@ -17,6 +17,6 @@ export const dplusI18nZH = {
     og_site_name: "dplus",
     og_image_width: 1200,
     og_image_height: 630,
-    og_image_alt: "dplus | 音乐会·庆典·展览·演出·快闪日程，一键添加"
-  }
+    og_image_alt: "dplus | 音乐会·庆典·展览·演出·快闪日程，一键添加",
+  },
 };

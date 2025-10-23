@@ -7,11 +7,24 @@ import {
   ResponseEventDetailForUserFront,
   ResponseFolderDetailForUserFront,
   ResponseGroupDetailForUserFront,
+  ResponseMetadataForUserFront,
   ResponseStagDetailForUserFront,
   ResponseTagDetailForUserFront,
   TEventCardForDateDetail,
 } from "dplus_common_v1";
-import { apiUrlCategory, apiUrlCity, apiUrlCountry, apiUrlDate, apiUrlEvent, apiUrlFolder, apiUrlGroup, apiUrlStag, apiUrlTag, apiUrlToday } from "./api-url";
+
+import {
+  apiUrlCategory,
+  apiUrlCity,
+  apiUrlCountry,
+  apiUrlDate,
+  apiUrlEvent,
+  apiUrlFolder,
+  apiUrlGroup,
+  apiUrlStag,
+  apiUrlTag,
+  apiUrlToday,
+} from "./api-url";
 
 /**
  * Event 상세 화면 조회 for User Front
@@ -31,9 +44,26 @@ export const reqGetEventDetail = async (
 };
 
 /**
+ * Event 메타데이터 조회 for User Front
+ * @param eventCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetEventMetadata = async (
+  eventCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlEvent("metadataGet", { eventCode, langCode }), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return res.json();
+};
+
+/**
  * Folder 상세 화면 조회 for User Front
  * @param folderCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -42,19 +72,21 @@ export const reqGetFolderDetail = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseFolderDetailForUserFront>> => {
-  const res = await fetch(apiUrlFolder("detailGet", { folderCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlFolder("detailGet", { folderCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return res.json();
 };
 
-
 /**
  * Folder 상세 화면 조회 for User Front
  * @param folderCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -63,21 +95,39 @@ export const reqGetFolderEvents = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseFolderDetailForUserFront>> => {
-  const res = await fetch(apiUrlFolder("eventsGet", { folderCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlFolder("eventsGet", { folderCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return res.json();
 };
 
-
+/**
+ * Folder 메타데이터 조회 for User Front
+ * @param folderCode
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetFolderMetadata = async (
+  folderCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlFolder("metadataGet", { folderCode, langCode }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
 
 /**
  * Date 상세 화면 조회 for User Front
  * @param countryCode
  * @param dateString
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -86,20 +136,23 @@ export const reqGetDateList = async (
   dateString: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>> => {
-  const res = await fetch(apiUrlDate("detailGet", { countryCode, dateString, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>
+> => {
+  const res = await fetch(
+    apiUrlDate("detailGet", { countryCode, dateString, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };
-
-
 
 /**
  * City 상세 화면 조회 for User Front
  * @param dateString
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -115,11 +168,10 @@ export const reqGetCityDetail = async (
   return res.json();
 };
 
-
 /**
  * City 상세 화면 조회 for User Front
  * @param cityCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -135,14 +187,42 @@ export const reqGetCityEvents = async (
   return res.json();
 };
 
+/**
+ * City 코드 목록 조회 for User Front
+ * @returns ResponseDplusAPI<string[]>
+ */
+export const reqGetCityCodes = async (): Promise<
+  ResponseDplusAPI<{ city_code: string }[]>
+> => {
+  const res = await fetch(apiUrlCity("getCityCodes"), {
+    method: "GET",
+    credentials: "include",
+  });
 
+  return res.json();
+};
 
-
+/**
+ * City 메타데이터 조회 for User Front
+ * @param cityCode
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetCityMetadata = async (
+  cityCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlCity("metadataGet", { cityCode, langCode }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
 
 /**
  * Stag 상세 화면 조회 for User Front
  * @param stagCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -158,11 +238,10 @@ export const reqGetStagDetail = async (
   return res.json();
 };
 
-
 /**
  * Stag 상세 화면 Events 더보기 조회 for User Front
  * @param stagCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -178,14 +257,27 @@ export const reqGetStagEvents = async (
   return res.json();
 };
 
-
-
-
+/**
+ * Stag 메타데이터 조회 for User Front
+ * @param stagCode
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetStagMetadata = async (
+  stagCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlStag("metadataGet", { stagCode, langCode }), {
+    method: "GET",
+    credentials: "include",
+  });
+  return res.json();
+};
 
 /**
  * Group 상세 화면 조회 for User Front
  * @param groupCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -194,18 +286,20 @@ export const reqGetGroupDetail = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseGroupDetailForUserFront>> => {
-  const res = await fetch(apiUrlGroup("detailGet", { groupCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlGroup("detailGet", { groupCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };
-
 
 /**
  * Group 상세 화면 Events 더보기 조회 for User Front
  * @param groupCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -214,21 +308,52 @@ export const reqGetGroupEvents = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseGroupDetailForUserFront>> => {
-  const res = await fetch(apiUrlGroup("eventsGet", { groupCode, start, limit }), {
+  const res = await fetch(
+    apiUrlGroup("eventsGet", { groupCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+  return res.json();
+};
+
+/**
+ * Group 코드 목록 조회 for User Front
+ * @returns ResponseDplusAPI<ResponseGroupDetailForUserFront>
+ */
+export const reqGetGroupCodes = async (): Promise<
+  ResponseDplusAPI<{ group_code: string }[]>
+> => {
+  const res = await fetch(apiUrlGroup("getGroupCodes"), {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return res.json();
+};
+
+/**
+ * Group 메타데이터 조회 for User Front
+ * @param groupCode
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetGroupMetadata = async (
+  groupCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlGroup("metadataGet", { groupCode, langCode }), {
     method: "GET",
     credentials: "include",
   });
   return res.json();
 };
 
-
-
-
-
 /**
  * Tag 상세 화면 조회 for User Front
  * @param tagCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -245,11 +370,10 @@ export const reqGetTagDetail = async (
   return res.json();
 };
 
-
 /**
  * Tag 상세 화면 Events 더보기 조회 for User Front
  * @param tagId
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -265,17 +389,11 @@ export const reqGetTagEvents = async (
   return res.json();
 };
 
-
-
-
-
-
-
 /**
  * Category 상세 화면 조회 for User Front
  * @param countryCode
  * @param categoryCode
- * @param start 
+ * @param start
  * @param limit
  * @param langCode
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
@@ -287,20 +405,28 @@ export const reqGetCategoryDetail = async (
   limit: number,
   langCode: string = "en",
 ): Promise<ResponseDplusAPI<ResponseCategoryDetailForUserFront>> => {
-  const res = await fetch(apiUrlCategory("detailGet", { countryCode, categoryCode, start, limit, langCode }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlCategory("detailGet", {
+      countryCode,
+      categoryCode,
+      start,
+      limit,
+      langCode,
+    }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return res.json();
 };
-
 
 /**
  * Category 상세 화면 Events 더보기 조회 for User Front
  * @param countryCode
  * @param categoryCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -310,21 +436,53 @@ export const reqGetCategoryEvents = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseCategoryDetailForUserFront>> => {
-  const res = await fetch(apiUrlCategory("eventsGet", { countryCode, categoryCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlCategory("eventsGet", { countryCode, categoryCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };
 
+/**
+ * Category 코드 목록 조회 for User Front
+ * @returns ResponseDplusAPI<string[]>
+ */
+export const reqGetCategoryCodes = async (): Promise<
+  ResponseDplusAPI<{ category_code: string }[]>
+> => {
+  const res = await fetch(apiUrlCategory("getCategoryCodes"), {
+    method: "GET",
+    credentials: "include",
+  });
 
+  return res.json();
+};
 
+/**
+ * Category 메타데터 조회 for User Front
+ * @param categoryCode
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetCategoryMetadata = async (
+  categoryCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlCategory("metadataGet", { categoryCode, langCode }), {
+    method: "GET",
+    credentials: "include",
+  });
 
+  return res.json();
+};
 
 /**
  * Today 상세 화면 조회 for User Front
  * @param countryCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -332,41 +490,47 @@ export const reqGetTodayList = async (
   countryCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>> => {
-  const res = await fetch(apiUrlToday("detailGet", { countryCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>
+> => {
+  const res = await fetch(
+    apiUrlToday("detailGet", { countryCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };
-
-
-
 
 /**
  * Country 상세 화면 조회 for User Front
  * @param dateString
- * @param start 
+ * @param start
  * @param limit
+ * @param langCode
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetCountryDetail = async (
   countryCode: string,
   start: number,
   limit: number,
+  langCode: string = "en",
 ): Promise<ResponseDplusAPI<ResponseCountryDetailForUserFront>> => {
-  const res = await fetch(apiUrlCountry("detailGet", { countryCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlCountry("detailGet", { countryCode, start, limit, langCode }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };
-
 
 /**
  * Country 상세 화면 Events 더보기 조회 for User Front
  * @param countryCode
- * @param start 
+ * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
@@ -375,10 +539,29 @@ export const reqGetCountryEvents = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseCountryDetailForUserFront>> => {
-  const res = await fetch(apiUrlCountry("eventsGet", { countryCode, start, limit }), {
+  const res = await fetch(
+    apiUrlCountry("eventsGet", { countryCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+  return res.json();
+};
+
+/**
+ * Country 메타데터 조회 for User Front
+ * @param countryCode
+ * @param langCode
+ * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
+ */
+export const reqGetCountryMetadata = async (
+  countryCode: string,
+  langCode: string,
+): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
+  const res = await fetch(apiUrlCountry("metadataGet", { countryCode, langCode }), {
     method: "GET",
     credentials: "include",
   });
   return res.json();
 };
-

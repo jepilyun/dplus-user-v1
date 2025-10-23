@@ -1,34 +1,12 @@
 "use client";
 
-import { reqGetCityDetail, reqGetCityEvents, reqGetFolderDetail, reqGetFolderEvents, reqGetStagDetail, reqGetStagEvents } from "@/actions/action";
-import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
-import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
-import { IconEmailRound } from "@/icons/icon-email-round";
-import { IconHomepageRound } from "@/icons/icon-homepage-round";
-import { IconInstagramRound } from "@/icons/icon-instagram-round";
-import { IconMapPinRound } from "@/icons/icon-map-pin-round";
-import { IconPhoneRound } from "@/icons/icon-phone-round";
-import { IconShare } from "@/icons/icon-share";
-import { IconWebsiteRound } from "@/icons/icon-website-round";
-import { IconYoutubeRound } from "@/icons/icon-youtube-round";
-import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
-import { calculateDaysFromToday } from "@/utils/calc-dates";
-import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseCityDetailForUserFront, ResponseFolderDetailForUserFront, ResponseStagDetailForUserFront, SUPPORT_LANG_CODES, TMapCityEventWithEventInfo, TMapFolderEventWithEventInfo, TMapStagEventWithEventInfo } from "dplus_common_v1";
+import { reqGetStagDetail, reqGetStagEvents } from "@/actions/action";
+import { ResponseStagDetailForUserFront, SUPPORT_LANG_CODES, TMapStagEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
-import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
-import { InfoItem } from "@/components/info-item";
-import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
-import { IconGoogleColor } from "@/icons/icon-google-color";
-import { IconApple } from "@/icons/icon-apple";
-import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
-import CompCommonDatetime from "../comp-common/comp-common-datetime";
-import { CompDatesInDetail } from "../comp-common/comp-dates-in-detail";
-import { getCityImageUrls, getFolderImageUrls, getStagImageUrls } from "@/utils/set-image-urls";
+import { getStagImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-carousel-city";
 import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-carousel-stag";
 
 
@@ -39,6 +17,10 @@ import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-c
  */
 export default function CompStagDetailPage({ stagCode, langCode, fullLocale }: { stagCode: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
+
+  const [error, setError] = useState<'not-found' | 'network' | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [stagDetail, setStagDetail] = useState<ResponseStagDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
@@ -60,9 +42,10 @@ export default function CompStagDetailPage({ stagCode, langCode, fullLocale }: {
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
 
-      // ❗ 콘텐츠 없을 때 에러 화면으로 이동
+      // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.success || isEmptyObj || !res?.dbResponse?.stag) {
-        // router.replace(`/error/content-not-found?type=city&lang=${encodeURIComponent(langCode)}`);
+        setError('not-found');
+        setLoading(false);
         return;
       }
 
@@ -80,9 +63,14 @@ export default function CompStagDetailPage({ stagCode, langCode, fullLocale }: {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (code) seenEventCodes.add(code);
       }
+
+      setError(null);
     } catch (e) {
-      // 네트워크/예외도 에러 페이지로
-      // router.replace(`/error/content-not-found?type=stag&lang=${encodeURIComponent(langCode)}`);
+      // 네트워크 에러나 서버 에러
+      console.error('Failed to fetch stag detail:', e);
+      setError('network');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,6 +124,55 @@ export default function CompStagDetailPage({ stagCode, langCode, fullLocale }: {
   useEffect(() => {
     fetchStagDetail();
   }, [stagCode]);
+
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // Stag를 찾을 수 없는 경우 - 인라인 에러 표시
+  if (error === 'not-found') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Stag Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            해당 스태그는 존재하지 않습니다.
+          </p>
+          <button
+            onClick={() => router.push(`/${langCode}`)}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            홈 화면으로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 네트워크 에러 - 재시도 옵션 제공
+  if (error === 'network') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
+          <p className="text-gray-600 mb-6">
+            Failed to load stag details. Please try again.
+          </p>
+          <button
+            onClick={() => fetchStagDetail()}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">

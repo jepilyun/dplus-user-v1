@@ -1,6 +1,5 @@
 import { createTheme } from "@mui/material/styles";
 
-
 const theme = createTheme({
   // 1. 색상 팔레트 (Color Palette)
   palette: {
@@ -8,7 +7,7 @@ const theme = createTheme({
     primary: {
       main: "#F13094", // 요청하신 메인 컬러
       light: "#FF6DBA", // 밝은 버전
-      dark: "#C1006C",  // 어두운 버전
+      dark: "#C1006C", // 어두운 버전
       contrastText: "#FFFFFF", // 버튼 등에서 글자 흰색
     },
     secondary: {

@@ -1,4 +1,3 @@
-
 /**
  * 브랜드/선명 팔레트 기반 일정 컬러 선택기
  * - D-Day(0): 브랜드 컬러 (#FD00B5)
@@ -11,20 +10,20 @@
  * - 그 외: 동일한 중립 컬러
  */
 export type TScheduleColorOptions = {
-  brandHex?: string;          // D-Day 기준 컬러
-  weekStartsOn?: 0 | 1;       // 0: Sunday, 1: Monday (기본 1)
+  brandHex?: string; // D-Day 기준 컬러
+  weekStartsOn?: 0 | 1; // 0: Sunday, 1: Monday (기본 1)
   tweaks?: {
     // 밝기 조정(포인트, 0~100)
-    tomorrowLPlus?: number;   // D+1
-    dayAfterLPlus?: number;   // D+2
-    nextWeekLPlus?: number;   // 다음주(이번주 대비)
+    tomorrowLPlus?: number; // D+1
+    dayAfterLPlus?: number; // D+2
+    nextWeekLPlus?: number; // 다음주(이번주 대비)
   };
   palette?: {
-    thisWeek: string;         // 이번주
-    thisMonth: string;        // 이번달
-    nextMonth: string;        // 다음달
-    monthPlus2: string;       // 다다음달
-    later: string;            // 그 외
+    thisWeek: string; // 이번주
+    thisMonth: string; // 이번달
+    nextMonth: string; // 다음달
+    monthPlus2: string; // 다다음달
+    later: string; // 그 외
   };
 };
 
@@ -126,7 +125,6 @@ export function readableTextColor(bg: string, fallback: string = "#111827") {
   }
 }
 
-
 /**
  * Convert a color to RGB
  * @param input - The color to convert
@@ -144,7 +142,9 @@ function toRGB(input: string): { r: number; g: number; b: number } {
     const C = (1 - Math.abs(2 * L - 1)) * S;
     const X = C * (1 - Math.abs(((h / 60) % 2) - 1));
     const m = L - C / 2;
-    let r1 = 0, g1 = 0, b1 = 0;
+    let r1 = 0,
+      g1 = 0,
+      b1 = 0;
     if (h < 60) [r1, g1, b1] = [C, X, 0];
     else if (h < 120) [r1, g1, b1] = [X, C, 0];
     else if (h < 180) [r1, g1, b1] = [0, C, X];
@@ -168,7 +168,11 @@ function toRGB(input: string): { r: number; g: number; b: number } {
   }
 
   let hex = s.startsWith("#") ? s.slice(1) : s;
-  if (hex.length === 3) hex = hex.split("").map(ch => ch + ch).join("");
+  if (hex.length === 3)
+    hex = hex
+      .split("")
+      .map((ch) => ch + ch)
+      .join("");
   const num = parseInt(hex, 16);
   if (!Number.isNaN(num) && hex.length === 6) {
     return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
@@ -177,7 +181,6 @@ function toRGB(input: string): { r: number; g: number; b: number } {
   return toRGB("#FD00B5");
 }
 
-
 /**
  * Convert RGB to HSL
  * @param r - The red component
@@ -185,18 +188,32 @@ function toRGB(input: string): { r: number; g: number; b: number } {
  * @param b - The blue component
  * @returns The HSL color
  */
-function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: number } {
-  r /= 255; g /= 255; b /= 255;
-  const max = Math.max(r,g,b), min = Math.min(r,g,b);
-  let h = 0, s = 0; 
+function rgbToHsl(
+  r: number,
+  g: number,
+  b: number,
+): { h: number; s: number; l: number } {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
+  let h = 0,
+    s = 0;
   const l = (max + min) / 2;
   const d = max - min;
   if (d !== 0) {
     s = d / (1 - Math.abs(2 * l - 1));
     switch (max) {
-      case r: h = ((g - b) / d) % 6; break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = ((g - b) / d) % 6;
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
     h *= 60;
     if (h < 0) h += 360;
@@ -216,19 +233,20 @@ function hslToHex(h: number, s: number, l: number): string {
   const C = (1 - Math.abs(2 * l - 1)) * s;
   const X = C * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - C / 2;
-  let r1=0,g1=0,b1=0;
-  if (h < 60) [r1,g1,b1]=[C,X,0];
-  else if (h < 120) [r1,g1,b1]=[X,C,0];
-  else if (h < 180) [r1,g1,b1]=[0,C,X];
-  else if (h < 240) [r1,g1,b1]=[0,X,C];
-  else if (h < 300) [r1,g1,b1]=[X,0,C];
-  else [r1,g1,b1]=[C,0,X];
+  let r1 = 0,
+    g1 = 0,
+    b1 = 0;
+  if (h < 60) [r1, g1, b1] = [C, X, 0];
+  else if (h < 120) [r1, g1, b1] = [X, C, 0];
+  else if (h < 180) [r1, g1, b1] = [0, C, X];
+  else if (h < 240) [r1, g1, b1] = [0, X, C];
+  else if (h < 300) [r1, g1, b1] = [X, 0, C];
+  else [r1, g1, b1] = [C, 0, X];
   const r = Math.round((r1 + m) * 255);
   const g = Math.round((g1 + m) * 255);
   const b = Math.round((b1 + m) * 255);
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
-
 
 /**
  * Adjust the lightness of a color
@@ -236,7 +254,10 @@ function hslToHex(h: number, s: number, l: number): string {
  * @param deltaLPercent - The amount to adjust the lightness
  * @returns The adjusted color
  */
-function adjustHslLightness(hexOrHslOrRgb: string, deltaLPercent: number): string {
+function adjustHslLightness(
+  hexOrHslOrRgb: string,
+  deltaLPercent: number,
+): string {
   const { r, g, b } = toRGB(hexOrHslOrRgb);
   const { h, s, l } = rgbToHsl(r, g, b);
   const newL = clamp01(l * 100 + deltaLPercent) / 100;
@@ -244,7 +265,6 @@ function adjustHslLightness(hexOrHslOrRgb: string, deltaLPercent: number): strin
   const newS = clamp01(s * 100 + (deltaLPercent > 0 ? -2 : 0)) / 100;
   return hslToHex(h, newS, newL);
 }
-
 
 /**
  * Calculate the relative luminance of a color
@@ -254,34 +274,53 @@ function adjustHslLightness(hexOrHslOrRgb: string, deltaLPercent: number): strin
  * @returns The relative luminance
  */
 function relLuminance(r: number, g: number, b: number): number {
-  const lin = [r, g, b].map(v =>
-    (v /= 255) <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+  const lin = [r, g, b].map((v) =>
+    (v /= 255) <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4),
   );
   return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
 }
-function clamp(n: number) { return Math.max(0, Math.min(255, Math.round(n))); }
-function clamp01(n: number) { return Math.max(0, Math.min(100, n)); }
-function toHex(n: number) { return n.toString(16).padStart(2, "0"); }
+function clamp(n: number) {
+  return Math.max(0, Math.min(255, Math.round(n)));
+}
+function clamp01(n: number) {
+  return Math.max(0, Math.min(100, n));
+}
+function toHex(n: number) {
+  return n.toString(16).padStart(2, "0");
+}
 
 // -------- 날짜 유틸 --------
-function startOfDay(d: Date) { const x = new Date(d); x.setHours(0,0,0,0); return x; }
-function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate()+n); return x; }
-function startOfWeek(d: Date, weekStartsOn: 0|1) {
+function startOfDay(d: Date) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
+}
+function addDays(d: Date, n: number) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+}
+function startOfWeek(d: Date, weekStartsOn: 0 | 1) {
   const x = startOfDay(d);
   const day = x.getDay(); // 0=Sun
   const diff = weekStartsOn === 1 ? (day === 0 ? -6 : 1 - day) : -day;
   return addDays(x, diff);
 }
-function endOfWeek(d: Date, weekStartsOn: 0|1) {
+function endOfWeek(d: Date, weekStartsOn: 0 | 1) {
   return addDays(startOfWeek(d, weekStartsOn), 6);
 }
-function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }
-function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth()+1, 0, 23,59,59,999); }
-function addMonths(d: Date, n: number) { return new Date(d.getFullYear(), d.getMonth()+n, d.getDate()); }
-function daysBetween(a: Date, b: Date) {
-  return Math.round((b.getTime() - a.getTime()) / (1000*60*60*24));
+function startOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
 }
-
+function endOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+}
+function addMonths(d: Date, n: number) {
+  return new Date(d.getFullYear(), d.getMonth() + n, d.getDate());
+}
+function daysBetween(a: Date, b: Date) {
+  return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
+}
 
 type BadgeColors = { bg: string; fg: string };
 
@@ -305,12 +344,12 @@ export function computeBadgeColors(
   // 2) 규칙 기반 배경색
   const bg = scheduleColorForDate(
     dateStr ? new Date(dateStr) : new Date(), // 대상 날짜
-    new Date(),                               // 오늘
+    new Date(), // 오늘
     {
       brandHex: "#FD00B5", // D-Day 기준 브랜드 컬러
-      weekStartsOn: 1,     // 월요일 시작 (원하면 0으로)
+      weekStartsOn: 1, // 월요일 시작 (원하면 0으로)
       // 필요 시 palette/tweaks 커스터마이즈 가능
-    }
+    },
   );
   const fg = readableTextColor(bg);
   return { bg, fg };

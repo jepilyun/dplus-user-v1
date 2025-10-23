@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
+import TopNavMain from "@/components/comp-top-nav/top-nav-main";
+import CompFooter from "@/components/comp-common/comp-footer";
 
 /**
  * Generate metadata for the page
@@ -9,7 +11,7 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n";
  */
 export async function generateMetadata({ params }: { params: Promise<{ langCode: string }> }): Promise<Metadata> {
   const { langCode } = await params;
-  const dict = await getDplusI18n(langCode);
+  const dict = getDplusI18n(langCode);
 
   return {
     title: dict.metadata.title,
@@ -21,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
       images: dict.metadata.og_image, 
     },
     alternates: {
-      canonical: `https://trand.app/city/seoul`,
+      canonical: `https://www.dplus.app/KR`,
     },
   };
 }
@@ -31,5 +33,13 @@ export default function HomeLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen flex flex-col">
+      <TopNavMain />
+      <main className="flex-1">
+        {children}
+      </main>
+      <CompFooter />
+    </div>
+  );
 }

@@ -1,5 +1,12 @@
-import { TCategoryDetail, TCityDetail, TCountryDetail, TEventDetail, TFolderDetail, TGroupDetail, TStagDetail } from "dplus_common_v1";
-
+import {
+  TCategoryDetail,
+  TCityDetail,
+  TCountryDetail,
+  TEventDetail,
+  TFolderDetail,
+  TGroupDetail,
+  TStagDetail,
+} from "dplus_common_v1";
 
 export const getEventImageUrls = (c: TEventDetail) => {
   const imageUrls: string[] = [];
@@ -21,7 +28,7 @@ export const getEventImageUrls = (c: TEventDetail) => {
   }
 
   return imageUrls;
-}
+};
 
 export const getFolderImageUrls = (c: TFolderDetail) => {
   const imageUrls: string[] = [];
@@ -41,8 +48,7 @@ export const getFolderImageUrls = (c: TFolderDetail) => {
     imageUrls.push(c.hero_image_05);
   }
   return imageUrls;
-}
-
+};
 
 export const getCountryImageUrls = (c: TCountryDetail) => {
   const imageUrls: string[] = [];
@@ -62,8 +68,7 @@ export const getCountryImageUrls = (c: TCountryDetail) => {
     imageUrls.push(c.hero_image_05);
   }
   return imageUrls;
-}
-
+};
 
 export const getCityImageUrls = (c: TCityDetail) => {
   const imageUrls: string[] = [];
@@ -83,7 +88,7 @@ export const getCityImageUrls = (c: TCityDetail) => {
     imageUrls.push(c.hero_image_05);
   }
   return imageUrls;
-}
+};
 
 export const getCategoryImageUrls = (c: TCategoryDetail) => {
   const imageUrls: string[] = [];
@@ -103,7 +108,7 @@ export const getCategoryImageUrls = (c: TCategoryDetail) => {
     imageUrls.push(c.hero_image_05);
   }
   return imageUrls;
-}
+};
 
 export const getStagImageUrls = (c: TStagDetail) => {
   const imageUrls: string[] = [];
@@ -123,8 +128,7 @@ export const getStagImageUrls = (c: TStagDetail) => {
     imageUrls.push(c.hero_image_05);
   }
   return imageUrls;
-}
-
+};
 
 export const getGroupImageUrls = (c: TGroupDetail) => {
   const imageUrls: string[] = [];
@@ -144,4 +148,4 @@ export const getGroupImageUrls = (c: TGroupDetail) => {
     imageUrls.push(c.hero_image_05);
   }
   return imageUrls;
-}
+};

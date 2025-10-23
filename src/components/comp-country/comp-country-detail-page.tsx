@@ -1,35 +1,14 @@
 "use client";
 
-import { reqGetCityDetail, reqGetCityEvents, reqGetCountryDetail, reqGetCountryEvents, reqGetFolderDetail, reqGetFolderEvents } from "@/actions/action";
-import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
-import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
-import { IconEmailRound } from "@/icons/icon-email-round";
-import { IconHomepageRound } from "@/icons/icon-homepage-round";
-import { IconInstagramRound } from "@/icons/icon-instagram-round";
-import { IconMapPinRound } from "@/icons/icon-map-pin-round";
-import { IconPhoneRound } from "@/icons/icon-phone-round";
-import { IconShare } from "@/icons/icon-share";
-import { IconWebsiteRound } from "@/icons/icon-website-round";
-import { IconYoutubeRound } from "@/icons/icon-youtube-round";
-import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
-import { calculateDaysFromToday } from "@/utils/calc-dates";
-import { getDdayLabel } from "@/utils/dday-label";
-import { ResponseCityDetailForUserFront, ResponseCountryDetailForUserFront, ResponseFolderDetailForUserFront, SUPPORT_LANG_CODES, TMapCityEventWithEventInfo, TMapCountryEventWithEventInfo, TMapFolderEventWithEventInfo } from "dplus_common_v1";
+import {reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
+import { ResponseCountryDetailForUserFront, SUPPORT_LANG_CODES, TMapCountryEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
-import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
-import { InfoItem } from "@/components/info-item";
-import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
-import { IconGoogleColor } from "@/icons/icon-google-color";
-import { IconApple } from "@/icons/icon-apple";
-import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
-import CompCommonDatetime from "../comp-common/comp-common-datetime";
-import { CompDatesInDetail } from "../comp-common/comp-dates-in-detail";
-import { getCityImageUrls, getCountryImageUrls, getFolderImageUrls } from "@/utils/set-image-urls";
+import { getCountryImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-carousel-city";
 import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
+import Link from "next/link";
 
 
 /**
@@ -37,10 +16,16 @@ import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-backgroun
  * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */
-export default function CompCountryDetailPage({ countryCode, langCode, fullLocale }: { countryCode: string, langCode: string, fullLocale: string }) {
+export default function CompCountryDetailPage({ countryCode, fullLocale, langCode }: { countryCode: string, fullLocale: string, langCode: string }) {
   const router = useRouter();
+
+  const [error, setError] = useState<'not-found' | 'network' | null>(null);
+  const [loading, setLoading] = useState(true);
+
   const [countryDetail, setCountryDetail] = useState<ResponseCountryDetailForUserFront | null>(null);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [hasCategories, setHasCategories] = useState(false);
+  const [hasCities, setHasCities] = useState(false);
 
   // 기존 상태들 아래에 추가
   const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>(countryDetail?.mapCountryEvent?.items ?? []);
@@ -55,20 +40,22 @@ export default function CompCountryDetailPage({ countryCode, langCode, fullLocal
 
   const fetchCountryDetail = async () => {
     try {
-      const res = await reqGetCountryDetail(countryCode, 0, EVENTS_LIMIT);
-console.log("res", res);
+      const res = await reqGetCountryDetail(countryCode, 0, EVENTS_LIMIT, langCode);
+
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
 
-      // ❗ 콘텐츠 없을 때 에러 화면으로 이동
+      // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.success || isEmptyObj || !res?.dbResponse?.country) {
-        // router.replace(`/error/content-not-found?type=city&lang=${encodeURIComponent(langCode)}`);
+        setError('not-found');
+        setLoading(false);
         return;
       }
 
       setCountryDetail(res?.dbResponse);
       setImageUrls(getCountryImageUrls(res?.dbResponse?.country));
-
+      setHasCategories(res?.dbResponse?.categories?.items?.length > 0);
+      setHasCities(res?.dbResponse?.cities?.items?.length > 0);
       // ✅ 이벤트 초기화
       const initItems = res?.dbResponse?.mapCountryEvent?.items ?? [];
       setEvents(initItems);
@@ -80,9 +67,14 @@ console.log("res", res);
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (code) seenEventCodes.add(code);
       }
+
+      setError(null);
     } catch (e) {
-      // 네트워크/예외도 에러 페이지로
-      // router.replace(`/error/content-not-found?type=city&lang=${encodeURIComponent(langCode)}`);
+      // 네트워크 에러나 서버 에러
+      console.error('Failed to fetch country detail:', e);
+      setError('network');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -137,6 +129,55 @@ console.log("res", res);
     fetchCountryDetail();
   }, [countryCode]);
 
+  // 로딩 중
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  // 국가를 찾을 수 없는 경우 - 인라인 에러 표시
+  if (error === 'not-found') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Country Not Found</h2>
+          <p className="text-gray-600 mb-6">
+            해당 국가는 존재하지 않습니다.
+          </p>
+          <button
+            onClick={() => router.push(`/${langCode}`)}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            홈 화면으로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 네트워크 에러 - 재시도 옵션 제공
+  if (error === 'network') {
+    return (
+      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
+          <p className="text-gray-600 mb-6">
+            Failed to load country details. Please try again.
+          </p>
+          <button
+            onClick={() => fetchCountryDetail()}
+            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <HeroImageBackgroundCarouselCountry
@@ -146,21 +187,52 @@ console.log("res", res);
         countryDetail={countryDetail?.country || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
-      {countryDetail?.categories?.items.map(item => (
-        <div key={item.category_code}>
-          <div>{item.name}</div>
+
+      {hasCategories && (
+        <div className="mx-auto w-full max-w-[1440px] px-4">
+          <div className="flex justify-center gap-2 flex-wrap">
+            {countryDetail?.categories?.items.map((item) => (
+              <Link
+                key={item.category_code}
+                href={`/category/${item.category_code}`}
+                className="block"
+              >
+                <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-xs border border-gray-200 px-4 py-2 transition hover:bg-gray-50">
+                  <div className="text-md font-medium text-center">
+                    {item.name_i18n ?? item.name}
+                  </div>
+                  {/* <div className="text-xs text-muted-foreground text-center">{item.name}</div> */}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-      ))}
-      {countryDetail?.cities?.items.map(item => (
-        <div key={item.city_code}>
-          <div>{item.name}</div>
+      )}
+      {hasCities && (
+        <div className="mx-auto w-full max-w-[1440px] px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 h-[240px]">
+            {countryDetail?.cities?.items.map((item) => (
+              <Link
+                key={item.city_code}
+                href={`/city/${item.city_code}`}
+                className="block"
+              >
+                <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-xs border border-gray-200 p-4 transition hover:bg-gray-50">
+                  <div className="text-md font-medium text-center">
+                    {item.name_i18n ?? item.name}
+                  </div>
+                  {/* <div className="text-xs text-muted-foreground text-center">{item.name}</div> */}
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
-      ))}
-      {countryDetail?.stags?.items.map(item => (
+      )}
+      {/* {countryDetail?.stags?.items.map(item => (
         <div key={item.stag_code}>
           <div>{item.stag}</div>
         </div>
-      ))}
+      ))} */}
       {events?.length ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {events.map(item => (

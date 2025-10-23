@@ -1,5 +1,3 @@
-import { LIST_LIMIT } from "dplus_common_v1";
-
 /**
  * API URL 옵션 파라미터 타입
  */
@@ -39,7 +37,7 @@ export type APIUrlOptionalParams = {
   // size?: number | null;
   // videoId?: string | null;
   // channelId?: string | null;
-  // primaryKey?: string | null;  
+  // primaryKey?: string | null;
   // tag?: string | null;
   // keywordCode?: string | null;
   // timeline?: string | null;
@@ -49,7 +47,6 @@ export type APIUrlOptionalParams = {
   // instaHashCode?: string | null;
 };
 
-
 /**
  * API Routes: Event Detail 경로 생성
  * @param type 경로 타입
@@ -57,7 +54,7 @@ export type APIUrlOptionalParams = {
  * @returns 경로
  */
 export const apiUrlEvent = (
-  type: "detailGet",
+  type: "detailGet" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
@@ -67,7 +64,19 @@ export const apiUrlEvent = (
       if (optionalParams?.eventCode && optionalParams?.langCode) {
         path = `/api/event/detail/get/${optionalParams?.eventCode}/${optionalParams?.langCode}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`,
+        );
+      }
+      break;
+    case "metadataGet":
+      if (optionalParams?.eventCode && optionalParams?.langCode) {
+        path = `/api/event/metadata/get/${optionalParams?.eventCode}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`,
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
       }
       break;
     default:
@@ -77,9 +86,6 @@ export const apiUrlEvent = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
 
 /**
  * API Routes: Folder Detail 경로 생성
@@ -88,24 +94,49 @@ export const apiUrlEvent = (
  * @returns 경로
  */
 export const apiUrlFolder = (
-  type: "detailGet" | "eventsGet",
+  type: "detailGet" | "eventsGet" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.folderCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.folderCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (optionalParams?.folderCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/folder/events/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        optionalParams?.folderCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/folder/events/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
+        );
+      }
+      break;
+    case "metadataGet":
+      if (
+        optionalParams?.folderCode &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/folder/metadata/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
       }
       break;
     default:
@@ -115,11 +146,6 @@ export const apiUrlFolder = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
-
-
 
 /**
  * API Routes: Date Detail 경로 생성
@@ -134,12 +160,21 @@ export const apiUrlDate = (
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.countryCode && optionalParams?.dateString && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/date/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.dateString)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.countryCode &&
+        optionalParams?.dateString &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/date/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.dateString)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
-        console.error(`Invalid optional params: [optionalParams?.dateString] ${optionalParams?.dateString}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.dateString] ${optionalParams?.dateString}`,
+        );
       }
       break;
     default:
@@ -149,11 +184,6 @@ export const apiUrlDate = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
-
-
 
 /**
  * API Routes: City Detail 경로 생성
@@ -162,24 +192,54 @@ export const apiUrlDate = (
  * @returns 경로
  */
 export const apiUrlCity = (
-  type: "detailGet" | "eventsGet",
+  type: "detailGet" | "eventsGet" | "getCityCodes" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.cityCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/city/detail/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.cityCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/city/detail/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (optionalParams?.cityCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/city/events/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        optionalParams?.cityCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/city/events/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
+        );
+      }
+      break;
+    case "getCityCodes":
+      path = `/api/city/get/code/list`;
+      break;
+    case "metadataGet":
+      if (
+        optionalParams?.cityCode &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/city/metadata/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
       }
       break;
     default:
@@ -189,11 +249,6 @@ export const apiUrlCity = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
-
-
 
 /**
  * API Routes: Stag Detail 경로 생성
@@ -202,24 +257,51 @@ export const apiUrlCity = (
  * @returns 경로
  */
 export const apiUrlStag = (
-  type: "detailGet" | "eventsGet",
+  type: "detailGet" | "eventsGet" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.stagCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/stag/detail/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.stagCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/stag/detail/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (optionalParams?.stagCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/stag/events/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        optionalParams?.stagCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/stag/events/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`,
+        );
+      }
+      break;
+    case "metadataGet":
+      if (
+        optionalParams?.stagCode &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/stag/metadata/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
       }
       break;
     default:
@@ -229,9 +311,6 @@ export const apiUrlStag = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
 
 /**
  * API Routes: Group Detail 경로 생성
@@ -240,24 +319,54 @@ export const apiUrlStag = (
  * @returns 경로
  */
 export const apiUrlGroup = (
-  type: "detailGet" | "eventsGet",
+  type: "detailGet" | "eventsGet" | "getGroupCodes" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.groupCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/group/detail/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.groupCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/group/detail/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (optionalParams?.groupCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/group/events/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        optionalParams?.groupCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/group/events/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`,
+        );
+      }
+      break;
+    case "getGroupCodes":
+      path = `/api/group/get/code/list`;
+      break;
+    case "metadataGet":
+      if (
+        optionalParams?.stagCode &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/group/metadata/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
       }
       break;
     default:
@@ -267,10 +376,6 @@ export const apiUrlGroup = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
-
 
 /**
  * API Routes: Tag Detail 경로 생성
@@ -285,18 +390,30 @@ export const apiUrlTag = (
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.tagCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/tag/detail/get/${encodeURIComponent(optionalParams?.tagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.tagCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/tag/detail/get/${encodeURIComponent(optionalParams?.tagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.tagCode] ${optionalParams?.tagCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.tagCode] ${optionalParams?.tagCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (typeof optionalParams?.tagId === "number" && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/tag/events/get/${optionalParams?.tagId}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        typeof optionalParams?.tagId === "number" &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/tag/events/get/${optionalParams?.tagId}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.tagId] ${optionalParams?.tagId}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.tagId] ${optionalParams?.tagId}`,
+        );
       }
       break;
     default:
@@ -306,10 +423,6 @@ export const apiUrlTag = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
-
 
 /**
  * API Routes: Category Detail 경로 생성
@@ -318,26 +431,63 @@ export const apiUrlTag = (
  * @returns 경로
  */
 export const apiUrlCategory = (
-  type: "detailGet" | "eventsGet",
+  type: "detailGet" | "eventsGet" | "getCategoryCodes" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.countryCode && optionalParams?.categoryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number" && optionalParams?.langCode) {
-        path =`/api/category/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
+    case "detailGet":
+      if (
+        optionalParams?.countryCode &&
+        optionalParams?.categoryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/category/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
-        console.error(`Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (optionalParams?.countryCode && optionalParams?.categoryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/category/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        optionalParams?.countryCode &&
+        optionalParams?.categoryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/category/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
-        console.error(`Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`,
+        );
+      }
+      break;
+    case "getCategoryCodes":
+      path = `/api/category/get/code/list`;
+      break;
+    case "metadataGet":
+      if (
+        optionalParams?.categoryCode &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/category/metadata/get/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.categoryCode] ${optionalParams?.categoryCode}`,
+        );
       }
       break;
     default:
@@ -347,9 +497,6 @@ export const apiUrlCategory = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
 
 /**
  * API Routes: Today Detail 경로 생성
@@ -364,11 +511,17 @@ export const apiUrlToday = (
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.countryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/today/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.countryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/today/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
       }
       break;
     default:
@@ -378,10 +531,6 @@ export const apiUrlToday = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-
-
-
 
 /**
  * API Routes: Country Detail 경로 생성
@@ -390,24 +539,52 @@ export const apiUrlToday = (
  * @returns 경로
  */
 export const apiUrlCountry = (
-  type: "detailGet" | "eventsGet",
+  type: "detailGet" | "eventsGet" | "metadataGet",
   optionalParams?: APIUrlOptionalParams,
 ) => {
   let path = "";
 
   switch (type) {
-    case "detailGet": 
-      if (optionalParams?.countryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/country/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+    case "detailGet":
+      if (
+        optionalParams?.countryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/country/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
       }
       break;
     case "eventsGet":
-      if (optionalParams?.countryCode && typeof optionalParams?.start === "number" &&  typeof optionalParams?.limit === "number") {
-        path =`/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+      if (
+        optionalParams?.countryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
-        console.error(`Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`);
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+      }
+      break;
+    case "metadataGet":
+      if (
+        optionalParams?.countryCode &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/country/metadata/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
       }
       break;
     default:
@@ -417,5 +594,3 @@ export const apiUrlCountry = (
 
   return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
 };
-
-

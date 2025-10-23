@@ -1,56 +1,79 @@
 import type { Metadata } from "next";
 import { Monoton, Noto_Sans_KR, Poppins, Jost } from "next/font/google";
-import { Suspense } from "react";
-import GoogleAnalytics from "@/components/google-analytics";
+import Script from "next/script";
+import { dplusI18nKO } from "@/i18n-data/dplus-i18n-ko";
+import { ScrollRestorationProvider } from "@/contexts/scroll-restoration-context";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "./globals.css";  // <- 누락되면 Tailwind가 전역 적용 안됨
 
 
+// 기본 메타데이터 설정
 export const metadata: Metadata = {
-  title: "dplus",
-  description: "dplus 놓치지 말아야 할 중요한 일정, 플러스하세요",
+  title: dplusI18nKO.metadata.title,
+  description: dplusI18nKO.metadata.description,
+  keywords: dplusI18nKO.metadata.keywords,
+  openGraph: {
+    title: dplusI18nKO.metadata.og_title,
+    description: dplusI18nKO.metadata.og_description,
+    url: dplusI18nKO.metadata.og_url,
+    type: "website",
+    locale: dplusI18nKO.metadata.og_locale,
+    siteName: dplusI18nKO.metadata.og_site_name,
+    images: [
+      {
+        url: dplusI18nKO.metadata.og_image,
+        width: dplusI18nKO.metadata.og_image_width,
+        height: dplusI18nKO.metadata.og_image_height,
+        alt: dplusI18nKO.metadata.og_image_alt,
+      },
+    ],
+  },
   icons: {
+    // 💡 rel="icon" 에 해당
     icon: [
       {
-        url: '/icons/favicon-16x16.png',
-        sizes: '16x16',
-        type: 'image/png',
+        url: "/icons/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
       },
       {
-        url: '/icons/favicon-32x32.png',
-        sizes: '32x32',
-        type: 'image/png',
+        url: "/icons/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
       },
       {
-        url: '/icons/favicon-48x48.png',
-        sizes: '48x48',
-        type: 'image/png',
+        url: "/icons/favicon-48x48.png",
+        sizes: "48x48",
+        type: "image/png",
       },
       {
-        url: '/icons/favicon-64x64.png',
-        sizes: '64x64',
-        type: 'image/png',
+        url: "/icons/favicon-64x64.png",
+        sizes: "64x64",
+        type: "image/png",
       },
       {
-        url: '/icons/favicon-96x96.png',
-        sizes: '96x96',
-        type: 'image/png',
+        url: "/icons/favicon-96x96.png",
+        sizes: "96x96",
+        type: "image/png",
       },
       {
-        url: '/icons/favicon-128x128.png',
-        sizes: '128x128',
-        type: 'image/png',
+        url: "/icons/favicon-128x128.png",
+        sizes: "128x128",
+        type: "image/png",
       },
     ],
     // 💡 rel="apple-touch-icon" 에 해당
     apple: [
       {
-        url: '/icons/apple-icon-180x180.png',
-        sizes: '180x180',
-        type: 'image/png',
+        url: "/icons/apple-icon-180x180.png",
+        sizes: "180x180",
+        type: "image/png",
       },
       // 다른 크기의 apple-icon이 있다면 여기에 추가
     ],
     // 💡 rel="shortcut icon" 이 필요하다면 추가
-    shortcut: '/favicon.ico',
+    shortcut: "/favicon.ico",
   },
 };
 
@@ -90,11 +113,34 @@ const jost = Jost({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko" className={`${notoSansKR.variable} ${monoton.variable} ${poppins.variable} ${jost.variable} antialiased`}>
+      {/* Google Tag Manager script (head에 삽입), <head> 태그 사용하면 안됨  */}
+      <Script
+        id="gtm-script"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+          new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+          j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+          'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','GTM-5CD6J8X6');`,
+        }}
+      />
+      
       <body>
-        <Suspense fallback={null}>
-          <GoogleAnalytics />
-        </Suspense>
-        {children}
+        <ScrollRestorationProvider>
+          {/* ✅ Google Tag Manager (noscript) - body 맨 앞 */}
+          <noscript>
+            <iframe
+              src="https://www.googletagmanager.com/ns.html?id=GTM-5CD6J8X6"
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            ></iframe>
+          </noscript>
+          {children}
+          <Analytics />
+          <SpeedInsights />
+        </ScrollRestorationProvider>
       </body>
     </html>
   );

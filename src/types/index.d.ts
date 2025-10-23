@@ -20,15 +20,14 @@ export interface ICalendarEvent {
   location?: string;
   allDay?: boolean;
 
-  guests?: string[];               // Google: attendees, ICS: ATTENDEE
-  busy?: boolean;                  // Google: default busy, ICS: TRANSP (true=OPAQUE, false=TRANSPARENT)
+  guests?: string[]; // Google: attendees, ICS: ATTENDEE
+  busy?: boolean; // Google: default busy, ICS: TRANSP (true=OPAQUE, false=TRANSPARENT)
 
   website?: { name?: string; url: string }; // ICS: URL, Google: description/link 등으로 사용
-  timezone?: string;               // IANA tz (e.g. "Asia/Seoul")
+  timezone?: string; // IANA tz (e.g. "Asia/Seoul")
 
   // 공통 확장 필드 (양쪽 매핑 가능)
-  uid?: string;                    // ICS UID (없으면 생성)
+  uid?: string; // ICS UID (없으면 생성)
   geo?: { lat: number; lon: number }; // ICS GEO
   status?: "tentative" | "confirmed" | "cancelled"; // ICS STATUS / Google eventStatus
 }
-

@@ -17,6 +17,6 @@ export const dplusI18nTW = {
     og_site_name: "dplus",
     og_image_width: 1200,
     og_image_height: 630,
-    og_image_alt: "dplus｜音樂會・慶典・展覽・演出・快閃行程，一鍵加入"
-  }
+    og_image_alt: "dplus｜音樂會・慶典・展覽・演出・快閃行程，一鍵加入",
+  },
 };

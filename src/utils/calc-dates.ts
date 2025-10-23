@@ -3,7 +3,9 @@
  * @param targetDate - 비교할 날짜 (Date 객체, 문자열, 또는 숫자)
  * @returns 날짜 차이 (양수: 미래, 0: 오늘, 음수: 과거)
  */
-export const calculateDaysFromToday = (targetDate: Date | string | number): number => {
+export const calculateDaysFromToday = (
+  targetDate: Date | string | number,
+): number => {
   // 오늘 날짜 (시간은 00:00:00으로 설정)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -14,7 +16,7 @@ export const calculateDaysFromToday = (targetDate: Date | string | number): numb
 
   // 날짜가 유효한지 확인
   if (isNaN(target.getTime())) {
-    throw new Error('유효하지 않은 날짜입니다.');
+    throw new Error("유효하지 않은 날짜입니다.");
   }
 
   // 밀리초 단위 차이를 일 단위로 변환
@@ -22,7 +24,7 @@ export const calculateDaysFromToday = (targetDate: Date | string | number): numb
   const diffInDays = Math.round(diffInMilliseconds / (1000 * 60 * 60 * 24));
 
   return diffInDays;
-}
+};
 
 // // 사용 예시
 // console.log('=== 날짜 차이 계산 예시 ===');
@@ -49,8 +51,6 @@ export const calculateDaysFromToday = (targetDate: Date | string | number): numb
 //     console.error(`날짜 계산 오류: ${error}`);
 //   }
 // });
-
-
 
 // // 더 많은 사용 예시
 // console.log('\n=== 추가 예시 ===');

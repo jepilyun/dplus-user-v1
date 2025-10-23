@@ -57,11 +57,16 @@ export const formatDateTime = (
   opts?: {
     includeTime?: boolean;
     style?: "long" | "short";
-    timeFormat?: "locale" | "12h";  // ★ 추가
-    compactTime?: boolean;          // ★ 추가
-  }
+    timeFormat?: "locale" | "12h"; // ★ 추가
+    compactTime?: boolean; // ★ 추가
+  },
 ): string => {
-  const { includeTime = true, style = "long", timeFormat = "locale", compactTime = true } = opts ?? {};
+  const {
+    includeTime = true,
+    style = "long",
+    timeFormat = "locale",
+    compactTime = true,
+  } = opts ?? {};
 
   let targetDate = new Date(date);
   if (typeof utcMinutes === "number") {
@@ -69,8 +74,17 @@ export const formatDateTime = (
   }
 
   // 날짜 파트 (locale 유지)
-  const dateOptsLong: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
-  const dateOptsShort: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
+  const dateOptsLong: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  const dateOptsShort: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  };
   const dateFmt = new Intl.DateTimeFormat(locale, {
     ...(style === "short" ? dateOptsShort : dateOptsLong),
     ...(tz ? { timeZone: tz } : {}),
@@ -96,7 +110,7 @@ export const formatDateTime = (
       const [hm, ap] = t.split(" "); // ["04:00", "PM"]
       const [h, m] = hm.split(":");
       const hour = String(Number(h)); // 앞의 0 제거
-      timeStr = (m === "00") ? `${hour}${ap}` : `${hour}:${m}${ap}`;
+      timeStr = m === "00" ? `${hour}${ap}` : `${hour}:${m}${ap}`;
     } else {
       timeStr = t; // "04:00 PM"
     }
