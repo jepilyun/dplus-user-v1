@@ -6,91 +6,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
-
-/** ---------- KST 문자열 유틸 (날짜 비교는 문자열만) ---------- **/
-const KST_TZ = "Asia/Seoul";
-const pad2 = (n: number) => String(n).padStart(2, "0");
-
-function ymdFromDateKST(d: Date): string {
-  const kst = new Date(d.toLocaleString("en-US", { timeZone: KST_TZ }));
-  return `${kst.getFullYear()}-${pad2(kst.getMonth() + 1)}-${pad2(kst.getDate())}`;
-}
-function todayKstYmd(): string {
-  return ymdFromDateKST(new Date());
-}
-function getIsoWeekBoundsYmd(nowYmd: string) {
-  const base = new Date(`${nowYmd}T12:00:00+09:00`);
-  const jsDay = base.getDay();
-  const isoDay = jsDay === 0 ? 7 : jsDay;
-  const start = new Date(base);
-  start.setDate(base.getDate() - (isoDay - 1));
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  return { startYmd: ymdFromDateKST(start), endYmd: ymdFromDateKST(end) };
-}
-function getMonthBoundsYmd(nowYmd: string) {
-  const base = new Date(`${nowYmd}T12:00:00+09:00`);
-  const y = base.getFullYear();
-  const m = base.getMonth();
-  const monthStart = new Date(`${y}-${pad2(m + 1)}-01T00:00:00+09:00`);
-  const monthEnd = new Date(monthStart);
-  monthEnd.setMonth(monthStart.getMonth() + 1);
-  monthEnd.setDate(0);
-  return { startYmd: ymdFromDateKST(monthStart), endYmd: ymdFromDateKST(monthEnd) };
-}
-function inRangeYmd(targetYmd: string, startYmd: string, endYmd: string) {
-  return targetYmd >= startYmd && targetYmd <= endYmd;
-}
-function fmtShortRange(startYmd: string, endYmd: string) {
-  const s = new Date(`${startYmd}T00:00:00+09:00`);
-  const e = new Date(`${endYmd}T00:00:00+09:00`);
-  const m = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const left = `${m[s.getMonth()]} ${s.getDate()}`;
-  const right = s.getMonth() === e.getMonth() ? `${e.getDate()}` : `${m[e.getMonth()]} ${e.getDate()}`;
-  return `${left}–${right}`;
-}
-function getSectionForDate(ymd: string, nowYmd: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return { key: "later", label: "LATER", sub: "" };
-
-  const { startYmd: thisWStart, endYmd: thisWEnd } = getIsoWeekBoundsYmd(nowYmd);
-  const nextWeekBase = new Date(`${thisWStart}T12:00:00+09:00`);
-  nextWeekBase.setDate(nextWeekBase.getDate() + 7);
-  const { startYmd: nextWStart, endYmd: nextWEnd } = getIsoWeekBoundsYmd(ymdFromDateKST(nextWeekBase));
-
-  if (inRangeYmd(ymd, thisWStart, thisWEnd)) {
-    return { key: "this-week", label: "THIS WEEK", sub: `(${fmtShortRange(thisWStart, thisWEnd)})` };
-  }
-  if (inRangeYmd(ymd, nextWStart, nextWEnd)) {
-    return { key: "next-week", label: "NEXT WEEK", sub: `(${fmtShortRange(nextWStart, nextWEnd)})` };
-  }
-
-  const { startYmd: thisMStart, endYmd: thisMEnd } = getMonthBoundsYmd(nowYmd);
-  const nextMonthBase = new Date(`${thisMStart}T12:00:00+09:00`);
-  nextMonthBase.setMonth(nextMonthBase.getMonth() + 1);
-  const { startYmd: nextMStart, endYmd: nextMEnd } = getMonthBoundsYmd(ymdFromDateKST(nextMonthBase));
-
-  if (inRangeYmd(ymd, thisMStart, thisMEnd)) {
-    return {
-      key: "this-month",
-      label: "THIS MONTH",
-      sub: `(${new Date(`${thisMStart}T00:00:00+09:00`).toLocaleString("en-US",{ month:"short" }).toUpperCase()})`,
-    };
-  }
-  if (inRangeYmd(ymd, nextMStart, nextMEnd)) {
-    return {
-      key: "next-month",
-      label: "NEXT MONTH",
-      sub: `(${new Date(`${nextMStart}T00:00:00+09:00`).toLocaleString("en-US",{ month:"short" }).toUpperCase()})`,
-    };
-  }
-
-  const thisYear = nowYmd.slice(0, 4);
-  const y = ymd.slice(0, 4);
-  if (y === thisYear) return { key: "this-year", label: "THIS YEAR", sub: `(${thisYear})` };
-  if (+y === +thisYear + 1) return { key: "next-year", label: "NEXT YEAR", sub: `(${+thisYear + 1})` };
-
-  return { key: "later", label: "LATER", sub: "" };
-}
+import {
+  todayYmdInTz,
+  getSectionForDate,
+  detectBrowserTimeZone,
+  Tz,
+  detectBrowserLanguage,
+} from "@/utils/date-ymd";
 
 // 최소 유효성 검사 (unknown 사용)
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
@@ -103,21 +25,40 @@ function isValidEvent(v: unknown): v is TEventCardForDateDetail {
   );
 }
 
+// ✅ 이벤트 + 섹션 정보를 함께 저장하는 타입
+type EventWithSection = TEventCardForDateDetail & {
+  section: { key: string; label: string; sub: string };
+};
+
 export default function CompTodayDetailPage({
   countryCode,
   langCode,
   fullLocale,
+  // 🔹 (선택) 서버/상위에서 기본 TZ를 내려줄 수도 있게 prop 추가
+  defaultTz = "Asia/Seoul",
 }: {
   countryCode: string;
   langCode: string;
   fullLocale: string;
+  defaultTz?: Tz;
 }) {
   const router = useRouter();
+
+  // 브라우저 TZ & 언어 감지
+  const [tz, setTz] = useState<Tz>(defaultTz);
+  const [lang, setLang] = useState<"en" | "ko">("en");
+
+  useEffect(() => {
+    setTz(detectBrowserTimeZone() || defaultTz);
+    const browserLang = detectBrowserLanguage();
+    setLang(browserLang === "ko" ? "ko" : "en");
+  }, [defaultTz]);
 
   const [error, setError] = useState<'not-found' | 'network' | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [events, setEvents] = useState<TEventCardForDateDetail[]>([]);
+  // ✅ 섹션 정보를 포함한 이벤트 배열
+  const [eventsWithSections, setEventsWithSections] = useState<EventWithSection[]>([]);
   const [eventsStart, setEventsStart] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
@@ -128,16 +69,21 @@ export default function CompTodayDetailPage({
 
   const EVENTS_LIMIT = 10;
 
+  // ✅ 오늘 날짜를 ref로 고정 (컴포넌트 마운트 시점 기준)
+  const nowYmdRef = useRef<string>("");
+
+  useEffect(() => {
+    nowYmdRef.current = todayYmdInTz(tz);
+  }, [tz]);
+
   const fetchTodayList = async () => {
-    const reqId = ++requestIdRef.current; // 최신 요청 id
+    const reqId = ++requestIdRef.current;
     try {
       const res = await reqGetTodayList(countryCode, 0, EVENTS_LIMIT);
-      // 최신 요청만 반영
       if (reqId !== requestIdRef.current) return;
 
-      // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.dbResponse || !res?.dbResponse?.items) {
-        setError('not-found');
+        setError("not-found");
         setLoading(false);
         return;
       }
@@ -145,24 +91,29 @@ export default function CompTodayDetailPage({
       const raw: unknown[] = res?.dbResponse?.items ?? [];
       const initItems = raw.filter(isValidEvent);
 
-      // 중복 제거
+      // ✅ 중복 제거 + 섹션 계산을 한 번에
       const seen = seenEventCodesRef.current;
-      const deduped: TEventCardForDateDetail[] = [];
+      const dedupedWithSections: EventWithSection[] = [];
+      
       for (const it of initItems) {
         if (!seen.has(it.event_code)) {
           seen.add(it.event_code);
-          deduped.push(it);
+          // 섹션 정보를 이벤트와 함께 저장
+          const section = getSectionForDate(it.date ?? "", nowYmdRef.current, tz, lang);
+          dedupedWithSections.push({
+            ...it,
+            section,
+          });
         }
       }
 
-      setEvents(deduped);
-      setEventsStart(deduped.length);
+      setEventsWithSections(dedupedWithSections);
+      setEventsStart(dedupedWithSections.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       setError(null);
     } catch (error) {
-      // 네트워크 에러나 서버 에러
-      console.error('[today] fetch error', error);
-      setError('network');
+      console.error("[today] fetch error", error);
+      setError("network");
     } finally {
       if (reqId === requestIdRef.current) {
         setLoading(false);
@@ -174,6 +125,7 @@ export default function CompTodayDetailPage({
     if (eventsLoading) return;
     setEventsLoading(true);
     const reqId = ++requestIdRef.current;
+    
     try {
       const res = await reqGetTodayList(countryCode, eventsStart, EVENTS_LIMIT);
       if (reqId !== requestIdRef.current) return;
@@ -181,17 +133,23 @@ export default function CompTodayDetailPage({
       const raw: unknown[] = res?.dbResponse?.items ?? [];
       const pageItems = raw.filter(isValidEvent);
 
+      // ✅ 새로운 페이지의 아이템도 섹션 계산 후 추가
       const seen = seenEventCodesRef.current;
-      const deduped: TEventCardForDateDetail[] = [];
+      const dedupedWithSections: EventWithSection[] = [];
+      
       for (const it of pageItems) {
         if (!seen.has(it.event_code)) {
           seen.add(it.event_code);
-          deduped.push(it);
+          const section = getSectionForDate(it.date ?? "", nowYmdRef.current, tz, lang);
+          dedupedWithSections.push({
+            ...it,
+            section,
+          });
         }
       }
 
-      setEvents((prev) => prev.concat(deduped));
-      setEventsStart((prev) => prev + deduped.length);
+      setEventsWithSections((prev) => prev.concat(dedupedWithSections));
+      setEventsStart((prev) => prev + dedupedWithSections.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       if (reqId === requestIdRef.current) setEventsLoading(false);
@@ -200,9 +158,8 @@ export default function CompTodayDetailPage({
 
   useEffect(() => {
     let alive = true;
-    // countryCode 바뀌면 목록/셋 초기화
     seenEventCodesRef.current = new Set();
-    setEvents([]);
+    setEventsWithSections([]);
     setEventsStart(0);
     setEventsHasMore(false);
 
@@ -213,46 +170,10 @@ export default function CompTodayDetailPage({
 
     return () => {
       alive = false;
-      // 이후 들어오는 응답은 무시되도록 id 증가
       requestIdRef.current++;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countryCode]);
-
-  const nowYmd = todayKstYmd();
-
-  // ✅ 섹션별 그룹화 - 메모이제이션
-  const groupedEvents = useMemo(() => {
-    console.log('🔄 Grouping events:', events.length); // 재계산 횟수 확인용
-    
-    const groups: Array<{
-      section: { key: string; label: string; sub: string };
-      items: TEventCardForDateDetail[];
-    }> = [];
-
-    let currentSection: { key: string; label: string; sub: string } | null = null;
-    let currentItems: TEventCardForDateDetail[] = [];
-
-    for (const item of events) {
-      const section = getSectionForDate(item.date ?? "", nowYmd);
-      
-      if (!currentSection || section.key !== currentSection.key) {
-        if (currentSection && currentItems.length > 0) {
-          groups.push({ section: currentSection, items: [...currentItems] });
-        }
-        currentSection = section;
-        currentItems = [item];
-      } else {
-        currentItems.push(item);
-      }
-    }
-
-    if (currentSection && currentItems.length > 0) {
-      groups.push({ section: currentSection, items: currentItems });
-    }
-
-    return groups;
-  }, [events, nowYmd]);
+  }, [countryCode, tz, lang]); // ✅ tz, lang 변경 시에도 재로딩
 
   // 로딩 중
   if (loading) {
@@ -263,40 +184,47 @@ export default function CompTodayDetailPage({
     );
   }
 
-  // 데이터를 찾을 수 없는 경우 - 인라인 에러 표시
-  if (error === 'not-found') {
+  // 에러 처리
+  if (error === "not-found") {
     return (
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">No Events Found</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            {lang === "ko" ? "이벤트를 찾을 수 없습니다" : "No Events Found"}
+          </h2>
           <p className="text-gray-600 mb-6">
-            오늘의 이벤트를 찾을 수 없습니다.
+            {lang === "ko" 
+              ? "오늘의 이벤트를 찾을 수 없습니다." 
+              : "No events found for today."}
           </p>
           <button
             onClick={() => router.push(`/${langCode}`)}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            홈 화면으로 이동
+            {lang === "ko" ? "홈으로 이동" : "Go to Home"}
           </button>
         </div>
       </div>
     );
   }
 
-  // 네트워크 에러 - 재시도 옵션 제공
-  if (error === 'network') {
+  if (error === "network") {
     return (
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            {lang === "ko" ? "오류" : "ERROR"}
+          </h2>
           <p className="text-gray-600 mb-6">
-            Failed to load today&apos;s events. Please try again.
+            {lang === "ko"
+              ? "이벤트를 불러오는데 실패했습니다. 다시 시도해주세요."
+              : "Failed to load today's events. Please try again."}
           </p>
           <button
             onClick={() => fetchTodayList()}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            Retry
+            {lang === "ko" ? "재시도" : "Retry"}
           </button>
         </div>
       </div>
@@ -307,34 +235,30 @@ export default function CompTodayDetailPage({
     <div className="flex flex-col gap-8">
       <div>
         <div className="text-center font-extrabold">
-          <div className="text-3xl">Upcoming Events</div>
+          <div className="text-3xl">
+            {lang === "ko" ? "다가오는 일정" : "Upcoming"}
+          </div>
         </div>
       </div>
 
-      {groupedEvents.length > 0 ? (
+      {eventsWithSections.length > 0 ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {(() => {
             let lastKey = "";
             const blocks: JSX.Element[] = [];
 
-            for (const item of events) {
-              const section = getSectionForDate(item.date ?? "", nowYmd);
-              if (section.key !== lastKey) {
-                lastKey = section.key;
+            // ✅ 이미 계산된 섹션 정보 사용 - 재계산 불필요!
+            for (const item of eventsWithSections) {
+              // 섹션이 바뀔 때만 헤더 추가
+              if (item.section.key !== lastKey) {
+                lastKey = item.section.key;
 
                 blocks.push(
-                  <div 
-                    key={`sec-${section.key}`}
-                    className="sticky top-[80px]"
-                  >
-                    <div
-                      className="
-                        px-4 lg:px-8 py-3
-                        text-gray-800 bg-gray-100 rounded-sm border border-gray-200
-                      "
-                    >
+                  <div key={`sec-${item.section.key}`} className="sticky top-[80px]">
+                    <div className="px-4 lg:px-8 py-3 text-gray-800 bg-gray-100 rounded-sm border border-gray-200">
                       <div className="text-sm sm:text-md md:text-lg uppercase tracking-wide text-gray-600 font-semibold">
-                        {section.label} <span className="text-gray-400">{section.sub}</span>
+                        {item.section.label}{" "}
+                        <span className="text-gray-400">{item.section.sub}</span>
                       </div>
                     </div>
                   </div>
@@ -359,9 +283,12 @@ export default function CompTodayDetailPage({
         </div>
       ) : (
         <div className="mx-auto w-full max-w-[1024px] px-2 sm:px-4 lg:px-6 text-center py-12 text-gray-500">
-          No events found for this date.
+          {lang === "ko" 
+            ? "이 날짜에 해당하는 이벤트가 없습니다." 
+            : "No events found for this date."}
         </div>
       )}
     </div>
   );
 }
+

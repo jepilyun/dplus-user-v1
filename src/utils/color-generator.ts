@@ -10,22 +10,25 @@
  * - 그 외: 동일한 중립 컬러
  */
 export type TScheduleColorOptions = {
-  brandHex?: string; // D-Day 기준 컬러
-  weekStartsOn?: 0 | 1; // 0: Sunday, 1: Monday (기본 1)
-  tweaks?: {
-    // 밝기 조정(포인트, 0~100)
-    tomorrowLPlus?: number; // D+1
-    dayAfterLPlus?: number; // D+2
-    nextWeekLPlus?: number; // 다음주(이번주 대비)
-  };
+  weekStartsOn?: 0 | 1; // 0: Sun, 1: Mon
   palette?: {
-    thisWeek: string; // 이번주
-    thisMonth: string; // 이번달
-    nextMonth: string; // 다음달
-    monthPlus2: string; // 다다음달
-    later: string; // 그 외
+    // 과거
+    past: string;            // 기본 과거
+    pastMilestone: string;   // 100/200/300...일 단위 과거
+    // 오늘~모레
+    today: string;
+    tomorrow: string;
+    dayAfter: string;
+    // 미래 구간
+    thisWeek: string;
+    nextWeek: string;
+    thisMonth: string;
+    nextMonth: string;
+    thisYear: string;
+    later: string;
   };
 };
+
 
 /**
  * Generate a schedule color for a given date
@@ -40,71 +43,57 @@ export function scheduleColorForDate(
   opts: TScheduleColorOptions = {},
 ): string {
   const {
-    brandHex = "#FD00B5",
     weekStartsOn = 1,
     palette = {
-      thisWeek: "#00C2FF",
-      thisMonth: "#00E05C",
-      nextMonth: "#FF9800",
-      monthPlus2: "#8E44FF",
-      later: "#9AA0A6",
+      past: "#45556c",
+      pastMilestone: "#0f172b",
+      today: "#ec003f",
+      tomorrow: "#ff2056",
+      dayAfter: "#ff637e",
+      thisWeek: "#f54900",
+      nextWeek: "#fe9a00",
+      thisMonth: "#00c950",
+      nextMonth: "#00a6f4",
+      thisYear: "#1447e6",
+      later: "#4f39f6",
     },
   } = opts;
 
-  // ✅ tweaks 필드별 기본값을 확정해두고 사용
-  const {
-    tomorrowLPlus = 10,
-    dayAfterLPlus = 18,
-    nextWeekLPlus = 12,
-  } = opts.tweaks ?? {};
-
   const today = startOfDay(new Date(todayInput));
   const target = startOfDay(new Date(date));
-  const d = daysBetween(today, target);
+  const d = daysBetween(today, target); // target - today (일수)
 
-  if (d === 0) return brandHex;
-  if (d === 1) return adjustHslLightness(brandHex, tomorrowLPlus);
-  if (d === 2) return adjustHslLightness(brandHex, dayAfterLPlus);
+  // 1) 과거
+  if (d < 0) {
+    const ad = Math.abs(d);
+    return ad % 100 === 0 ? palette.pastMilestone : palette.past;
+  }
 
-  // 주/월 경계 계산
+  // 2) 오늘/내일/내일모레
+  if (d === 0) return palette.today;
+  if (d === 1) return palette.tomorrow;
+  if (d === 2) return palette.dayAfter;
+
+  // 3) 이번주/다음주
   const sw = startOfWeek(today, weekStartsOn);
   const ew = endOfWeek(today, weekStartsOn);
   const nextWStart = addDays(ew, 1);
   const nextWEnd = endOfWeek(nextWStart, weekStartsOn);
 
+  if (target >= sw && target <= ew) return palette.thisWeek;
+  if (target >= nextWStart && target <= nextWEnd) return palette.nextWeek;
+
+  // 4) 이번달/다음달
   const tmStart = startOfMonth(today);
   const tmEnd = endOfMonth(today);
   const nmStart = startOfMonth(addMonths(today, 1));
   const nmEnd = endOfMonth(addMonths(today, 1));
-  const pm2Start = startOfMonth(addMonths(today, 2));
-  const pm2End = endOfMonth(addMonths(today, 2));
 
-  // 2) 이번주
-  if (target >= sw && target <= ew) {
-    return palette.thisWeek;
-  }
+  if (target >= tmStart && target <= tmEnd) return palette.thisMonth;
+  if (target >= nmStart && target <= nmEnd) return palette.nextMonth;
 
-  // 3) 다음주 (이번주 컬러보다 밝게)
-  if (target >= nextWStart && target <= nextWEnd) {
-    return adjustHslLightness(palette.thisWeek, nextWeekLPlus);
-  }
-
-  // 4) 이번달 (이번주/다음주 제외)
-  if (target >= tmStart && target <= tmEnd) {
-    return palette.thisMonth;
-  }
-
-  // 5) 다음달
-  if (target >= nmStart && target <= nmEnd) {
-    return palette.nextMonth;
-  }
-
-  // 6) 다다음달
-  if (target >= pm2Start && target <= pm2End) {
-    return palette.monthPlus2;
-  }
-
-  // 7) 나머지(그 외 먼 미래/과거)
+  // 5) 올해 / 그 외(내년+)
+  if (target.getFullYear() === today.getFullYear()) return palette.thisYear;
   return palette.later;
 }
 
@@ -335,22 +324,29 @@ export function computeBadgeColors(
   dateStr?: string | null,
   explicitBg?: string | null,
   explicitFg?: string | null,
-): BadgeColors {
+): { bg: string; fg: string } {
   // 1) 명시 색상 우선
   if (explicitBg) {
     const fg = explicitFg ?? readableTextColor(explicitBg);
     return { bg: explicitBg, fg };
   }
-  // 2) 규칙 기반 배경색
-  const bg = scheduleColorForDate(
-    dateStr ? new Date(dateStr) : new Date(), // 대상 날짜
-    new Date(), // 오늘
-    {
-      brandHex: "#FD00B5", // D-Day 기준 브랜드 컬러
-      weekStartsOn: 1, // 월요일 시작 (원하면 0으로)
-      // 필요 시 palette/tweaks 커스터마이즈 가능
-    },
-  );
+
+  const target = dateStr ? startOfDay(new Date(dateStr)) : startOfDay(new Date());
+  const today = startOfDay(new Date());
+  const d = daysBetween(today, target);
+
+  const bg = scheduleColorForDate(target, today, {
+    weekStartsOn: 1,
+  });
+
+  // 과거 또는 D0/D+1/D+2 → 흰색 텍스트 고정
+  if (d < 0 || d === 0 || d === 1 || d === 2) {
+    return { bg, fg: "#FFFFFF" };
+  }
+
+  // 그 외는 대비 기반으로 결정
   const fg = readableTextColor(bg);
   return { bg, fg };
 }
+
+
