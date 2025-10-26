@@ -210,18 +210,17 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
       )}
       {hasCities && (
         <div className="mx-auto w-full max-w-[1440px] px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 h-[240px]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 min-h-[120px]">
             {countryDetail?.cities?.items.map((item) => (
               <Link
                 key={item.city_code}
                 href={`/city/${item.city_code}`}
                 className="block"
               >
-                <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-xs border border-gray-200 p-4 transition hover:bg-gray-50">
+                <div className="flex flex-col items-center justify-center gap-1 h-full min-h-[120px] w-full rounded-xs border border-gray-200 p-4 transition hover:bg-gray-50">
                   <div className="text-md font-medium text-center">
                     {item.name_i18n ?? item.name}
                   </div>
-                  {/* <div className="text-xs text-muted-foreground text-center">{item.name}</div> */}
                 </div>
               </Link>
             ))}

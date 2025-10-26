@@ -56,15 +56,18 @@ export function HeroImageBackgroundCarouselCountry({ bucket, imageUrls = [], int
           "absolute inset-0 flex gap-4 md:gap-6 lg:gap-8 flex-col items-center justify-center text-center px-4",
           hasImages ? "z-30 text-white" : "z-10 text-gray-900"
         )}>
-          <HeadlineTagsDetail
+          {/* <HeadlineTagsDetail
             targetCountryCode={countryDetail.country_code || null}
             targetCountryName={countryDetail.country_name || null}
             langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
-          />
-          <div id="city-title" className="text-center font-extrabold text-4xl md:text-5xl lg:text-6xl"
+          /> */}
+          <div id="city-title" className="text-center font-extrabold"
             data-country-code={countryDetail.country_code}
           >
-            <div>{countryDetail.native}</div>
+            <div className="flex flex-col gap-2">
+              <div className="text-3xl md:text-4xl lg:text-5xl font-bold">{countryDetail.native}</div>
+              <div className="text-md md:text-lg lg:text-xl text-gray-400">{countryDetail.country_name}</div>
+            </div>
           </div>
         </div>
       )}
