@@ -1,5 +1,5 @@
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import { SUPPORT_LANG_CODES } from "dplus_common_v1";
+import { SUPPORT_LANG_CODES, TMapCategoryEventWithCategoryInfo, TMapCategoryFolderWithCategoryInfo } from "dplus_common_v1";
 import Link from "next/link";
 
 export const HeadlineTagsDetail = ({
@@ -14,7 +14,7 @@ export const HeadlineTagsDetail = ({
   targetCountryName?: string | null;
   targetCityCode?: string | null;
   targetCityName?: string | null;
-  categories?: string[] | null;
+  categories?: TMapCategoryEventWithCategoryInfo[] | TMapCategoryFolderWithCategoryInfo[] | null;
   langCode?: (typeof SUPPORT_LANG_CODES)[number];
 }) =>  {
   const i18n = getDplusI18n(langCode);
@@ -33,8 +33,8 @@ export const HeadlineTagsDetail = ({
       )}
       {categories && categories.length > 0 && (
         categories.map((category) => (
-          <Link href={`/category/${category}`} key={category}>
-            <div className="bg-tag-category">{category}</div>
+          <Link href={`/category/${category.category_info?.category_code}`} key={category.category_info?.category_code}>
+            <div className="bg-tag-category">{category.category_info?.name}</div>
           </Link>
         ))
       )}

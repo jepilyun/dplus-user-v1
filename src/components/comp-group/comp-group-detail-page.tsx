@@ -33,7 +33,7 @@ export default function CompGroupDetailPage({ groupCode, langCode, fullLocale }:
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 10;
+  const EVENTS_LIMIT = 36;
 
   const fetchGroupDetail = async () => {
     try {

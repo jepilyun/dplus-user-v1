@@ -169,7 +169,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         targetCountryName={eventDetail?.event.target_country_native || null}
         targetCityCode={eventDetail?.event.target_city_code || null}
         targetCityName={eventDetail?.event.target_city_native || null}
-        categories={eventDetail?.mapCategoryEvent?.items.map(item => item.category_info?.name || '') ?? null}
+        categories={eventDetail?.mapCategoryEvent?.items ?? null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
       <div id="event-title" className="text-center font-extrabold text-3xl"

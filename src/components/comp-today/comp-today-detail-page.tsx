@@ -67,7 +67,7 @@ export default function CompTodayDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const requestIdRef = useRef(0);
 
-  const EVENTS_LIMIT = 10;
+  const EVENTS_LIMIT = 36;
 
   // ✅ 오늘 날짜를 ref로 고정 (컴포넌트 마운트 시점 기준)
   const nowYmdRef = useRef<string>("");

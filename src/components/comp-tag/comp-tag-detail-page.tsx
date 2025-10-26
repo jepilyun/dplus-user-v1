@@ -30,7 +30,7 @@ export default function CompTagDetailPage({ tagCode, langCode, fullLocale }: { t
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 10;
+  const EVENTS_LIMIT = 36;
 
   const fetchTagDetail = async () => {
     try {

@@ -35,7 +35,7 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 10;
+  const EVENTS_LIMIT = 36;
 
   const fetchFolderDetail = async () => {
     try {
@@ -185,7 +185,7 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
         targetCountryName={folderDetail?.folder.target_country_native || null}
         targetCityCode={folderDetail?.folder.target_city_code || null}
         targetCityName={folderDetail?.folder.target_city_native || null}
-        categories={folderDetail?.mapCategoryFolder?.items.map(item => item.category_info?.name || '') ?? null}
+        categories={folderDetail?.mapCategoryFolder?.items ?? null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
       <div id="folder-title" className="text-center font-extrabold text-3xl"

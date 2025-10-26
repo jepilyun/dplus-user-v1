@@ -36,7 +36,7 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 10;
+  const EVENTS_LIMIT = 36;
 
   const fetchCountryDetail = async () => {
     try {
