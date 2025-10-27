@@ -10,6 +10,7 @@ import { IconYoutubeRound } from "@/icons/icon-youtube-round";
 import { IconInstagramRound } from "@/icons/icon-instagram-round";
 import { IconWebsiteRound } from "@/icons/icon-website-round";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
+import { IconTicketRound } from "@/icons/icon-ticket-round";
 
 type TEventMinimal = {
   address_native?: string | null;
@@ -22,6 +23,7 @@ type TEventMinimal = {
   youtube_ch_id?: string | null;
   instagram_id?: string | null;
   url?: string | null;
+  ticket_purchase?: string | null;
 };
 
 type TLinkItem = {
@@ -101,6 +103,16 @@ export default function CompEventContactLinks({ event }: { event: TEventMinimal 
         icon: <IconInstagramRound className="h-12 w-12 text-gray-700" />,
         text: "Instagram",
         href: toInstagramUrl(event.instagram_id),
+      });
+    }
+
+    // 티켓 구매 링크
+    if (event.ticket_purchase) {
+      list.push({
+        key: "ticket_purchase",
+        icon: <IconTicketRound className="h-12 w-12 text-gray-700" />,
+        text: event.ticket_purchase.replace(/^https?:\/\//i, ""),
+        href: toAbsoluteUrl(event.ticket_purchase),
       });
     }
 

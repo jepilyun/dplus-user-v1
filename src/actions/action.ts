@@ -11,6 +11,13 @@ import {
   ResponseStagDetailForUserFront,
   ResponseTagDetailForUserFront,
   TEventCardForDateDetail,
+  TMapCategoryEventWithEventInfo,
+  TMapCityEventWithEventInfo,
+  TMapCountryEventWithEventInfo,
+  TMapFolderEventWithEventInfo,
+  TMapGroupEventWithEventInfo,
+  TMapStagEventWithEventInfo,
+  TMapTagEventWithEventInfo,
 } from "dplus_common_v1";
 
 import {
@@ -136,7 +143,7 @@ export const reqGetFolderEvents = async (
   folderCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseFolderDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapFolderEventWithEventInfo>>> => {
   const res = await fetch(
     apiUrlFolder("eventsGet", { folderCode, start, limit }),
     {
@@ -221,7 +228,7 @@ export const reqGetCityEvents = async (
   cityCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseCityDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapCityEventWithEventInfo>>> => {
   const res = await fetch(apiUrlCity("eventsGet", { cityCode, start, limit }), {
     method: "GET",
     credentials: "include",
@@ -307,7 +314,7 @@ export const reqGetStagEvents = async (
   stagCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseStagDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapStagEventWithEventInfo>>> => {
   const res = await fetch(apiUrlStag("eventsGet", { stagCode, start, limit }), {
     method: "GET",
     credentials: "include",
@@ -365,7 +372,7 @@ export const reqGetGroupEvents = async (
   groupCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseGroupDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapGroupEventWithEventInfo>>> => {
   const res = await fetch(
     apiUrlGroup("eventsGet", { groupCode, start, limit }),
     {
@@ -441,7 +448,7 @@ export const reqGetTagEvents = async (
   tagId: number,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseTagDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapTagEventWithEventInfo>>> => {
   const res = await fetch(apiUrlTag("eventsGet", { tagId, start, limit }), {
     method: "GET",
     credentials: "include",
@@ -495,7 +502,7 @@ export const reqGetCategoryEvents = async (
   categoryCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseCategoryDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapCategoryEventWithEventInfo>>> => {
   const res = await fetch(
     apiUrlCategory("eventsGet", { countryCode, categoryCode, start, limit }),
     {
@@ -600,7 +607,7 @@ export const reqGetCountryEvents = async (
   countryCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<ResponseCountryDetailForUserFront>> => {
+): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapCountryEventWithEventInfo>>> => {
   const res = await fetch(
     apiUrlCountry("eventsGet", { countryCode, start, limit }),
     {

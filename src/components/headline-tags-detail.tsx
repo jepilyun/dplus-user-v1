@@ -34,7 +34,7 @@ export const HeadlineTagsDetail = ({
       {categories && categories.length > 0 && (
         categories.map((category) => (
           <Link href={`/category/${category.category_info?.category_code}`} key={category.category_info?.category_code}>
-            <div className="bg-tag-category">{category.category_info?.name}</div>
+            <div className="bg-tag-category">{category.category_info?.name_i18n}</div>
           </Link>
         ))
       )}

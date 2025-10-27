@@ -32,7 +32,7 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 10;
+  const EVENTS_LIMIT = 36;
 
   const fetchCityDetail = async () => {
     try {
@@ -104,8 +104,8 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
 
     try {
       const res = await reqGetCityEvents(cityCode, eventsStart, EVENTS_LIMIT);
-      const page = res?.dbResponse?.mapCityEvent;
-      const newItems = (page?.items ?? []).filter((it: TMapCityEventWithEventInfo) => {
+      const fetchedItems = res?.dbResponse?.items;
+      const newItems = (fetchedItems ?? []).filter((it: TMapCityEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);
@@ -114,7 +114,7 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
 
       setEvents(prev => prev.concat(newItems));
       setEventsStart(eventsStart + (newItems.length || 0));
-      setEventsHasMore(Boolean(page?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }

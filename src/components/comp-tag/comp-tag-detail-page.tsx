@@ -102,8 +102,8 @@ export default function CompTagDetailPage({ tagCode, langCode, fullLocale }: { t
     try {
       if (tagDetail?.tag.id) {
         const res = await reqGetTagEvents(tagDetail?.tag.id, eventsStart, EVENTS_LIMIT);
-        const page = res?.dbResponse?.mapTagEvent;
-        const newItems = (page?.items ?? []).filter((it: TMapTagEventWithEventInfo) => {
+        const fetchedItems = res?.dbResponse?.items;
+        const newItems = (fetchedItems ?? []).filter((it: TMapTagEventWithEventInfo) => {
           const code = it?.event_info?.event_code ?? it?.event_code;
           if (!code || seenEventCodes.has(code)) return false;
           seenEventCodes.add(code);
@@ -112,7 +112,7 @@ export default function CompTagDetailPage({ tagCode, langCode, fullLocale }: { t
 
         setEvents(prev => prev.concat(newItems));
         setEventsStart(eventsStart + (newItems.length || 0));
-        setEventsHasMore(Boolean(page?.hasMore));
+        setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       } else {
         console.log('tagDetail?.tag.id is not defined');
       }

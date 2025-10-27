@@ -14,7 +14,7 @@ export default function CompCommonDatetime({ datetime, fullLocale, time, isRepea
           {getDplusI18n(fullLocale).repeat_annually}
         </div>
       )}
-      <div className="text-center font-poppins font-extrabold text-2xl">
+      <div className="text-center font-poppins font-medium text-gray-700 text-xl sm:text-2xl md:text-3xl">
         {generateDdayDatetime(datetime, fullLocale, time ?? null, {
           style: "long",
           timeFormat: "12h",   // ★ "4PM" 스타일

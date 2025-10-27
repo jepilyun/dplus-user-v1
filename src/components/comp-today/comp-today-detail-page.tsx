@@ -2,7 +2,7 @@
 
 import { reqGetTodayList } from "@/actions/action";
 import { TEventCardForDateDetail } from "dplus_common_v1";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
@@ -130,14 +130,14 @@ export default function CompTodayDetailPage({
       const res = await reqGetTodayList(countryCode, eventsStart, EVENTS_LIMIT);
       if (reqId !== requestIdRef.current) return;
 
-      const raw: unknown[] = res?.dbResponse?.items ?? [];
-      const pageItems = raw.filter(isValidEvent);
+      const fetchedItems = res?.dbResponse?.items;
+      const newItems = (fetchedItems ?? []).filter(isValidEvent);
 
       // ✅ 새로운 페이지의 아이템도 섹션 계산 후 추가
       const seen = seenEventCodesRef.current;
       const dedupedWithSections: EventWithSection[] = [];
       
-      for (const it of pageItems) {
+      for (const it of newItems) {
         if (!seen.has(it.event_code)) {
           seen.add(it.event_code);
           const section = getSectionForDate(it.date ?? "", nowYmdRef.current, tz, lang);

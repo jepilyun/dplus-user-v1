@@ -105,8 +105,8 @@ export default function CompGroupDetailPage({ groupCode, langCode, fullLocale }:
 
     try {
       const res = await reqGetGroupEvents(groupCode, eventsStart, EVENTS_LIMIT);
-      const page = res?.dbResponse?.mapGroupEvent;
-      const newItems = (page?.items ?? []).filter((it: TMapGroupEventWithEventInfo) => {
+      const fetchedItems = res?.dbResponse?.items;
+      const newItems = (fetchedItems ?? []).filter((it: TMapGroupEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);
@@ -115,7 +115,7 @@ export default function CompGroupDetailPage({ groupCode, langCode, fullLocale }:
 
       setEvents(prev => prev.concat(newItems));
       setEventsStart(eventsStart + (newItems.length || 0));
-      setEventsHasMore(Boolean(page?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }

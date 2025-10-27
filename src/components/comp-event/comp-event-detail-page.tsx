@@ -155,7 +155,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       date-created-at={eventDetail?.event.created_at}
       date-updated-at={eventDetail?.event.updated_at}
     >
-      <div className="text-center font-poppins font-extrabold text-8xl">
+      <div className="text-center font-poppins font-extrabold text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
         {eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
       </div>
       <CompCommonDatetime 
@@ -172,7 +172,10 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         categories={eventDetail?.mapCategoryEvent?.items ?? null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
-      <div id="event-title" className="text-center font-extrabold text-3xl"
+      <div
+        id="event-title"
+        className="text-center px-4 sm:px-6 md:px-8 lg:px-10 font-extrabold
+                  text-2xl sm:text-3xl md:text-4xl leading-[1.8]"
         data-event-code={eventDetail?.event.event_code}
       >
         {eventDetail?.event.title}
@@ -201,7 +204,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         className="m-auto w-full flex max-w-[1440px]"
       />
       {eventDetail?.event.description && (
-        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">{eventDetail?.event.description}</div>
+        <div className="m-auto p-4 px-8 text-center w-full text-lg max-w-[1024px] whitespace-pre-line">{eventDetail?.event.description}</div>
       )}
       {eventDetail?.mapStagEvent?.items.map(item => (
         <div key={item.stag_info?.stag_code}>
@@ -232,9 +235,9 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       )}
       {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
       <div className="flex gap-4 justify-center flex-wrap">
-        <CompLabelCount01 title="Views" count={eventDetail?.event.view_count ?? 0} minWidth={120} minHeight={120} />
-        <CompLabelCount01 title="Saved" count={eventDetail?.event.saved_count ?? 0} minWidth={120} minHeight={120} />
-        <CompLabelCount01 title="Shared" count={eventDetail?.event.shared_count ?? 0} minWidth={120} minHeight={120} />
+        <CompLabelCount01 title="Views" count={eventDetail?.event.view_count ?? 0} />
+        <CompLabelCount01 title="Saved" count={eventDetail?.event.saved_count ?? 0} />
+        <CompLabelCount01 title="Shared" count={eventDetail?.event.shared_count ?? 0} />
       </div>
     </div>
   );

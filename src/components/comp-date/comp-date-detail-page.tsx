@@ -75,8 +75,8 @@ export default function CompDateDetailPage({
 
     try {
       const res = await reqGetDateList(countryCode, dateString, eventsStart, EVENTS_LIMIT);
-      const events = res?.dbResponse?.items ?? [];
-      const newItems = events.filter((it: TEventCardForDateDetail) => {
+      const fetchedItems = res?.dbResponse?.items;
+      const newItems = (fetchedItems ?? []).filter((it: TEventCardForDateDetail) => {
         const code = it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);

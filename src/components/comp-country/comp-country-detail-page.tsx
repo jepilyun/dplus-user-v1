@@ -102,15 +102,14 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
     }
   };
 
-
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
 
     try {
       const res = await reqGetCountryEvents(countryCode, eventsStart, EVENTS_LIMIT);
-      const page = res?.dbResponse?.mapCountryEvent;
-      const newItems = (page?.items ?? []).filter((it: TMapCountryEventWithEventInfo) => {
+      const fetchedItems = res?.dbResponse?.items;
+      const newItems = (fetchedItems ?? []).filter((it: TMapCountryEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);
@@ -119,7 +118,7 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
 
       setEvents(prev => prev.concat(newItems));
       setEventsStart(eventsStart + (newItems.length || 0));
-      setEventsHasMore(Boolean(page?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
@@ -210,7 +209,7 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
       )}
       {hasCities && (
         <div className="mx-auto w-full max-w-[1440px] px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 min-h-[120px]">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
             {countryDetail?.cities?.items.map((item) => (
               <Link
                 key={item.city_code}

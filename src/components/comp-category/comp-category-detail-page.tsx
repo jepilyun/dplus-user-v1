@@ -75,8 +75,8 @@ export default function CompCategoryDetailPage({
 
     try {
       const res = await reqGetCategoryEvents(countryCode, categoryCode, eventsStart, EVENTS_LIMIT);
-      const events = res?.dbResponse?.mapCategoryEvent?.items ?? [];
-      const newItems = events.filter((it: TMapCategoryEventWithEventInfo) => {
+      const fetchedItems = res?.dbResponse?.items;
+      const newItems = (fetchedItems ?? []).filter((it: TMapCategoryEventWithEventInfo) => {
         const code = it?.event_code;
         if (!code || seenEventCodes.has(code)) return false;
         seenEventCodes.add(code);
@@ -85,7 +85,7 @@ export default function CompCategoryDetailPage({
 
       setEvents(prev => prev.concat(newItems));
       setEventsStart(eventsStart + (newItems.length || 0));
-      setEventsHasMore(Boolean(res?.dbResponse?.mapCategoryEvent?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
