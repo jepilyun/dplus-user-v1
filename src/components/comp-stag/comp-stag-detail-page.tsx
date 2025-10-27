@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetStagDetail, reqGetStagEvents } from "@/actions/action";
-import { ResponseStagDetailForUserFront, SUPPORT_LANG_CODES, TMapStagEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseStagDetailForUserFront, SUPPORT_LANG_CODES, TMapStagEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { getStagImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
@@ -33,11 +33,9 @@ export default function CompStagDetailPage({ stagCode, langCode, fullLocale }: {
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchStagDetail = async () => {
     try {
-      const res = await reqGetStagDetail(stagCode, 0, EVENTS_LIMIT);
+      const res = await reqGetStagDetail(stagCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
@@ -104,7 +102,7 @@ export default function CompStagDetailPage({ stagCode, langCode, fullLocale }: {
     setEventsLoading(true);
 
     try {
-      const res = await reqGetStagEvents(stagCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetStagEvents(stagCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TMapStagEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

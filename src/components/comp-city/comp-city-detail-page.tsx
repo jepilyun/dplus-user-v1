@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetCityDetail, reqGetCityEvents } from "@/actions/action";
-import { ResponseCityDetailForUserFront, SUPPORT_LANG_CODES, TMapCityEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseCityDetailForUserFront, SUPPORT_LANG_CODES, TMapCityEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { getCityImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
@@ -32,11 +32,9 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchCityDetail = async () => {
     try {
-      const res = await reqGetCityDetail(cityCode, 0, EVENTS_LIMIT);
+      const res = await reqGetCityDetail(cityCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
@@ -103,7 +101,7 @@ export default function CompCityDetailPage({ cityCode, langCode, fullLocale }: {
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCityEvents(cityCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetCityEvents(cityCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TMapCityEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

@@ -2,7 +2,7 @@
 
 import { reqGetFolderDetail, reqGetFolderEvents } from "@/actions/action";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
-import { ResponseFolderDetailForUserFront, SUPPORT_LANG_CODES, TMapFolderEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseFolderDetailForUserFront, SUPPORT_LANG_CODES, TMapFolderEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
@@ -35,11 +35,9 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchFolderDetail = async () => {
     try {
-      const res = await reqGetFolderDetail(folderCode, 0, EVENTS_LIMIT);
+      const res = await reqGetFolderDetail(folderCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
 
       const isEmptyObj =
@@ -106,7 +104,7 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
     setEventsLoading(true);
 
     try {
-      const res = await reqGetFolderEvents(folderCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetFolderEvents(folderCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TMapFolderEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

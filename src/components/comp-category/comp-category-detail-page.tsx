@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetCategoryDetail, reqGetCategoryEvents } from "@/actions/action";
-import { ResponseCategoryDetailForUserFront, TMapCategoryEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseCategoryDetailForUserFront, TMapCategoryEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -36,11 +36,9 @@ export default function CompCategoryDetailPage({
 
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 10;
-
   const fetchCategoryDetail = async () => {
     try {
-      const res = await reqGetCategoryDetail(countryCode, categoryCode, 0, EVENTS_LIMIT, langCode);
+      const res = await reqGetCategoryDetail(countryCode, categoryCode, 0, LIST_LIMIT.default, langCode);
 
       // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.dbResponse || !res?.dbResponse?.category) {
@@ -74,7 +72,7 @@ export default function CompCategoryDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCategoryEvents(countryCode, categoryCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetCategoryEvents(countryCode, categoryCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TMapCategoryEventWithEventInfo) => {
         const code = it?.event_code;

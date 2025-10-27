@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetDateList } from "@/actions/action";
-import { TEventCardForDateDetail } from "dplus_common_v1";
+import { LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -36,11 +36,9 @@ export default function CompDateDetailPage({
 
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchDateDetail = async () => {
     try {
-      const res = await reqGetDateList(countryCode, dateString, 0, EVENTS_LIMIT);
+      const res = await reqGetDateList(countryCode, dateString, 0, LIST_LIMIT.default);
 
       // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.dbResponse || !res?.dbResponse?.items) {
@@ -74,7 +72,7 @@ export default function CompDateDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetDateList(countryCode, dateString, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetDateList(countryCode, dateString, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TEventCardForDateDetail) => {
         const code = it?.event_code;

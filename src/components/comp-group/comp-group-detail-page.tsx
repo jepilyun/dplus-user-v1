@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetGroupDetail, reqGetGroupEvents } from "@/actions/action";
-import { ResponseGroupDetailForUserFront, SUPPORT_LANG_CODES, TMapGroupEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseGroupDetailForUserFront, SUPPORT_LANG_CODES, TMapGroupEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { getGroupImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
@@ -33,11 +33,9 @@ export default function CompGroupDetailPage({ groupCode, langCode, fullLocale }:
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchGroupDetail = async () => {
     try {
-      const res = await reqGetGroupDetail(groupCode, 0, EVENTS_LIMIT);
+      const res = await reqGetGroupDetail(groupCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
@@ -104,7 +102,7 @@ export default function CompGroupDetailPage({ groupCode, langCode, fullLocale }:
     setEventsLoading(true);
 
     try {
-      const res = await reqGetGroupEvents(groupCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetGroupEvents(groupCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TMapGroupEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

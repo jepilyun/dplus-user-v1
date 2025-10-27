@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetTagDetail, reqGetTagEvents } from "@/actions/action";
-import { ResponseTagDetailForUserFront, TMapTagEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseTagDetailForUserFront, TMapTagEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
@@ -30,11 +30,9 @@ export default function CompTagDetailPage({ tagCode, langCode, fullLocale }: { t
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchTagDetail = async () => {
     try {
-      const res = await reqGetTagDetail(tagCode, 0, EVENTS_LIMIT);
+      const res = await reqGetTagDetail(tagCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
@@ -101,7 +99,7 @@ export default function CompTagDetailPage({ tagCode, langCode, fullLocale }: { t
 
     try {
       if (tagDetail?.tag.id) {
-        const res = await reqGetTagEvents(tagDetail?.tag.id, eventsStart, EVENTS_LIMIT);
+        const res = await reqGetTagEvents(tagDetail?.tag.id, eventsStart, LIST_LIMIT.default);
         const fetchedItems = res?.dbResponse?.items;
         const newItems = (fetchedItems ?? []).filter((it: TMapTagEventWithEventInfo) => {
           const code = it?.event_info?.event_code ?? it?.event_code;

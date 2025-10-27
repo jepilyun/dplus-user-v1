@@ -1,7 +1,7 @@
 "use client";
 
 import {reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
-import { ResponseCountryDetailForUserFront, SUPPORT_LANG_CODES, TMapCountryEventWithEventInfo } from "dplus_common_v1";
+import { LIST_LIMIT, ResponseCountryDetailForUserFront, SUPPORT_LANG_CODES, TMapCountryEventWithEventInfo } from "dplus_common_v1";
 import { useEffect, useState } from "react";
 import { getCountryImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
@@ -36,11 +36,9 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
   // 중복 방지
   const [seenEventCodes] = useState<Set<string>>(new Set());
 
-  const EVENTS_LIMIT = 36;
-
   const fetchCountryDetail = async () => {
     try {
-      const res = await reqGetCountryDetail(countryCode, 0, EVENTS_LIMIT, langCode);
+      const res = await reqGetCountryDetail(countryCode, 0, LIST_LIMIT.default, langCode);
 
       const isEmptyObj =
         !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
@@ -107,7 +105,7 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCountryEvents(countryCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetCountryEvents(countryCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items;
       const newItems = (fetchedItems ?? []).filter((it: TMapCountryEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

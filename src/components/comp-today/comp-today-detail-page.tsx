@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetTodayList } from "@/actions/action";
-import { TEventCardForDateDetail } from "dplus_common_v1";
+import { LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -67,8 +67,6 @@ export default function CompTodayDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const requestIdRef = useRef(0);
 
-  const EVENTS_LIMIT = 36;
-
   // ✅ 오늘 날짜를 ref로 고정 (컴포넌트 마운트 시점 기준)
   const nowYmdRef = useRef<string>("");
 
@@ -79,7 +77,7 @@ export default function CompTodayDetailPage({
   const fetchTodayList = async () => {
     const reqId = ++requestIdRef.current;
     try {
-      const res = await reqGetTodayList(countryCode, 0, EVENTS_LIMIT);
+      const res = await reqGetTodayList(countryCode, 0, LIST_LIMIT.default);
       if (reqId !== requestIdRef.current) return;
 
       if (!res?.dbResponse || !res?.dbResponse?.items) {
@@ -127,7 +125,7 @@ export default function CompTodayDetailPage({
     const reqId = ++requestIdRef.current;
     
     try {
-      const res = await reqGetTodayList(countryCode, eventsStart, EVENTS_LIMIT);
+      const res = await reqGetTodayList(countryCode, eventsStart, LIST_LIMIT.default);
       if (reqId !== requestIdRef.current) return;
 
       const fetchedItems = res?.dbResponse?.items;
