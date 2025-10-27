@@ -9,6 +9,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
 import Link from "next/link";
+import { getCityBgUrl } from "@/utils/get-city-bg-image";
 
 
 /**
@@ -208,19 +209,65 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
       {hasCities && (
         <div className="mx-auto w-full max-w-[1440px] px-4">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
-            {countryDetail?.cities?.items.map((item) => (
-              <Link
-                key={item.city_code}
-                href={`/city/${item.city_code}`}
-                className="block"
-              >
-                <div className="flex flex-col items-center justify-center gap-1 h-full min-h-[120px] w-full rounded-xs border border-gray-200 p-4 transition hover:bg-gray-50">
-                  <div className="text-md font-medium text-center">
-                    {item.name_i18n ?? item.name}
+            {countryDetail?.cities?.items.map((item) => {
+              const bg = getCityBgUrl(item);
+              return (
+                <Link
+                  key={item.city_code}
+                  href={`/city/${item.city_code}`}
+                  className={[
+                    "relative flex flex-col items-center justify-center gap-1",
+                    "h-full min-h-[120px] w-full rounded-xs border border-gray-200 p-4",
+                    "transition-all duration-200 overflow-hidden",
+                    "group", // ← 중요: group으로 설정
+                    bg 
+                      ? "bg-gray-900" 
+                      : "bg-gray-50 hover:bg-gray-100",
+                  ].join(" ")}
+                >
+                  {/* 배경 이미지 레이어 */}
+                  {bg && (
+                    <>
+                      <div
+                        className="absolute inset-0 bg-center bg-cover transition-transform duration-300 group-hover:scale-105"
+                        style={{ backgroundImage: `url(${bg})` }}
+                        aria-hidden="true"
+                      />
+                      
+                      {/* 검은 반투명 오버레이 - hover 시 더 투명하게 */}
+                      <div 
+                        className="absolute inset-0 bg-black/60 transition-opacity duration-200 group-hover:bg-black/40" 
+                        aria-hidden="true"
+                      />
+                    </>
+                  )}
+
+                  {/* 내용 */}
+                  <div className="relative z-10 w-full">
+                    <div
+                      className={[
+                        "text-xl font-bold text-center transition-transform duration-200",
+                        bg 
+                          ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] group-hover:scale-105" 
+                          : "text-gray-900",
+                      ].join(" ")}
+                    >
+                      {item.name_native ?? item.name}
+                    </div>
+                    <div
+                      className={[
+                        "text-sm text-center transition-transform duration-200",
+                        bg
+                          ? "text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:scale-105"
+                          : "text-muted-foreground",
+                      ].join(" ")}
+                    >
+                      {item.name}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
