@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Monoton, Noto_Sans_KR, Poppins, Jost } from "next/font/google";
+import { Monoton, Noto_Sans, Noto_Sans_KR, Poppins, Candal } from "next/font/google";
 import Script from "next/script";
 import { dplusI18nKO } from "@/i18n-data/dplus-i18n-ko";
 import { ScrollRestorationProvider } from "@/contexts/scroll-restoration-context";
@@ -77,19 +77,26 @@ export const metadata: Metadata = {
   },
 };
 
+const monoton = Monoton({
+  weight: ["400"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-monoton", // CSS 변수로 사용
+});
+
+const notoSans = Noto_Sans({
+  weight: ["100", "300", "400", "500", "700", "900"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-noto-sans", // CSS 변수로 사용
+});
+
 // 폰트 설정 (Pretendard는 구글 폰트가 아니므로, 가장 유사한 Noto Sans KR로 대체)
 const notoSansKR = Noto_Sans_KR({
   weight: ["100", "300", "400", "500", "700", "900"],
   subsets: ["latin"],
   display: "swap",
   variable: "--font-noto-sans-kr", // CSS 변수로 사용
-});
-
-const monoton = Monoton({
-  weight: ["400"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-monoton", // CSS 변수로 사용
 });
 
 const poppins = Poppins({
@@ -99,11 +106,11 @@ const poppins = Poppins({
   variable: "--font-poppins", // CSS 변수로 사용
 });
 
-const jost = Jost({
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+const candal = Candal({
+  weight: ["400"],
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-jost", // CSS 변수로 사용
+  variable: "--font-candal", // CSS 변수로 사용
 });
 
 /**
@@ -112,7 +119,7 @@ const jost = Jost({
  */
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${notoSansKR.variable} ${monoton.variable} ${poppins.variable} ${jost.variable} antialiased`}>
+    <html lang="ko" className={`${notoSans.variable} ${notoSansKR.variable} ${monoton.variable} ${poppins.variable} ${candal.variable} antialiased`}>
       {/* Google Tag Manager script (head에 삽입), <head> 태그 사용하면 안됨  */}
       <Script
         id="gtm-script"

@@ -33,7 +33,7 @@ export default function CompCommonDdayItemForDate({
             className="w-full h-full flex items-center justify-center rounded-[1rem] p-2 md:p-3"
             style={{ color: fg }}
           >
-            <span className="font-poppins font-extrabold text-lg sm:text-xl md:text-3xl tracking-tight">
+            <span className="font-candal font-extrabold text-lg sm:text-xl md:text-3xl tracking-tight">
               {event?.date
                 ? getDdayLabel(calculateDaysFromToday(event?.date))
                 : ""}

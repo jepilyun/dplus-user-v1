@@ -20,7 +20,7 @@ export const HeadlineTagsDetail = ({
   const i18n = getDplusI18n(langCode);
 
   return (
-    <div className="flex gap-2 flex-wrap justify-center">
+    <div className="flex gap-2 flex-wrap justify-center font-bold">
       {targetCountryName && (
         <Link href={`/country/${targetCountryCode}`}>
           <div className="bg-tag-country">{targetCountryName}</div>

@@ -200,8 +200,8 @@ export default function CompFolderDetailPage({ folderCode, langCode, fullLocale 
         <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">{folderDetail?.folder.description}</div>
       )}
       <div className="flex gap-4 justify-center">
-        <CompLabelCount01 title="Views" count={folderDetail?.folder.view_count ?? 0} />
-        <CompLabelCount01 title="Shared" count={folderDetail?.folder.shared_count ?? 0} />
+        <CompLabelCount01 label="Views" count={folderDetail?.folder.view_count ?? 0} />
+        <CompLabelCount01 label="Shared" count={folderDetail?.folder.shared_count ?? 0} />
       </div>
       {events?.length ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">

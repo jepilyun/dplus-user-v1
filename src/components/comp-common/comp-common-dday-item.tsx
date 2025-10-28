@@ -31,7 +31,7 @@ export default function CompCommonDdayItem({
             className="w-full h-full flex items-center justify-center rounded-[1rem] p-2 md:p-3"
             style={{ color: fg }}
           >
-            <span className="font-poppins font-extrabold text-lg sm:text-xl md:text-3xl tracking-tight">
+            <span className="font-candal font-extrabold text-lg sm:text-xl md:text-3xl tracking-tight">
               {event?.event_info?.date
                 ? getDdayLabel(calculateDaysFromToday(event?.event_info?.date))
                 : ""}
@@ -41,7 +41,7 @@ export default function CompCommonDdayItem({
 
         {/* 텍스트 */}
         <div className="flex flex-col flex-grow gap-1 md:gap-2">
-          <div className="text-sm md:text-base text-gray-600">
+          <div className="text-sm md:text-base text-gray-400 font-noto-sans font-medium">
             {event?.event_info?.date
               ? generateDdayDatetime(
                   new Date(event?.event_info?.date),

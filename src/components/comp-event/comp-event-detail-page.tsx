@@ -155,7 +155,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       date-created-at={eventDetail?.event.created_at}
       date-updated-at={eventDetail?.event.updated_at}
     >
-      <div className="text-center font-poppins font-extrabold text-5xl sm:text-6xl md:text-7xl lg:text-8xl">
+      <div className="my-2 sm:my-4 md:my-6 text-center font-candal font-extrabold text-5xl sm:text-7xl md:text-8xl">
         {eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
       </div>
       <CompCommonDatetime 
@@ -164,21 +164,23 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         time={eventDetail?.event.time ?? null}
         isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
       />
-      <HeadlineTagsDetail
-        targetCountryCode={eventDetail?.event.target_country_code || null}
-        targetCountryName={eventDetail?.event.target_country_native || null}
-        targetCityCode={eventDetail?.event.target_city_code || null}
-        targetCityName={eventDetail?.event.target_city_native || null}
-        categories={eventDetail?.mapCategoryEvent?.items ?? null}
-        langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
-      />
-      <div
-        id="event-title"
-        className="text-center px-4 sm:px-6 md:px-8 lg:px-10 font-extrabold
-                  text-2xl sm:text-3xl md:text-4xl leading-[1.8]"
-        data-event-code={eventDetail?.event.event_code}
-      >
-        {eventDetail?.event.title}
+      <div className="flex flex-col gap-2 sm:gap-4 md:gap-6 justify-center items-center my-2 sm:my-4 md:my-6">
+        <HeadlineTagsDetail
+          targetCountryCode={eventDetail?.event.target_country_code || null}
+          targetCountryName={eventDetail?.event.target_country_native || null}
+          targetCityCode={eventDetail?.event.target_city_code || null}
+          targetCityName={eventDetail?.event.target_city_native || null}
+          categories={eventDetail?.mapCategoryEvent?.items ?? null}
+          langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
+        />
+        <div
+          id="event-title"
+          className="text-center px-4 sm:px-6 md:px-8 lg:px-10 font-extrabold
+                    text-2xl sm:text-3xl md:text-4xl leading-[1.8]"
+          data-event-code={eventDetail?.event.event_code}
+        >
+          {eventDetail?.event.title}
+        </div>
       </div>
       <div className="flex gap-4 justify-center">
         <BtnWithIcon01 
@@ -234,10 +236,10 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         </div>
       )}
       {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
-      <div className="flex gap-4 justify-center flex-wrap">
-        <CompLabelCount01 title="Views" count={eventDetail?.event.view_count ?? 0} />
-        <CompLabelCount01 title="Saved" count={eventDetail?.event.saved_count ?? 0} />
-        <CompLabelCount01 title="Shared" count={eventDetail?.event.shared_count ?? 0} />
+      <div className="my-6 sm:my-8 md:my-10 flex gap-4 justify-center flex-wrap">
+        <CompLabelCount01 label="Views" count={eventDetail?.event.view_count ?? 0} />
+        <CompLabelCount01 label="Saved" count={eventDetail?.event.saved_count ?? 0} />
+        <CompLabelCount01 label="Shared" count={eventDetail?.event.shared_count ?? 0} />
       </div>
     </div>
   );

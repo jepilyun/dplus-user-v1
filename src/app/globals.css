@@ -29,6 +29,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.font-noto-sans {
+  font-family: var(--font-noto-sans);
+}
+
+.font-noto-sans-kr {
+  font-family: var(--font-noto-sans-kr);
+}
+
 .font-monoton {
   font-family: var(--font-monoton);
 }
@@ -37,8 +45,8 @@ body {
   font-family: var(--font-poppins);
 }
 
-.font-jost {
-  font-family: var(--font-jost);
+.font-candal {
+  font-family: var(--font-candal);
 }
 
 .font-logo {
@@ -84,16 +92,16 @@ body {
 
 
 .bg-tag-country {
-  @apply bg-rose-500 text-white rounded-xs px-2 py-1 font-bold;
+  @apply bg-rose-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-rose-600;
   /* 또는 커스텀 핫핑크: */
   /* background-color: #e91e63; */
 }
 .bg-tag-city {
-  @apply bg-sky-500 text-white rounded-xs px-2 py-1 font-bold;
+  @apply bg-sky-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-sky-600;
 }
 .bg-tag-repeat {
-  @apply bg-teal-500 text-white rounded-xs px-2 py-1 font-bold;
+  @apply bg-teal-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-teal-600;
 }
 .bg-tag-category {
-  @apply bg-fuchsia-500 text-white rounded-xs px-2 py-1 font-bold;
+  @apply bg-fuchsia-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-fuchsia-600;
 }
