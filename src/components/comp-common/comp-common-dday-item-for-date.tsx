@@ -33,7 +33,7 @@ export default function CompCommonDdayItemForDate({
 
   return (
     <Link href={`/event/${code}`}>
-      <div className="m-auto w-full flex flex-row gap-8 items-center p-4 rounded-xs border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
+      <div className="m-auto w-full flex flex-row gap-4 sm:gap-6 md:gap-8 items-center p-4 rounded-xs border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-sm"
           style={{ backgroundColor: bg }}

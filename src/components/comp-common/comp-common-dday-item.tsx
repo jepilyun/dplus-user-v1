@@ -32,7 +32,7 @@ export default function CompCommonDdayItem({
 
   return (
     <Link href={`/event/${code}`}>
-      <div className="m-auto w-full flex flex-row gap-8 items-center p-4 rounded-xs border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
+      <div className="m-auto w-full flex flex-row gap-4 sm:gap-6 md:gap-8 items-center p-4 rounded-xs border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-sm"
           style={{ backgroundColor: bg }}
@@ -66,9 +66,9 @@ export default function CompCommonDdayItem({
                 )
               : ""}
           </div>
-          <div className="my-1 flex flex-col items-start sm:flex-row gap-2 sm:items-center">
+          <div className="mt-1 flex flex-col items-start sm:flex-row gap-2 sm:items-center">
             {hasValidTime(event?.event_info?.time) && (
-              <div className="p-1 sm:px-2 sm:py-1 whitespace-nowrap rounded-md text-gray-600 bg-gray-100 text-xs sm:text-sm md:text-base lg:text-medium">
+              <div className="p-1 px-2 sm:py-1 whitespace-nowrap rounded-md text-gray-600 bg-gray-100 text-xs sm:text-sm md:text-base lg:text-medium">
                 {formatTimeOnly(combinedDate, "ko-KR", null, null, {
                   timeFormat: "12h",
                   compactTime: true
