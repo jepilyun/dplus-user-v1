@@ -149,7 +149,7 @@ export default function CompCategoryDetailPage({
         {categoryDetail?.i18n?.name ? (
           <div className="text-center font-extrabold">
             <div className="text-3xl">{categoryDetail?.i18n?.name}</div>
-            <div className="text-lg">{categoryDetail?.category?.name}</div>
+            <div className="text-gray-400 text-lg font-thin">{categoryDetail?.category?.name}</div>
           </div>
         ): (
           <div className="text-center font-extrabold">

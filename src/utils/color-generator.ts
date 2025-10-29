@@ -45,17 +45,17 @@ export function scheduleColorForDate(
   const {
     weekStartsOn = 1,
     palette = {
-      past: "#45556c",
-      pastMilestone: "#0f172b",
-      today: "#ec003f",
-      tomorrow: "#ff2056",
-      dayAfter: "#ff637e",
-      thisWeek: "#f54900",
-      nextWeek: "#fe9a00",
-      thisMonth: "#00c950",
-      nextMonth: "#00a6f4",
-      thisYear: "#1447e6",
-      later: "#4f39f6",
+      past: "#6b7280",        
+      pastMilestone: "#374151",
+      today: "#EF007D",       // 🎯 핑크 (today)
+      tomorrow: "#F97316",    // 오렌지 (tomorrow)
+      dayAfter: "#FBBF24",    // 옐로우 (dayAfter)
+      thisWeek: "#84CC16",    // 라임 (thisWeek)
+      nextWeek: "#10B981",    // 에메랄드 (nextWeek)
+      thisMonth: "#06B6D4",   // 시안 (thisMonth)
+      nextMonth: "#3B82F6",   // 블루 (nextMonth)
+      thisYear: "#6366F1",    // 인디고 (thisYear)
+      later: "#8B5CF6",       // 바이올렛 (later)
     },
   } = opts;
 

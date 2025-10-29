@@ -1,11 +1,11 @@
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { generateDdayDatetime } from "@/utils/dday-utils";
 import { computeBadgeColors } from "@/utils/color-generator";
 import Link from "next/link";
 import { TMapCategoryEventWithEventInfo, TMapCityEventWithEventInfo, TMapCountryEventWithEventInfo, TMapFolderEventWithEventInfo, TMapGroupEventWithEventInfo, TMapStagEventWithEventInfo, TMapTagEventWithEventInfo } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 
 
 export default function CompCommonDdayItem({
@@ -18,6 +18,17 @@ export default function CompCommonDdayItem({
     event?.event_info?.bg_color ?? undefined,
     event?.event_info?.fg_color ?? undefined
   );
+
+  const combinedDate = new Date(event?.event_info?.date ?? "");
+
+  if (event?.event_info?.time) {
+    parseAndSetTime(combinedDate, event.event_info.time);
+  }
+
+  // 컴포넌트 상단에 추가
+  const hasValidTime = (timeStr: string | null | undefined): boolean => {
+    return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
+  };
 
   return (
     <Link href={`/event/${code}`}>
@@ -43,16 +54,30 @@ export default function CompCommonDdayItem({
         <div className="flex flex-col flex-grow gap-1 md:gap-2">
           <div className="text-sm md:text-base text-gray-400 font-noto-sans font-medium">
             {event?.event_info?.date
-              ? generateDdayDatetime(
+              ? formatDateTime(
                   new Date(event?.event_info?.date),
                   fullLocale,
-                  event?.event_info?.time ?? null,
-                  { style: "long", timeFormat: "12h", compactTime: true }
+                  null,
+                  null,
+                  {
+                    includeTime: false,
+                    style: 'long'
+                  }
                 )
               : ""}
           </div>
-          <div className="text-base sm:text-lg md:text-2xl font-medium">
-            {event?.event_info?.title}
+          <div className="my-1 flex flex-col items-start sm:flex-row gap-2 sm:items-center">
+            {hasValidTime(event?.event_info?.time) && (
+              <div className="p-1 sm:px-2 sm:py-1 whitespace-nowrap rounded-md text-gray-600 bg-gray-100 text-xs sm:text-sm md:text-base lg:text-medium">
+                {formatTimeOnly(combinedDate, "ko-KR", null, null, {
+                  timeFormat: "12h",
+                  compactTime: true
+                })}
+              </div>
+            )}
+            <div className="text-base sm:text-lg md:text-2xl font-medium">
+              {event?.event_info?.title}
+            </div>
           </div>
         </div>
 

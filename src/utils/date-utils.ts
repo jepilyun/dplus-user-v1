@@ -130,6 +130,66 @@ export const formatDateTime = (
 };
 
 /**
+ * 시간만 포맷팅 (날짜 제외)
+ */
+export const formatTimeOnly = (
+  date: Date,
+  locale: string = "ko-KR",
+  tz?: string | null,
+  utcMinutes?: number | null,
+  opts?: {
+    timeFormat?: "locale" | "12h";
+    compactTime?: boolean;
+    hideMinutesIfZero?: boolean; // ★ 새 옵션 추가
+  },
+): string => {
+  const { 
+    timeFormat = "locale", 
+    compactTime = true,
+    hideMinutesIfZero = false // 기본값: 항상 분 표시
+  } = opts ?? {};
+
+  let targetDate = new Date(date);
+  if (typeof utcMinutes === "number") {
+    targetDate = new Date(targetDate.getTime() + utcMinutes * 60 * 1000);
+  }
+
+  if (timeFormat === "12h") {
+    const t = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      ...(tz ? { timeZone: tz } : {}),
+    }).format(targetDate);
+
+    if (compactTime) {
+      const [hm, ap] = t.split(" ");
+      const [h, m] = hm.split(":");
+      const hour = String(Number(h));
+      
+      // hideMinutesIfZero가 true이고 분이 00이면 분 숨김
+      if (hideMinutesIfZero && m === "00") {
+        return `${ap} ${hour}`;
+      }
+      
+      // 기본: 항상 분 표시
+      return `${ap} ${hour}:${m}`;
+    }
+    return t;
+  }
+
+  // locale 기반 시간 (한국어면 24시간제)
+  const use24h = locale.toLowerCase().startsWith("ko");
+  return new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: !use24h,
+    ...(tz ? { timeZone: tz } : {}),
+  }).format(targetDate);
+};
+
+
+/**
  * 종일 이벤트용 날짜를 YYYYMMDD 형식으로 포맷합니다.
  */
 export const formatDateAllDay = (date: ISODateInput): string => {

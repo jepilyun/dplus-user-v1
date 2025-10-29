@@ -1,4 +1,5 @@
-import { generateDdayDatetime } from "@/utils/dday-utils";
+
+import { formatDateTime } from "@/utils/date-utils";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import Link from "next/link";
 
@@ -17,12 +18,16 @@ export default function CompCommonDatetime({ datetime, fullLocale, time, isRepea
       )}
       <Link href={`/date/${datetime}`}>
         <div className="p-2 px-4 rounded-md sm:p-3 sm:px-6 sm:rounded-lg md:p-4 md:px-8 md:rounded-xl hover:text-black hover:bg-gray-100 text-center font-noto-sans font-medium text-gray-500 text-md sm:text-xl md:text-2xl lg:text-3xl">
-          {generateDdayDatetime(datetime, fullLocale, time ?? null, {
-            style: "long",
-            timeFormat: "12h",   // ★ "4PM" 스타일
-            compactTime: true,   // ★ ":00"이면 분 생략 + 공백 제거
-            // tz: "Asia/Seoul",
-          })}
+          {formatDateTime(
+            new Date(datetime),
+            fullLocale,
+            null,
+            null,
+            {
+              includeTime: false,
+              style: 'long'
+            }
+          )}
         </div>
       </Link>
     </div>

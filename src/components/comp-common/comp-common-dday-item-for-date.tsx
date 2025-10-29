@@ -1,11 +1,11 @@
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
-import { generateDdayDatetime } from "@/utils/dday-utils";
 import { computeBadgeColors } from "@/utils/color-generator";
 import Link from "next/link";
 import { TEventCardForDateDetail } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 
 
 export default function CompCommonDdayItemForDate({
@@ -19,7 +19,17 @@ export default function CompCommonDdayItemForDate({
     event?.fg_color ?? undefined
   );
 
-  console.log("event>>>>", event);
+  
+  const combinedDate = new Date(event?.date ?? "");
+
+  if (event?.time) {
+    parseAndSetTime(combinedDate, event.time);
+  }
+
+  // 컴포넌트 상단에 추가
+  const hasValidTime = (timeStr: string | null | undefined): boolean => {
+    return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
+  };
 
   return (
     <Link href={`/event/${code}`}>
@@ -44,17 +54,31 @@ export default function CompCommonDdayItemForDate({
         {/* 텍스트 */}
         <div className="flex flex-col flex-grow gap-1 md:gap-2">
           <div className="text-sm md:text-base text-gray-600">
-            {event?.date
-              ? generateDdayDatetime(
-                  new Date(event?.date),
-                  fullLocale,
-                  event?.time ?? null,
-                  { style: "long", timeFormat: "12h", compactTime: true }
-                )
-              : ""}
+          {event?.date
+            ? formatDateTime(
+                new Date(event?.date),
+                fullLocale,
+                null,
+                null,
+                {
+                  includeTime: false,
+                  style: 'long'
+                }
+              )
+            : ""}
           </div>
-          <div className="text-base sm:text-lg md:text-2xl font-medium">
-            {event?.title}
+          <div className="flex flex-col sm:flex-row sm:inline-flex gap-2 items-center">
+            {hasValidTime(event?.time) && (
+              <div className="px-2 py-1 whitespace-nowrap rounded-md text-gray-600 bg-gray-100 text-xs sm:text-sm">
+                {formatTimeOnly(combinedDate, "ko-KR", null, null, {
+                  timeFormat: "12h",
+                  compactTime: true
+                })}
+              </div>
+            )}
+            <div className="text-base sm:text-lg md:text-2xl font-medium">
+              {event?.title}
+            </div>
           </div>
         </div>
 

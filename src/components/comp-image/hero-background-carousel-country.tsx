@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
-import { HeadlineTagsDetail } from "../headline-tags-detail";
 import { SUPPORT_LANG_CODES, TCountryDetail } from "dplus_common_v1";
 
 export function HeroImageBackgroundCarouselCountry({ bucket, imageUrls = [], interval = 5000, countryDetail, langCode }: {
@@ -66,7 +65,7 @@ export function HeroImageBackgroundCarouselCountry({ bucket, imageUrls = [], int
           >
             <div className="flex flex-col gap-2">
               <div className="text-3xl md:text-4xl lg:text-5xl font-bold">{countryDetail.native}</div>
-              <div className="text-md md:text-lg lg:text-xl text-gray-400">{countryDetail.country_name}</div>
+              <div className="font-thin text-md md:text-lg lg:text-xl text-gray-400">{countryDetail.country_name}</div>
             </div>
           </div>
         </div>
