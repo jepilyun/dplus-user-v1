@@ -13,8 +13,9 @@ import {
   Tz,
   detectBrowserLanguage,
 } from "@/utils/date-ymd";
+import { useScrollRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
 
-// 최소 유효성 검사 (unknown 사용)
+// 최소 유효성 검사
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
   if (typeof v !== "object" || v === null) return false;
   const o = v as Record<string, unknown>;
@@ -25,16 +26,25 @@ function isValidEvent(v: unknown): v is TEventCardForDateDetail {
   );
 }
 
-// ✅ 이벤트 + 섹션 정보를 함께 저장하는 타입
+// ✅ 섹션 정보를 함께 붙인 렌더용 타입
 type EventWithSection = TEventCardForDateDetail & {
   section: { key: string; label: string; sub: string };
+};
+
+// ✅ 저장/복원용 상태 (섹션은 복원 시 재계산하므로 raw만 저장)
+type TodayPageState = {
+  rawEvents: TEventCardForDateDetail[];
+  eventsStart: number;
+  eventsHasMore: boolean;
+  seenEventCodes: string[];
+  tz: Tz;
+  lang: "en" | "ko";
 };
 
 export default function CompTodayDetailPage({
   countryCode,
   langCode,
   fullLocale,
-  // 🔹 (선택) 서버/상위에서 기본 TZ를 내려줄 수도 있게 prop 추가
   defaultTz = "Asia/Seoul",
 }: {
   countryCode: string;
@@ -43,6 +53,10 @@ export default function CompTodayDetailPage({
   defaultTz?: Tz;
 }) {
   const router = useRouter();
+
+  // ✅ 스크롤/상태 복원 훅
+  const { savePage, restorePage } = useScrollRestoration();
+  const STATE_KEY = `dplus:today:${countryCode}`; // 국가별 분리 저장
 
   // 브라우저 TZ & 언어 감지
   const [tz, setTz] = useState<Tz>(defaultTz);
@@ -54,25 +68,32 @@ export default function CompTodayDetailPage({
     setLang(browserLang === "ko" ? "ko" : "en");
   }, [defaultTz]);
 
-  const [error, setError] = useState<'not-found' | 'network' | null>(null);
+  const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 섹션 정보를 포함한 이벤트 배열
+  // ✅ 렌더용(섹션 포함) 상태
   const [eventsWithSections, setEventsWithSections] = useState<EventWithSection[]>([]);
   const [eventsStart, setEventsStart] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // ✅ remount에도 유지되도록 ref 사용
+  // ✅ 복원/중복 제어
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const requestIdRef = useRef(0);
-
-  // ✅ 오늘 날짜를 ref로 고정 (컴포넌트 마운트 시점 기준)
   const nowYmdRef = useRef<string>("");
+  const hydratedFromRestoreRef = useRef(false); // 복원 여부
 
   useEffect(() => {
     nowYmdRef.current = todayYmdInTz(tz);
   }, [tz]);
+
+  // ✅ 섹션 부착 헬퍼 (복원/패치 공통)
+  const attachSections = (items: TEventCardForDateDetail[]): EventWithSection[] => {
+    return items.map((it) => ({
+      ...it,
+      section: getSectionForDate(it.date ?? "", nowYmdRef.current, tz, lang),
+    }));
+  };
 
   const fetchTodayList = async () => {
     const reqId = ++requestIdRef.current;
@@ -89,24 +110,21 @@ export default function CompTodayDetailPage({
       const raw: unknown[] = res?.dbResponse?.items ?? [];
       const initItems = raw.filter(isValidEvent);
 
-      // ✅ 중복 제거 + 섹션 계산을 한 번에
-      const seen = seenEventCodesRef.current;
-      const dedupedWithSections: EventWithSection[] = [];
-      
+      // 중복 제거
+      seenEventCodesRef.current.clear();
+      const deduped: TEventCardForDateDetail[] = [];
       for (const it of initItems) {
-        if (!seen.has(it.event_code)) {
-          seen.add(it.event_code);
-          // 섹션 정보를 이벤트와 함께 저장
-          const section = getSectionForDate(it.date ?? "", nowYmdRef.current, tz, lang);
-          dedupedWithSections.push({
-            ...it,
-            section,
-          });
+        if (!seenEventCodesRef.current.has(it.event_code)) {
+          seenEventCodesRef.current.add(it.event_code);
+          deduped.push(it);
         }
       }
 
-      setEventsWithSections(dedupedWithSections);
-      setEventsStart(dedupedWithSections.length);
+      // ✅ 복원으로 이미 채워졌으면 섹션만 최신 TZ/Lang으로 재계산해서 교체,
+      // 아니면 새로 계산
+      const nextWithSections = attachSections(deduped);
+      setEventsWithSections(nextWithSections);
+      setEventsStart(nextWithSections.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       setError(null);
     } catch (error) {
@@ -120,60 +138,121 @@ export default function CompTodayDetailPage({
   };
 
   const loadMoreEvents = async () => {
-    if (eventsLoading) return;
+    if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
     const reqId = ++requestIdRef.current;
-    
+
     try {
       const res = await reqGetTodayList(countryCode, eventsStart, LIST_LIMIT.default);
       if (reqId !== requestIdRef.current) return;
 
-      const fetchedItems = res?.dbResponse?.items;
-      const newItems = (fetchedItems ?? []).filter(isValidEvent);
+      const newRaw = (res?.dbResponse?.items ?? []).filter(isValidEvent);
 
-      // ✅ 새로운 페이지의 아이템도 섹션 계산 후 추가
-      const seen = seenEventCodesRef.current;
-      const dedupedWithSections: EventWithSection[] = [];
-      
-      for (const it of newItems) {
-        if (!seen.has(it.event_code)) {
-          seen.add(it.event_code);
-          const section = getSectionForDate(it.date ?? "", nowYmdRef.current, tz, lang);
-          dedupedWithSections.push({
-            ...it,
-            section,
-          });
+      const toAppend: TEventCardForDateDetail[] = [];
+      for (const it of newRaw) {
+        if (!seenEventCodesRef.current.has(it.event_code)) {
+          seenEventCodesRef.current.add(it.event_code);
+          toAppend.push(it);
         }
       }
 
-      setEventsWithSections((prev) => prev.concat(dedupedWithSections));
-      setEventsStart((prev) => prev + dedupedWithSections.length);
+      if (toAppend.length) {
+        const withSections = attachSections(toAppend);
+        setEventsWithSections((prev) => prev.concat(withSections));
+        setEventsStart((prev) => prev + withSections.length);
+      }
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       if (reqId === requestIdRef.current) setEventsLoading(false);
     }
   };
 
+  // ✅ ① 마운트 시 상태 복원 → 있으면 즉시 렌더
   useEffect(() => {
-    let alive = true;
-    seenEventCodesRef.current = new Set();
-    setEventsWithSections([]);
-    setEventsStart(0);
-    setEventsHasMore(false);
+    const saved = restorePage<TodayPageState>(STATE_KEY);
+    if (saved) {
+      hydratedFromRestoreRef.current = true;
+      // TZ/Lang이 바뀌었을 수 있으므로 섹션은 현 TZ/Lang으로 재계산
+      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
+      setEventsWithSections(attachSections(saved.rawEvents ?? []));
+      setEventsStart(saved.eventsStart ?? 0);
+      setEventsHasMore(Boolean(saved.eventsHasMore));
 
-    (async () => {
-      await fetchTodayList();
-      if (!alive) return;
-    })();
-
-    return () => {
-      alive = false;
-      requestIdRef.current++;
-    };
+      // 복원된 TZ/Lang이 있으면 우선 적용(브라우저 감지 전 임시 일관성)
+      if (saved.tz) setTz(saved.tz);
+      if (saved.lang) setLang(saved.lang);
+      setLoading(false);
+    }
+    // 서버 최신화(복원 여부와 무관)
+    fetchTodayList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countryCode, tz, lang]); // ✅ tz, lang 변경 시에도 재로딩
+  }, [countryCode]);
 
-  // 로딩 중
+  // ✅ ② 라우팅 직전/링크 클릭 직전 저장(pointerdown capture)
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest("a") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+
+      // 저장은 raw 기준으로(섹션은 복원 시 재계산)
+      const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
+        const { section, ...rest } = it;
+        return rest;
+      });
+
+      savePage<TodayPageState>(STATE_KEY, {
+        rawEvents,
+        eventsStart,
+        eventsHasMore,
+        seenEventCodes: Array.from(seenEventCodesRef.current),
+        tz,
+        lang,
+      });
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, savePage]);
+
+  // ✅ ③ 새로고침/탭 숨김 시 상태 저장
+  useEffect(() => {
+    const persist = () => {
+      const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
+        const { section, ...rest } = it;
+        return rest;
+      });
+      savePage<TodayPageState>(STATE_KEY, {
+        rawEvents,
+        eventsStart,
+        eventsHasMore,
+        seenEventCodes: Array.from(seenEventCodesRef.current),
+        tz,
+        lang,
+      });
+    };
+
+    window.addEventListener("beforeunload", persist);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") persist();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("beforeunload", persist);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, savePage]);
+
+  // ✅ ④ TZ/Lang이 변하면 섹션만 재계산하여 화면 업데이트(데이터 재요청 불필요)
+  useEffect(() => {
+    if (!eventsWithSections.length) return;
+    setEventsWithSections((prev) =>
+      attachSections(prev.map(({ section, ...raw }) => raw))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tz, lang]);
+
+  // ===== 렌더 =====
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -182,7 +261,6 @@ export default function CompTodayDetailPage({
     );
   }
 
-  // 에러 처리
   if (error === "not-found") {
     return (
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
@@ -191,9 +269,7 @@ export default function CompTodayDetailPage({
             {lang === "ko" ? "이벤트를 찾을 수 없습니다" : "No Events Found"}
           </h2>
           <p className="text-gray-600 mb-6">
-            {lang === "ko" 
-              ? "오늘의 이벤트를 찾을 수 없습니다." 
-              : "No events found for today."}
+            {lang === "ko" ? "오늘의 이벤트를 찾을 수 없습니다." : "No events found for today."}
           </p>
           <button
             onClick={() => router.push(`/${langCode}`)}
@@ -210,9 +286,7 @@ export default function CompTodayDetailPage({
     return (
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">
-            {lang === "ko" ? "오류" : "ERROR"}
-          </h2>
+          <h2 className="text-2xl font-bold mb-4">{lang === "ko" ? "오류" : "ERROR"}</h2>
           <p className="text-gray-600 mb-6">
             {lang === "ko"
               ? "이벤트를 불러오는데 실패했습니다. 다시 시도해주세요."
@@ -231,12 +305,8 @@ export default function CompTodayDetailPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <div className="text-center font-extrabold">
-          <div className="text-3xl">
-            {lang === "ko" ? "다가오는 일정" : "Upcoming"}
-          </div>
-        </div>
+      <div className="text-center font-extrabold">
+        <div className="text-3xl">{lang === "ko" ? "다가오는 일정" : "Upcoming"}</div>
       </div>
 
       {eventsWithSections.length > 0 ? (
@@ -245,12 +315,9 @@ export default function CompTodayDetailPage({
             let lastKey = "";
             const blocks: JSX.Element[] = [];
 
-            // ✅ 이미 계산된 섹션 정보 사용 - 재계산 불필요!
             for (const item of eventsWithSections) {
-              // 섹션이 바뀔 때만 헤더 추가
               if (item.section.key !== lastKey) {
                 lastKey = item.section.key;
-
                 blocks.push(
                   <div key={`sec-${item.section.key}`} className="sticky top-[80px]">
                     <div className="px-4 lg:px-8 py-3 text-gray-800 bg-gray-100 rounded-sm border border-gray-200">
@@ -281,12 +348,9 @@ export default function CompTodayDetailPage({
         </div>
       ) : (
         <div className="mx-auto w-full max-w-[1024px] px-2 sm:px-4 lg:px-6 text-center py-12 text-gray-500">
-          {lang === "ko" 
-            ? "이 날짜에 해당하는 이벤트가 없습니다." 
-            : "No events found for this date."}
+          {lang === "ko" ? "이 날짜에 해당하는 이벤트가 없습니다." : "No events found for this date."}
         </div>
       )}
     </div>
   );
 }
-

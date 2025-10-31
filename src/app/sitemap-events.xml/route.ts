@@ -1,10 +1,11 @@
 // app/sitemap-events.xml/route.ts
-import { reqGetEventCodeList } from '@/actions/action';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+
+import { reqGetEventCodeList } from "@/actions/action";
 
 export async function GET() {
-  const baseUrl = 'https://www.dplus.app';
-  
+  const baseUrl = "https://www.dplus.app";
+
   // 전체 이벤트 코드 가져오기 (페이지네이션 필요 시 여러번 호출)
   const eventRes = await reqGetEventCodeList(50000);
   const eventCodes = eventRes?.dbResponse ?? [];
@@ -19,18 +20,18 @@ export async function GET() {
     <lastmod>${new Date().toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-  </url>`
+  </url>`,
     )
-    .join('')}
+    .join("")}
 </urlset>`;
 
   return new NextResponse(sitemap, {
     headers: {
-      'Content-Type': 'application/xml',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      "Content-Type": "application/xml",
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
     },
   });
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 export const revalidate = 86400; // 24시간마다 재생성

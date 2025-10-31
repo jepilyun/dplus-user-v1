@@ -1,4 +1,5 @@
 import { cookies, headers } from "next/headers";
+
 import "server-only";
 
 /**
@@ -9,9 +10,11 @@ import "server-only";
  * 3) Accept-Language
  * 4) default: ko-KR
  */
-export function getRequestLocale(
-  override?: { langCode?: string; fullLocale?: string; countryCode?: string }
-): {
+export function getRequestLocale(override?: {
+  langCode?: string;
+  fullLocale?: string;
+  countryCode?: string;
+}): {
   fullLocale: string;
   langCode: string;
   baseLang: string;
@@ -24,7 +27,13 @@ export function getRequestLocale(
 
   // --- helpers ---
   const firstSeg = (v?: string | null) =>
-    (v ?? "").split(",")[0].trim().split(";")[0].trim().split("-")[0].toLowerCase() || undefined;
+    (v ?? "")
+      .split(",")[0]
+      .trim()
+      .split(";")[0]
+      .trim()
+      .split("-")[0]
+      .toLowerCase() || undefined;
 
   const normFull = (v?: string | null) => {
     if (!v) return undefined;
@@ -63,12 +72,13 @@ export function getRequestLocale(
 
   // --- zh mapping to tw/cn ---
   const lowerFull = fullLocale.toLowerCase();
-  const zhMapped =
-    lowerFull.startsWith("zh")
-      ? lowerFull.includes("-tw") || lowerFull.includes("-hk") || lowerFull.includes("-mo")
-        ? "tw"
-        : "cn"
-      : undefined;
+  const zhMapped = lowerFull.startsWith("zh")
+    ? lowerFull.includes("-tw") ||
+      lowerFull.includes("-hk") ||
+      lowerFull.includes("-mo")
+      ? "tw"
+      : "cn"
+    : undefined;
 
   // --- final langCode (allow explicit override first) ---
   const langCode =

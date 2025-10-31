@@ -64,10 +64,18 @@ export const reqGetEventCodeList = async (
   countryCode: string | null = null,
   cityCode: string | null = null,
 ): Promise<ResponseDplusAPI<{ event_code: string }[]>> => {
-  const res = await fetch(apiUrlEvent("upcomingCodeListGet", { limit, backDays, countryCode, cityCode }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlEvent("upcomingCodeListGet", {
+      limit,
+      backDays,
+      countryCode,
+      cityCode,
+    }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return res.json();
 };
@@ -124,10 +132,13 @@ export const reqGetFolderCodeList = async (
   countryCode: string | null = null,
   cityCode: string | null = null,
 ): Promise<ResponseDplusAPI<{ folder_code: string }[]>> => {
-  const res = await fetch(apiUrlFolder("recentCodeListGet", { limit, countryCode, cityCode }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlFolder("recentCodeListGet", { limit, countryCode, cityCode }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return res.json();
 };
@@ -143,7 +154,9 @@ export const reqGetFolderEvents = async (
   folderCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapFolderEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapFolderEventWithEventInfo>>
+> => {
   const res = await fetch(
     apiUrlFolder("eventsGet", { folderCode, start, limit }),
     {
@@ -165,10 +178,13 @@ export const reqGetFolderMetadata = async (
   folderCode: string,
   langCode: string,
 ): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlFolder("metadataGet", { folderCode, langCode }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlFolder("metadataGet", { folderCode, langCode }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };
 
@@ -228,7 +244,9 @@ export const reqGetCityEvents = async (
   cityCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapCityEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapCityEventWithEventInfo>>
+> => {
   const res = await fetch(apiUrlCity("eventsGet", { cityCode, start, limit }), {
     method: "GET",
     credentials: "include",
@@ -242,9 +260,7 @@ export const reqGetCityEvents = async (
  */
 export const reqGetCityCodes = async (
   limit: number = 100,
-): Promise<
-  ResponseDplusAPI<{ city_code: string }[]>
-> => {
+): Promise<ResponseDplusAPI<{ city_code: string }[]>> => {
   const res = await fetch(apiUrlCity("getCityCodes"), {
     method: "GET",
     credentials: "include",
@@ -314,7 +330,9 @@ export const reqGetStagEvents = async (
   stagCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapStagEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapStagEventWithEventInfo>>
+> => {
   const res = await fetch(apiUrlStag("eventsGet", { stagCode, start, limit }), {
     method: "GET",
     credentials: "include",
@@ -372,7 +390,9 @@ export const reqGetGroupEvents = async (
   groupCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapGroupEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapGroupEventWithEventInfo>>
+> => {
   const res = await fetch(
     apiUrlGroup("eventsGet", { groupCode, start, limit }),
     {
@@ -389,9 +409,7 @@ export const reqGetGroupEvents = async (
  */
 export const reqGetGroupCodes = async (
   limit: number = 100,
-): Promise<
-  ResponseDplusAPI<{ group_code: string }[]>
-> => {
+): Promise<ResponseDplusAPI<{ group_code: string }[]>> => {
   const res = await fetch(apiUrlGroup("getGroupCodes", { limit }), {
     method: "GET",
     credentials: "include",
@@ -448,7 +466,9 @@ export const reqGetTagEvents = async (
   tagId: number,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapTagEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapTagEventWithEventInfo>>
+> => {
   const res = await fetch(apiUrlTag("eventsGet", { tagId, start, limit }), {
     method: "GET",
     credentials: "include",
@@ -502,7 +522,9 @@ export const reqGetCategoryEvents = async (
   categoryCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapCategoryEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapCategoryEventWithEventInfo>>
+> => {
   const res = await fetch(
     apiUrlCategory("eventsGet", { countryCode, categoryCode, start, limit }),
     {
@@ -519,9 +541,7 @@ export const reqGetCategoryEvents = async (
  */
 export const reqGetCategoryCodes = async (
   limit: number = 200,
-): Promise<
-  ResponseDplusAPI<{ category_code: string }[]>
-> => {
+): Promise<ResponseDplusAPI<{ category_code: string }[]>> => {
   const res = await fetch(apiUrlCategory("getCategoryCodes", { limit }), {
     method: "GET",
     credentials: "include",
@@ -540,10 +560,13 @@ export const reqGetCategoryMetadata = async (
   categoryCode: string,
   langCode: string,
 ): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlCategory("metadataGet", { categoryCode, langCode }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlCategory("metadataGet", { categoryCode, langCode }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
 
   return res.json();
 };
@@ -607,7 +630,9 @@ export const reqGetCountryEvents = async (
   countryCode: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TMapCountryEventWithEventInfo>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TMapCountryEventWithEventInfo>>
+> => {
   const res = await fetch(
     apiUrlCountry("eventsGet", { countryCode, start, limit }),
     {
@@ -643,9 +668,12 @@ export const reqGetCountryMetadata = async (
   countryCode: string,
   langCode: string,
 ): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlCountry("metadataGet", { countryCode, langCode }), {
-    method: "GET",
-    credentials: "include",
-  });
+  const res = await fetch(
+    apiUrlCountry("metadataGet", { countryCode, langCode }),
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
   return res.json();
 };

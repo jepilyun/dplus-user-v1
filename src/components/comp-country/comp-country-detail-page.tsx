@@ -1,8 +1,13 @@
 "use client";
 
-import {reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
-import { LIST_LIMIT, ResponseCountryDetailForUserFront, SUPPORT_LANG_CODES, TMapCountryEventWithEventInfo } from "dplus_common_v1";
-import { useEffect, useState } from "react";
+import { reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
+import {
+  LIST_LIMIT,
+  ResponseCountryDetailForUserFront,
+  SUPPORT_LANG_CODES,
+  TMapCountryEventWithEventInfo,
+} from "dplus_common_v1";
+import { useEffect, useRef, useState } from "react"; // ✅ 수정: useRef 추가
 import { getCountryImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
@@ -10,17 +15,29 @@ import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
 import Link from "next/link";
 import { getCityBgUrl } from "@/utils/get-city-bg-image";
+import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
 
+// ✅ 추가: 복원할 상태 타입
+type CountryPageState = {
+  events: TMapCountryEventWithEventInfo[];
+  eventsStart: number;
+  eventsHasMore: boolean;
+  seenEventCodes: string[];
+};
 
-/**
- * 폴더 상세 페이지
- * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
- * @returns 이벤트 상세 페이지
- */
-export default function CompCountryDetailPage({ countryCode, fullLocale, langCode }: { countryCode: string, fullLocale: string, langCode: string }) {
+export default function CompCountryDetailPage({
+  countryCode,
+  fullLocale,
+  langCode,
+}: {
+  countryCode: string;
+  fullLocale: string;
+  langCode: string;
+}) {
   const router = useRouter();
+  const { save, restore } = useCountryPageRestoration(countryCode); // ✅ 추가
 
-  const [error, setError] = useState<'not-found' | 'network' | null>(null);
+  const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [countryDetail, setCountryDetail] = useState<ResponseCountryDetailForUserFront | null>(null);
@@ -28,100 +45,152 @@ export default function CompCountryDetailPage({ countryCode, fullLocale, langCod
   const [hasCategories, setHasCategories] = useState(false);
   const [hasCities, setHasCities] = useState(false);
 
-  // 기존 상태들 아래에 추가
-  const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>(countryDetail?.mapCountryEvent?.items ?? []);
+  // ✅ 수정: Set은 렌더링과 무관하므로 useRef가 더 적합 (불필요한 리렌더 방지)
+  const seenEventCodesRef = useRef<Set<string>>(new Set());
+
+  const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>([]);
   const [eventsStart, setEventsStart] = useState(0);
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // 중복 방지
-  const [seenEventCodes] = useState<Set<string>>(new Set());
+  // ✅ 추가: 복원 여부 플래그
+  const hydratedFromRestoreRef = useRef(false);
 
   const fetchCountryDetail = async () => {
     try {
       const res = await reqGetCountryDetail(countryCode, 0, LIST_LIMIT.default, langCode);
 
       const isEmptyObj =
-        !res?.dbResponse || (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
+        !res?.dbResponse ||
+        (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
 
-      // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.success || isEmptyObj || !res?.dbResponse?.country) {
-        setError('not-found');
+        setError("not-found");
         setLoading(false);
         return;
       }
 
-      setCountryDetail(res?.dbResponse);
-      setImageUrls(getCountryImageUrls(res?.dbResponse?.country));
-      setHasCategories(res?.dbResponse?.categories?.items?.length > 0);
-      setHasCities(res?.dbResponse?.cities?.items?.length > 0);
-      // ✅ 이벤트 초기화
-      const initItems = res?.dbResponse?.mapCountryEvent?.items ?? [];
-      setEvents(initItems);
-      setEventsStart(initItems.length);
-      setEventsHasMore(Boolean(res?.dbResponse?.mapCountryEvent?.hasMore));
+      setCountryDetail(res.dbResponse);
+      setImageUrls(getCountryImageUrls(res.dbResponse.country));
+      setHasCategories((res.dbResponse.categories?.items?.length ?? 0) > 0);
+      setHasCities((res.dbResponse.cities?.items?.length ?? 0) > 0);
 
-      // 중복 방지 Set 채우기
-      for (const it of initItems) {
-        const code = it?.event_info?.event_code ?? it?.event_code;
-        if (code) seenEventCodes.add(code);
+      // ✅ 초기 로드(복원 없이 첫 진입)일 때만 서버 응답으로 초기화
+      if (!hydratedFromRestoreRef.current) {
+        const initItems = res.dbResponse.mapCountryEvent?.items ?? [];
+        setEvents(initItems);
+        setEventsStart(initItems.length);
+        setEventsHasMore(Boolean(res.dbResponse.mapCountryEvent?.hasMore));
+        // 중복 방지 Set 채우기
+        for (const it of initItems) {
+          const code = it?.event_info?.event_code ?? it?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        }
       }
 
       setError(null);
     } catch (e) {
-      // 네트워크 에러나 서버 에러
-      console.error('Failed to fetch country detail:', e);
-      setError('network');
+      console.error("Failed to fetch country detail:", e);
+      setError("network");
     } finally {
       setLoading(false);
     }
   };
 
-  // 공유 기능 핸들러
   const handleShareClick = async () => {
     const shareData = {
-      title: countryDetail?.country.country_name || '이벤트 세트 공유',
-      text: countryDetail?.country.country_name || '이벤트 세트 정보를 확인해보세요!',
-      url: window.location.href,  
+      title: countryDetail?.country.country_name || "이벤트 세트 공유",
+      text: countryDetail?.country.country_name || "이벤트 세트 정보를 확인해보세요!",
+      url: window.location.href,
     };
-
-    // Web Share API 지원 여부 확인
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        console.log('공유 성공');
       } catch (error) {
-        console.error('공유 실패:', error);
+        console.error("공유 실패:", error);
       }
     } else {
-      // Web Share API가 지원되지 않을 경우, 대체 로직 구현 (예: 모달 띄우기)
-      // 여기서는 예시로 Twitter 공유 창을 띄웁니다.
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareData.text)}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, '_blank', 'width=600,height=400');
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        shareData.text
+      )}&url=${encodeURIComponent(shareData.url)}`;
+      window.open(twitterUrl, "_blank", "width=600,height=400");
     }
   };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
-
     try {
       const res = await reqGetCountryEvents(countryCode, eventsStart, LIST_LIMIT.default);
-      const fetchedItems = res?.dbResponse?.items;
-      const newItems = (fetchedItems ?? []).filter((it: TMapCountryEventWithEventInfo) => {
+      const fetchedItems = res?.dbResponse?.items ?? [];
+      const newItems = fetchedItems.filter((it: TMapCountryEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
-        if (!code || seenEventCodes.has(code)) return false;
-        seenEventCodes.add(code);
+        if (!code || seenEventCodesRef.current.has(code)) return false;
+        seenEventCodesRef.current.add(code);
         return true;
       });
-
-      setEvents(prev => prev.concat(newItems));
-      setEventsStart(eventsStart + (newItems.length || 0));
+      setEvents((prev) => prev.concat(newItems));
+      setEventsStart((prev) => prev + newItems.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
   };
+
+  // ✅ 추가: ① 마운트 시 즉시 복원(있으면 로딩 플래시 없이 바로 그려주기)
+  useEffect(() => {
+    const saved = restore<CountryPageState>();
+    if (saved) {
+      hydratedFromRestoreRef.current = true;
+      setEvents(saved.events ?? []);
+      setEventsStart(saved.eventsStart ?? 0);
+      setEventsHasMore(Boolean(saved.eventsHasMore));
+      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
+      setLoading(false); // 복원 화면 먼저 보여주고, 서버 갱신은 백그라운드로
+    }
+    // saved 유무와 무관하게 최신화 시도
+    fetchCountryDetail();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryCode]);
+
+  // ✅ 추가: ② 라우팅 직전(링크 클릭) 상태 저장 — pointerdown 캡처 단계가 가장 안전
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest("a") as HTMLAnchorElement | null;
+      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+
+      save<CountryPageState>({
+        events,
+        eventsStart,
+        eventsHasMore,
+        seenEventCodes: Array.from(seenEventCodesRef.current),
+      });
+    };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [events, eventsStart, eventsHasMore, save]);
+
+  // ✅ 추가: ③ 새로고침/탭 숨김 시에도 저장 (선택이지만 추천)
+  useEffect(() => {
+    const persist = () =>
+      save<CountryPageState>({
+        events,
+        eventsStart,
+        eventsHasMore,
+        seenEventCodes: Array.from(seenEventCodesRef.current),
+      });
+
+    window.addEventListener("beforeunload", persist);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") persist();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("beforeunload", persist);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [events, eventsStart, eventsHasMore, save]);
 
   useEffect(() => {
     fetchCountryDetail();

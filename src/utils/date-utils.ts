@@ -143,10 +143,10 @@ export const formatTimeOnly = (
     hideMinutesIfZero?: boolean; // ★ 새 옵션 추가
   },
 ): string => {
-  const { 
-    timeFormat = "locale", 
+  const {
+    timeFormat = "locale",
     compactTime = true,
-    hideMinutesIfZero = false // 기본값: 항상 분 표시
+    hideMinutesIfZero = false, // 기본값: 항상 분 표시
   } = opts ?? {};
 
   let targetDate = new Date(date);
@@ -166,12 +166,12 @@ export const formatTimeOnly = (
       const [hm, ap] = t.split(" ");
       const [h, m] = hm.split(":");
       const hour = String(Number(h));
-      
+
       // hideMinutesIfZero가 true이고 분이 00이면 분 숨김
       if (hideMinutesIfZero && m === "00") {
         return `${ap} ${hour}`;
       }
-      
+
       // 기본: 항상 분 표시
       return `${ap} ${hour}:${m}`;
     }
@@ -187,7 +187,6 @@ export const formatTimeOnly = (
     ...(tz ? { timeZone: tz } : {}),
   }).format(targetDate);
 };
-
 
 /**
  * 종일 이벤트용 날짜를 YYYYMMDD 형식으로 포맷합니다.

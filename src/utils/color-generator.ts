@@ -13,8 +13,8 @@ export type TScheduleColorOptions = {
   weekStartsOn?: 0 | 1; // 0: Sun, 1: Mon
   palette?: {
     // 과거
-    past: string;            // 기본 과거
-    pastMilestone: string;   // 100/200/300...일 단위 과거
+    past: string; // 기본 과거
+    pastMilestone: string; // 100/200/300...일 단위 과거
     // 오늘~모레
     today: string;
     tomorrow: string;
@@ -28,7 +28,6 @@ export type TScheduleColorOptions = {
     later: string;
   };
 };
-
 
 /**
  * Generate a schedule color for a given date
@@ -45,17 +44,17 @@ export function scheduleColorForDate(
   const {
     weekStartsOn = 1,
     palette = {
-      past: "#6b7280",        
+      past: "#6b7280",
       pastMilestone: "#374151",
-      today: "#EF007D",       // 🎯 핑크 (today)
-      tomorrow: "#F97316",    // 오렌지 (tomorrow)
-      dayAfter: "#FBBF24",    // 옐로우 (dayAfter)
-      thisWeek: "#84CC16",    // 라임 (thisWeek)
-      nextWeek: "#10B981",    // 에메랄드 (nextWeek)
-      thisMonth: "#06B6D4",   // 시안 (thisMonth)
-      nextMonth: "#3B82F6",   // 블루 (nextMonth)
-      thisYear: "#6366F1",    // 인디고 (thisYear)
-      later: "#8B5CF6",       // 바이올렛 (later)
+      today: "#EF007D", // 🎯 핑크 (today)
+      tomorrow: "#F97316", // 오렌지 (tomorrow)
+      dayAfter: "#FBBF24", // 옐로우 (dayAfter)
+      thisWeek: "#84CC16", // 라임 (thisWeek)
+      nextWeek: "#10B981", // 에메랄드 (nextWeek)
+      thisMonth: "#06B6D4", // 시안 (thisMonth)
+      nextMonth: "#3B82F6", // 블루 (nextMonth)
+      thisYear: "#6366F1", // 인디고 (thisYear)
+      later: "#8B5CF6", // 바이올렛 (later)
     },
   } = opts;
 
@@ -331,7 +330,9 @@ export function computeBadgeColors(
     return { bg: explicitBg, fg };
   }
 
-  const target = dateStr ? startOfDay(new Date(dateStr)) : startOfDay(new Date());
+  const target = dateStr
+    ? startOfDay(new Date(dateStr))
+    : startOfDay(new Date());
   const today = startOfDay(new Date());
   const d = daysBetween(today, target);
 
@@ -348,5 +349,3 @@ export function computeBadgeColors(
   const fg = readableTextColor(bg);
   return { bg, fg };
 }
-
-

@@ -74,12 +74,18 @@ export const apiUrlEvent = (
       const qp = new URLSearchParams();
 
       // limit: 숫자면 추가 (원하면 clampInt로 범위 제한)
-      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
         qp.set("limit", String(optionalParams.limit));
       }
 
       // backDays: 숫자면 추가
-      if (typeof optionalParams?.backDays === "number" && Number.isFinite(optionalParams.backDays)) {
+      if (
+        typeof optionalParams?.backDays === "number" &&
+        Number.isFinite(optionalParams.backDays)
+      ) {
         qp.set("backDays", String(optionalParams.backDays));
       }
 
@@ -159,7 +165,10 @@ export const apiUrlFolder = (
       const qp = new URLSearchParams();
 
       // limit: 숫자면 추가 (원하면 clampInt로 범위 제한)
-      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
         // const lim = clampInt(optionalParams.limit, 100, 1, 1000); // 범위 제한이 필요하면 사용
         qp.set("limit", String(optionalParams.limit));
       }
@@ -180,10 +189,7 @@ export const apiUrlFolder = (
       path = `/api/folder/get/codes/recent${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
-      if (
-        optionalParams?.folderCode &&
-        optionalParams?.langCode
-      ) {
+      if (optionalParams?.folderCode && optionalParams?.langCode) {
         path = `/api/folder/metadata/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}`;
       } else {
         console.error(
@@ -279,17 +285,17 @@ export const apiUrlCity = (
       break;
     case "getCityCodes":
       const qp = new URLSearchParams();
-      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
         qp.set("limit", String(optionalParams.limit));
       }
       const qs = qp.toString();
       path = `/api/city/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
-      if (
-        optionalParams?.cityCode &&
-        optionalParams?.langCode
-      ) {
+      if (optionalParams?.cityCode && optionalParams?.langCode) {
         path = `/api/city/metadata/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}`;
       } else {
         console.error(
@@ -349,17 +355,17 @@ export const apiUrlStag = (
       break;
     case "getStagCodes":
       const qp = new URLSearchParams();
-      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
         qp.set("limit", String(optionalParams.limit));
       }
       const qs = qp.toString();
       path = `/api/group/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
-      if (
-        optionalParams?.stagCode &&
-        optionalParams?.langCode
-      ) {
+      if (optionalParams?.stagCode && optionalParams?.langCode) {
         path = `/api/stag/metadata/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.langCode}`;
       } else {
         console.error(
@@ -419,17 +425,17 @@ export const apiUrlGroup = (
       break;
     case "getGroupCodes":
       const qp = new URLSearchParams();
-      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
         qp.set("limit", String(optionalParams.limit));
       }
       const qs = qp.toString();
       path = `/api/group/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
-      if (
-        optionalParams?.stagCode &&
-        optionalParams?.langCode
-      ) {
+      if (optionalParams?.stagCode && optionalParams?.langCode) {
         path = `/api/group/metadata/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.langCode}`;
       } else {
         console.error(
@@ -545,17 +551,17 @@ export const apiUrlCategory = (
       break;
     case "getCategoryCodes":
       const qp = new URLSearchParams();
-      if (typeof optionalParams?.limit === "number" && Number.isFinite(optionalParams.limit)) {
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
         qp.set("limit", String(optionalParams.limit));
       }
       const qs = qp.toString();
       path = `/api/category/get/code/list${qs ? `?${qs}` : ""}`;
       break;
     case "metadataGet":
-      if (
-        optionalParams?.categoryCode &&
-        optionalParams?.langCode
-      ) {
+      if (optionalParams?.categoryCode && optionalParams?.langCode) {
         path = `/api/category/metadata/get/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.langCode}`;
       } else {
         console.error(
@@ -652,10 +658,7 @@ export const apiUrlCountry = (
       path = `/api/country/get/code/list`;
       break;
     case "metadataGet":
-      if (
-        optionalParams?.countryCode &&
-        optionalParams?.langCode
-      ) {
+      if (optionalParams?.countryCode && optionalParams?.langCode) {
         path = `/api/country/metadata/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}`;
       } else {
         console.error(

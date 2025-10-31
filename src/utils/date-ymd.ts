@@ -7,8 +7,34 @@ export type Tz = string;
  * 월 이름 다국어 지원
  */
 const MONTH_NAMES = {
-  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  ko: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+  en: [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ],
+  ko: [
+    "1월",
+    "2월",
+    "3월",
+    "4월",
+    "5월",
+    "6월",
+    "7월",
+    "8월",
+    "9월",
+    "10월",
+    "11월",
+    "12월",
+  ],
 } as const;
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -51,7 +77,7 @@ function dateAtNoonInTz(ymd: string, tz: Tz): Date {
 // ISO 주(월~일) 범위 (YYYY-MM-DD 반환)
 export function getIsoWeekBoundsYmd(nowYmd: string, tz: Tz = "Asia/Seoul") {
   const base = dateAtNoonInTz(nowYmd, tz);
-  const jsDay = base.getDay();           // 0=Sun,1=Mon,...6=Sat
+  const jsDay = base.getDay(); // 0=Sun,1=Mon,...6=Sat
   const isoDay = jsDay === 0 ? 7 : jsDay; // 1=Mon,...,7=Sun
 
   const start = new Date(base);
@@ -82,7 +108,11 @@ export function getMonthBoundsYmd(nowYmd: string, tz: Tz = "Asia/Seoul") {
   };
 }
 
-export function inRangeYmd(targetYmd: string, startYmd: string, endYmd: string) {
+export function inRangeYmd(
+  targetYmd: string,
+  startYmd: string,
+  endYmd: string,
+) {
   // YYYY-MM-DD 문자열 비교 (동일 포맷 전제)
   return targetYmd >= startYmd && targetYmd <= endYmd;
 }
@@ -90,16 +120,21 @@ export function inRangeYmd(targetYmd: string, startYmd: string, endYmd: string) 
 /**
  * 날짜 범위를 짧은 형식으로 포맷 (다국어 지원)
  */
-export function fmtShortRange(startYmd: string, endYmd: string, lang: "en" | "ko" = "en"): string {
+export function fmtShortRange(
+  startYmd: string,
+  endYmd: string,
+  lang: "en" | "ko" = "en",
+): string {
   const s = new Date(`${startYmd}T00:00:00`);
   const e = new Date(`${endYmd}T00:00:00`);
   const months = MONTH_NAMES[lang];
-  
+
   const left = `${months[s.getMonth()]} ${s.getDate()}`;
-  const right = s.getMonth() === e.getMonth() 
-    ? `${e.getDate()}` 
-    : `${months[e.getMonth()]} ${e.getDate()}`;
-  
+  const right =
+    s.getMonth() === e.getMonth()
+      ? `${e.getDate()}`
+      : `${months[e.getMonth()]} ${e.getDate()}`;
+
   return `${left}–${right}`;
 }
 
@@ -112,13 +147,12 @@ function getMonthName(ymd: string, lang: "en" | "ko" = "en"): string {
   return months[date.getMonth()];
 }
 
-
 /**
  * 브라우저 언어 감지
  */
 export function detectBrowserLanguage(): string {
   if (typeof window === "undefined") return "en";
-  
+
   const browserLang = navigator.language || navigator.languages?.[0] || "en";
   // "ko-KR" -> "ko", "en-US" -> "en"
   return browserLang.split("-")[0].toLowerCase();
@@ -135,7 +169,7 @@ const SECTION_LABELS = {
     "next-month": "NEXT MONTH",
     "this-year": "THIS YEAR",
     "next-year": "NEXT YEAR",
-    "later": "LATER",
+    later: "LATER",
   },
   ko: {
     "this-week": "이번 주",
@@ -144,7 +178,7 @@ const SECTION_LABELS = {
     "next-month": "다음 달",
     "this-year": "올해",
     "next-year": "내년",
-    "later": "이후",
+    later: "이후",
   },
 } as const;
 
@@ -158,18 +192,21 @@ export function getSectionForDate(
   ymd: string,
   nowYmd: string,
   tz: Tz = "Asia/Seoul",
-  lang: "en" | "ko" = "en"
+  lang: "en" | "ko" = "en",
 ): { key: string; label: string; sub: string } {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
-    return { 
-      key: "later", 
-      label: SECTION_LABELS[lang]["later"], 
-      sub: "" 
+    return {
+      key: "later",
+      label: SECTION_LABELS[lang]["later"],
+      sub: "",
     };
   }
 
   // This Week
-  const { startYmd: thisWStart, endYmd: thisWEnd } = getIsoWeekBoundsYmd(nowYmd, tz);
+  const { startYmd: thisWStart, endYmd: thisWEnd } = getIsoWeekBoundsYmd(
+    nowYmd,
+    tz,
+  );
   if (inRangeYmd(ymd, thisWStart, thisWEnd)) {
     return {
       key: "this-week",
@@ -183,7 +220,7 @@ export function getSectionForDate(
   nextWeekBase.setDate(nextWeekBase.getDate() + 7);
   const { startYmd: nextWStart, endYmd: nextWEnd } = getIsoWeekBoundsYmd(
     ymdFromDateInTz(nextWeekBase, tz),
-    tz
+    tz,
   );
   if (inRangeYmd(ymd, nextWStart, nextWEnd)) {
     return {
@@ -194,7 +231,10 @@ export function getSectionForDate(
   }
 
   // This Month
-  const { startYmd: thisMStart, endYmd: thisMEnd } = getMonthBoundsYmd(nowYmd, tz);
+  const { startYmd: thisMStart, endYmd: thisMEnd } = getMonthBoundsYmd(
+    nowYmd,
+    tz,
+  );
   if (inRangeYmd(ymd, thisMStart, thisMEnd)) {
     const monthName = new Date(`${thisMStart}T00:00:00`)
       .toLocaleString("en-US", { month: "short" })
@@ -211,7 +251,7 @@ export function getSectionForDate(
   nextMonthBase.setMonth(nextMonthBase.getMonth() + 1);
   const { startYmd: nextMStart, endYmd: nextMEnd } = getMonthBoundsYmd(
     ymdFromDateInTz(nextMonthBase, tz),
-    tz
+    tz,
   );
   if (inRangeYmd(ymd, nextMStart, nextMEnd)) {
     return {
@@ -226,10 +266,10 @@ export function getSectionForDate(
   const targetYear = ymd.slice(0, 4);
 
   if (targetYear === thisYear) {
-    return { 
-      key: "this-year", 
-      label: SECTION_LABELS[lang]["this-year"], 
-      sub: `(${thisYear})` 
+    return {
+      key: "this-year",
+      label: SECTION_LABELS[lang]["this-year"],
+      sub: `(${thisYear})`,
     };
   }
   if (+targetYear === +thisYear + 1) {
@@ -240,9 +280,9 @@ export function getSectionForDate(
     };
   }
 
-  return { 
-    key: "later", 
-    label: SECTION_LABELS[lang]["later"], 
-    sub: "" 
+  return {
+    key: "later",
+    label: SECTION_LABELS[lang]["later"],
+    sub: "",
   };
 }

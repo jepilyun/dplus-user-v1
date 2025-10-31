@@ -57,7 +57,7 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     
     if (!state) return null;
 
-    // 5분 이상 지난 데이터는 무시
+    {/* 5분 이상 지난 데이터는 무시 */}
     const FIVE_MINUTES = 5 * 60 * 1000;
     if (Date.now() - state.timestamp > FIVE_MINUTES) {
       pageStates.current.delete(key);
@@ -67,7 +67,7 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
       return null;
     }
 
-    // 스크롤 복원
+    {/* 스크롤 복원 */}
     if (typeof window !== "undefined") {
       // 약간의 지연을 두고 스크롤 (DOM 렌더링 대기)
       setTimeout(() => {
@@ -100,7 +100,28 @@ export function useScrollRestoration() {
   return context;
 }
 
-// 각 페이지 타입별 커스텀 훅
+export function useCountryPageRestoration(countryCode: string) {
+  const { savePage, restorePage, clearPage } = useScrollRestoration();
+  const key = `country-${countryCode}`;
+  
+  return {
+    save: <T = unknown>(data: T) => savePage(key, data),
+    restore: <T = unknown>() => restorePage<T>(key),
+    clear: () => clearPage(key),
+  };
+}
+
+export function useCategoryPageRestoration(categoryCode: string, countryCode?: string) {
+  const { savePage, restorePage, clearPage } = useScrollRestoration();
+  const key = `category-${countryCode ? `${countryCode}-` : 'no-country-'}${categoryCode}`;
+  
+  return {
+    save: <T = unknown>(data: T) => savePage(key, data),
+    restore: <T = unknown>() => restorePage<T>(key),
+    clear: () => clearPage(key),
+  };
+}
+
 export function useCityPageRestoration(cityCode: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
   const key = `city-${cityCode}`;
@@ -112,9 +133,9 @@ export function useCityPageRestoration(cityCode: string) {
   };
 }
 
-export function useCategoryPageRestoration(cityCode: string, categoryCode: string) {
+export function useDatePageRestoration(date: string, countryCode?: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
-  const key = `category-${cityCode}-${categoryCode}`;
+  const key = `date-${countryCode ? `${countryCode}-` : 'no-country-'}${date}`;
   
   return {
     save: <T = unknown>(data: T) => savePage(key, data),
@@ -123,9 +144,9 @@ export function useCategoryPageRestoration(cityCode: string, categoryCode: strin
   };
 }
 
-export function useStreetPageRestoration(cityCode: string, streetCode: string) {
+export function useFolderPageRestoration(folderCode: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
-  const key = `street-${cityCode}-${streetCode}`;
+  const key = `folder-${folderCode}`;
   
   return {
     save: <T = unknown>(data: T) => savePage(key, data),
@@ -134,9 +155,9 @@ export function useStreetPageRestoration(cityCode: string, streetCode: string) {
   };
 }
 
-export function useStagPageRestoration(cityCode: string, stagCode: string) {
+export function useGroupPageRestoration(groupCode: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
-  const key = `stag-${cityCode}-${stagCode}`;
+  const key = `group-${groupCode}`;
   
   return {
     save: <T = unknown>(data: T) => savePage(key, data),
@@ -145,9 +166,31 @@ export function useStagPageRestoration(cityCode: string, stagCode: string) {
   };
 }
 
-export function useTagPageRestoration(cityCode: string, tagValue: string) {
+export function useStagPageRestoration(stagCode: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
-  const key = `tag-${cityCode}-${tagValue}`;
+  const key = `stag-${stagCode}`;
+  
+  return {
+    save: <T = unknown>(data: T) => savePage(key, data),
+    restore: <T = unknown>() => restorePage<T>(key),
+    clear: () => clearPage(key),
+  };
+}
+
+export function useTagPageRestoration(tagCode: string) {
+  const { savePage, restorePage, clearPage } = useScrollRestoration();
+  const key = `tag-${tagCode}`;
+  
+  return {
+    save: <T = unknown>(data: T) => savePage(key, data),
+    restore: <T = unknown>() => restorePage<T>(key),
+    clear: () => clearPage(key),
+  };
+}
+
+export function useTodayPageRestoration(countryCode?: string) {
+  const { savePage, restorePage, clearPage } = useScrollRestoration();
+  const key = `today-${countryCode ? `${countryCode}-` : 'no-country-'}`;
   
   return {
     save: <T = unknown>(data: T) => savePage(key, data),
