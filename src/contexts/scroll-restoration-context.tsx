@@ -57,7 +57,6 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     
     if (!state) return null;
 
-    {/* 5분 이상 지난 데이터는 무시 */}
     const FIVE_MINUTES = 5 * 60 * 1000;
     if (Date.now() - state.timestamp > FIVE_MINUTES) {
       pageStates.current.delete(key);
@@ -67,7 +66,6 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
       return null;
     }
 
-    {/* 스크롤 복원 */}
     if (typeof window !== "undefined") {
       // 약간의 지연을 두고 스크롤 (DOM 렌더링 대기)
       setTimeout(() => {
@@ -103,7 +101,7 @@ export function useScrollRestoration() {
 export function useCountryPageRestoration(countryCode: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
   const key = `country-${countryCode}`;
-  
+
   return {
     save: <T = unknown>(data: T) => savePage(key, data),
     restore: <T = unknown>() => restorePage<T>(key),

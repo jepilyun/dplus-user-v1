@@ -192,10 +192,6 @@ export default function CompCountryDetailPage({
     };
   }, [events, eventsStart, eventsHasMore, save]);
 
-  useEffect(() => {
-    fetchCountryDetail();
-  }, [countryCode]);
-
   // 로딩 중
   if (loading) {
     return (
