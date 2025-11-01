@@ -59,7 +59,7 @@ export default function CompCountryDetailPage({
   const fetchCountryDetail = async () => {
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
-
+console.log("res", res);
       const isEmptyObj =
         !res?.dbResponse ||
         (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
