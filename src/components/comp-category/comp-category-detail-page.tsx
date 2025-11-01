@@ -55,27 +55,34 @@ export default function CompCategoryDetailPage({
   const fetchCategoryDetail = async () => {
     try {
       const res = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
-
+  
       if (!res?.dbResponse || !res?.dbResponse?.category) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
+  
       setCategoryDetail(res.dbResponse);
-
-      // ✅ 복원 없이 첫 진입일 때만 서버 응답으로 초기화
+  
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
       if (!hydratedFromRestoreRef.current) {
         const initItems = res?.dbResponse?.mapCategoryEvent?.items ?? [];
         setEvents(initItems);
         setEventsStart(initItems.length);
         setEventsHasMore(Boolean(res?.dbResponse?.mapCategoryEvent?.hasMore));
+        
+        seenEventCodesRef.current.clear();
         for (const it of initItems) {
           const code = it?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         }
       }
-
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        const serverTotal = res?.dbResponse?.mapCategoryEvent?.total ?? 0;
+        setEventsHasMore(events.length < serverTotal);
+      }
+  
       setError(null);
     } catch (e) {
       console.error("Failed to fetch category detail:", e);
@@ -84,7 +91,7 @@ export default function CompCategoryDetailPage({
       setLoading(false);
     }
   };
-
+  
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
@@ -141,30 +148,8 @@ export default function CompCategoryDetailPage({
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [events, eventsStart, eventsHasMore, savePage]);
 
-  // ✅ ③ 새로고침/백그라운드 전환 시 저장 (권장)
-  useEffect(() => {
-    const persist = () =>
-      savePage<CategoryPageState>(STATE_KEY, {
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
-
-    window.addEventListener("beforeunload", persist);
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [events, eventsStart, eventsHasMore, savePage]);
 
   // ========================= 렌더 =========================
-
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">

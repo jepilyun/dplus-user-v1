@@ -100,32 +100,39 @@ export default function CompTodayDetailPage({
     try {
       const res = await reqGetTodayList(countryCode, 0, LIST_LIMIT.default);
       if (reqId !== requestIdRef.current) return;
-
+  
       if (!res?.dbResponse || !res?.dbResponse?.items) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
+  
       const raw: unknown[] = res?.dbResponse?.items ?? [];
       const initItems = raw.filter(isValidEvent);
-
-      // 중복 제거
-      seenEventCodesRef.current.clear();
-      const deduped: TEventCardForDateDetail[] = [];
-      for (const it of initItems) {
-        if (!seenEventCodesRef.current.has(it.event_code)) {
-          seenEventCodesRef.current.add(it.event_code);
-          deduped.push(it);
+  
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
+      if (!hydratedFromRestoreRef.current) {
+        // 중복 제거
+        seenEventCodesRef.current.clear();
+        const deduped: TEventCardForDateDetail[] = [];
+        for (const it of initItems) {
+          if (!seenEventCodesRef.current.has(it.event_code)) {
+            seenEventCodesRef.current.add(it.event_code);
+            deduped.push(it);
+          }
         }
+  
+        const nextWithSections = attachSections(deduped);
+        setEventsWithSections(nextWithSections);
+        setEventsStart(nextWithSections.length);
+        setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       }
-
-      // ✅ 복원으로 이미 채워졌으면 섹션만 최신 TZ/Lang으로 재계산해서 교체,
-      // 아니면 새로 계산
-      const nextWithSections = attachSections(deduped);
-      setEventsWithSections(nextWithSections);
-      setEventsStart(nextWithSections.length);
-      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        const serverTotal = res?.dbResponse?.total ?? 0;
+        setEventsHasMore(eventsWithSections.length < serverTotal);
+      }
+  
       setError(null);
     } catch (error) {
       console.error("[today] fetch error", error);
@@ -136,7 +143,7 @@ export default function CompTodayDetailPage({
       }
     }
   };
-
+  
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
@@ -170,14 +177,14 @@ export default function CompTodayDetailPage({
   // ✅ ① 마운트 시 상태 복원 → 있으면 즉시 렌더
   useEffect(() => {
     const saved = restorePage<TodayPageState>(STATE_KEY);
-    if (saved) {
+    if (saved && saved.rawEvents && saved.rawEvents.length > 0) {  // ✅ 빈 배열 체크 추가
       hydratedFromRestoreRef.current = true;
       // TZ/Lang이 바뀌었을 수 있으므로 섹션은 현 TZ/Lang으로 재계산
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setEventsWithSections(attachSections(saved.rawEvents ?? []));
+      setEventsWithSections(attachSections(saved.rawEvents));
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
-
+  
       // 복원된 TZ/Lang이 있으면 우선 적용(브라우저 감지 전 임시 일관성)
       if (saved.tz) setTz(saved.tz);
       if (saved.lang) setLang(saved.lang);

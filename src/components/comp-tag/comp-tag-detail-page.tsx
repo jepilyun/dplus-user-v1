@@ -56,32 +56,37 @@ export default function CompTagDetailPage({
     try {
       const res = await reqGetTagDetail(tagCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
-
+  
       const isEmptyObj =
         !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
-
+  
       if (!res?.success || isEmptyObj || !db?.tag) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
+  
       setTagDetail(db);
-
-      // ✅ 복원으로 이미 채워졌다면 초기화로 덮지 않음
+  
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
       if (!hydratedFromRestoreRef.current) {
         const initItems = db?.mapTagEvent?.items ?? [];
         setEvents(initItems);
         setEventsStart(initItems.length);
         setEventsHasMore(Boolean(db?.mapTagEvent?.hasMore));
-
+  
         seenEventCodesRef.current.clear();
         for (const it of initItems) {
           const code = it?.event_info?.event_code ?? it?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         }
       }
-
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        const serverTotal = db?.mapTagEvent?.total ?? 0;
+        setEventsHasMore(events.length < serverTotal);
+      }
+  
       setError(null);
     } catch (e) {
       console.error("Failed to fetch tag detail:", e);
@@ -90,7 +95,7 @@ export default function CompTagDetailPage({
       setLoading(false);
     }
   };
-
+  
   const handleShareClick = async () => {
     const shareData = {
       title: tagDetail?.tag.tag || "이벤트 세트 공유",
@@ -143,9 +148,9 @@ export default function CompTagDetailPage({
   // ✅ ① 마운트 시 복원 → 있으면 즉시 렌더 후 서버 최신화
   useEffect(() => {
     const saved = restorePage<TagPageState>(STATE_KEY);
-    if (saved) {
+    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
       hydratedFromRestoreRef.current = true;
-      setEvents(saved.events ?? []);
+      setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);

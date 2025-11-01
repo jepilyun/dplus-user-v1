@@ -57,35 +57,41 @@ export default function CompCityDetailPage({
   const fetchCityDetail = async () => {
     try {
       const res = await reqGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
-
+  
       const isEmptyObj =
         !res?.dbResponse ||
         (typeof res?.dbResponse === "object" &&
           !Array.isArray(res?.dbResponse) &&
           Object.keys(res?.dbResponse).length === 0);
-
+  
       if (!res?.success || isEmptyObj || !res?.dbResponse?.city) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
+  
       setCityDetail(res.dbResponse);
       setImageUrls(getCityImageUrls(res.dbResponse.city));
-
-      // ✅ 복원으로 이미 채워졌다면 서버 응답으로 덮지 않음
+  
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
       if (!hydratedFromRestoreRef.current) {
         const initItems = res?.dbResponse?.mapCityEvent?.items ?? [];
         setEvents(initItems);
         setEventsStart(initItems.length);
         setEventsHasMore(Boolean(res?.dbResponse?.mapCityEvent?.hasMore));
-
+  
+        seenEventCodesRef.current.clear();
         for (const it of initItems) {
           const code = it?.event_info?.event_code ?? it?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         }
       }
-
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        const serverTotal = res?.dbResponse?.mapCityEvent?.total ?? 0;
+        setEventsHasMore(events.length < serverTotal);
+      }
+  
       setError(null);
     } catch (e) {
       console.error("Failed to fetch city detail:", e);
@@ -141,13 +147,13 @@ export default function CompCityDetailPage({
   // ✅ ① 마운트 시 복원: 있으면 즉시 렌더(플래시 제거), 이후 서버 최신화
   useEffect(() => {
     const saved = restore<CityPageState>();
-    if (saved) {
+    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
       hydratedFromRestoreRef.current = true;
-      setEvents(saved.events ?? []);
+      setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false); // 복원 화면 먼저
+      setLoading(false);
     }
     fetchCityDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps

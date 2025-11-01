@@ -60,36 +60,41 @@ export default function CompStagDetailPage({
   const fetchStagDetail = async () => {
     try {
       const res = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
-
+  
       const isEmptyObj =
         !res?.dbResponse ||
         (typeof res?.dbResponse === "object" &&
           !Array.isArray(res?.dbResponse) &&
           Object.keys(res?.dbResponse).length === 0);
-
+  
       if (!res?.success || isEmptyObj || !res?.dbResponse?.stag) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
+  
       setStagDetail(res.dbResponse);
       setImageUrls(getStagImageUrls(res.dbResponse.stag));
-
-      // ✅ 복원으로 이미 채워졌으면 서버 초기화로 덮지 않음
+  
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
       if (!hydratedFromRestoreRef.current) {
         const initItems = res?.dbResponse?.mapStagEvent?.items ?? [];
         setEvents(initItems);
         setEventsStart(initItems.length);
         setEventsHasMore(Boolean(res?.dbResponse?.mapStagEvent?.hasMore));
-
+  
         seenEventCodesRef.current.clear();
         for (const it of initItems) {
           const code = it?.event_info?.event_code ?? it?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         }
       }
-
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        const serverTotal = res?.dbResponse?.mapStagEvent?.total ?? 0;
+        setEventsHasMore(events.length < serverTotal);
+      }
+  
       setError(null);
     } catch (e) {
       console.error("Failed to fetch stag detail:", e);
@@ -145,9 +150,9 @@ export default function CompStagDetailPage({
   // ✅ ① 마운트 시 복원 → 있으면 즉시 렌더(플래시 방지) 후 서버 최신화
   useEffect(() => {
     const saved = restorePage<StagPageState>(STATE_KEY);
-    if (saved) {
+    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
       hydratedFromRestoreRef.current = true;
-      setEvents(saved.events ?? []);
+      setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
@@ -253,7 +258,7 @@ export default function CompStagDetailPage({
       />
 
       {events?.length ? (
-        <div className="mx-auto w-full max-w-[1024px] flex flex_col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
+        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {events.map((item) => (
             <CompCommonDdayItem
               key={item.event_info?.event_code ?? item.event_code}

@@ -55,28 +55,33 @@ export default function CompDateDetailPage({
   const fetchDateDetail = async () => {
     try {
       const res = await reqGetDateList(countryCode, dateString, 0, LIST_LIMIT.default);
-
+  
       // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.dbResponse || !res?.dbResponse?.items) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
-      // ✅ 복원으로 이미 채웠으면 서버 응답으로 초기화하지 않음
+  
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
       if (!hydratedFromRestoreRef.current) {
         const initItems = res?.dbResponse?.items ?? [];
         setEvents(initItems);
         setEventsStart(initItems.length);
         setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
-
+  
         seenEventCodesRef.current.clear();
         for (const it of initItems) {
           const code = it?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         }
       }
-
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        const serverTotal = res?.dbResponse?.total ?? 0;
+        setEventsHasMore(events.length < serverTotal);
+      }
+  
       setError(null);
     } catch (e) {
       console.error("Failed to fetch date detail:", e);
@@ -111,13 +116,13 @@ export default function CompDateDetailPage({
   // ✅ ① 마운트 시 복원 → 있으면 즉시 렌더 후 서버 최신화
   useEffect(() => {
     const saved = restorePage<DatePageState>(STATE_KEY);
-    if (saved) {
+    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
       hydratedFromRestoreRef.current = true;
-      setEvents(saved.events ?? []);
+      setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false); // 플래시 방지
+      setLoading(false);
     }
     fetchDateDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
