@@ -59,7 +59,8 @@ export default function CompCountryDetailPage({
   const fetchCountryDetail = async () => {
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
-
+      console.log("res", res);
+      
       const isEmptyObj =
         !res?.dbResponse ||
         (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
@@ -75,17 +76,25 @@ export default function CompCountryDetailPage({
       setHasCategories((res.dbResponse.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse.cities?.items?.length ?? 0) > 0);
   
-      // ✅ 수정: 항상 최신 이벤트 데이터로 업데이트
-      const initItems = res.dbResponse.mapCountryEvent?.items ?? [];
-      setEvents(initItems);
-      setEventsStart(initItems.length);
-      setEventsHasMore(Boolean(res.dbResponse.mapCountryEvent?.hasMore));
-      
-      // 중복 방지 Set 초기화 후 다시 채우기
-      seenEventCodesRef.current.clear();
-      for (const it of initItems) {
-        const code = it?.event_info?.event_code ?? it?.event_code;
-        if (code) seenEventCodesRef.current.add(code);
+      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
+      if (!hydratedFromRestoreRef.current) {
+        const initItems = res.dbResponse.mapCountryEvent?.items ?? [];
+        setEvents(initItems);
+        setEventsStart(initItems.length);
+        setEventsHasMore(Boolean(res.dbResponse.mapCountryEvent?.hasMore));
+        
+        // 중복 방지 Set 채우기
+        seenEventCodesRef.current.clear();
+        for (const it of initItems) {
+          const code = it?.event_info?.event_code ?? it?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        }
+      }
+      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
+      else {
+        // 서버에서 받은 total과 현재 events 개수를 비교해서 hasMore 재계산
+        const serverTotal = res.dbResponse.mapCountryEvent?.total ?? 0;
+        setEventsHasMore(events.length < serverTotal);
       }
   
       setError(null);
@@ -140,13 +149,13 @@ export default function CompCountryDetailPage({
   // ✅ 추가: ① 마운트 시 즉시 복원(있으면 로딩 플래시 없이 바로 그려주기)
   useEffect(() => {
     const saved = restore<CountryPageState>();
-    if (saved) {
+    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
       hydratedFromRestoreRef.current = true;
-      setEvents(saved.events ?? []);
+      setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false); // 복원 화면 먼저 보여주고, 서버 갱신은 백그라운드로
+      setLoading(false);
     }
     // saved 유무와 무관하게 최신화 시도
     fetchCountryDetail();
