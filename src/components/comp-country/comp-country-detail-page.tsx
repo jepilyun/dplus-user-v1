@@ -59,35 +59,36 @@ export default function CompCountryDetailPage({
   const fetchCountryDetail = async () => {
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
-console.log("res", res);
+      console.log("res", res);
+      
       const isEmptyObj =
         !res?.dbResponse ||
         (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
-
+  
       if (!res?.success || isEmptyObj || !res?.dbResponse?.country) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
+  
       setCountryDetail(res.dbResponse);
       setImageUrls(getCountryImageUrls(res.dbResponse.country));
       setHasCategories((res.dbResponse.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse.cities?.items?.length ?? 0) > 0);
-
-      // ✅ 초기 로드(복원 없이 첫 진입)일 때만 서버 응답으로 초기화
-      if (!hydratedFromRestoreRef.current) {
-        const initItems = res.dbResponse.mapCountryEvent?.items ?? [];
-        setEvents(initItems);
-        setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(res.dbResponse.mapCountryEvent?.hasMore));
-        // 중복 방지 Set 채우기
-        for (const it of initItems) {
-          const code = it?.event_info?.event_code ?? it?.event_code;
-          if (code) seenEventCodesRef.current.add(code);
-        }
+  
+      // ✅ 수정: 항상 최신 이벤트 데이터로 업데이트
+      const initItems = res.dbResponse.mapCountryEvent?.items ?? [];
+      setEvents(initItems);
+      setEventsStart(initItems.length);
+      setEventsHasMore(Boolean(res.dbResponse.mapCountryEvent?.hasMore));
+      
+      // 중복 방지 Set 초기화 후 다시 채우기
+      seenEventCodesRef.current.clear();
+      for (const it of initItems) {
+        const code = it?.event_info?.event_code ?? it?.event_code;
+        if (code) seenEventCodesRef.current.add(code);
       }
-
+  
       setError(null);
     } catch (e) {
       console.error("Failed to fetch country detail:", e);
