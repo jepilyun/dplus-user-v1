@@ -54,7 +54,7 @@ export default function CompCategoryDetailPage({
 
   const fetchCategoryDetail = async () => {
     try {
-      const res = await reqGetCategoryDetail(countryCode, categoryCode, 0, LIST_LIMIT.default, langCode);
+      const res = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
 
       if (!res?.dbResponse || !res?.dbResponse?.category) {
         setError("not-found");
