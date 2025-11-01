@@ -59,7 +59,7 @@ export default function CompGroupDetailPage({
 
   const fetchGroupDetail = async () => {
     try {
-      const res = await reqGetGroupDetail(groupCode, 0, LIST_LIMIT.default);
+      const res = await reqGetGroupDetail(groupCode, langCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse ||

@@ -61,7 +61,7 @@ export default function CompFolderDetailPage({
 
   const fetchFolderDetail = async () => {
     try {
-      const res = await reqGetFolderDetail(folderCode, 0, LIST_LIMIT.default);
+      const res = await reqGetFolderDetail(folderCode, langCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
 
       const isEmptyObj = !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);

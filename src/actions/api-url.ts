@@ -138,10 +138,11 @@ export const apiUrlFolder = (
     case "detailGet":
       if (
         optionalParams?.folderCode &&
+        optionalParams?.langCode &&
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
@@ -260,10 +261,11 @@ export const apiUrlCity = (
     case "detailGet":
       if (
         optionalParams?.cityCode &&
+        optionalParams?.langCode &&
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/city/detail/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/city/detail/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
@@ -330,10 +332,11 @@ export const apiUrlStag = (
     case "detailGet":
       if (
         optionalParams?.stagCode &&
+        optionalParams?.langCode &&
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/stag/detail/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/stag/detail/get/${encodeURIComponent(optionalParams?.stagCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.stagCode] ${optionalParams?.stagCode}`,
@@ -400,10 +403,11 @@ export const apiUrlGroup = (
     case "detailGet":
       if (
         optionalParams?.groupCode &&
+        optionalParams?.langCode &&
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/group/detail/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/group/detail/get/${encodeURIComponent(optionalParams?.groupCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.groupCode] ${optionalParams?.groupCode}`,

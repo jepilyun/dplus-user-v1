@@ -56,7 +56,7 @@ export default function CompCityDetailPage({
 
   const fetchCityDetail = async () => {
     try {
-      const res = await reqGetCityDetail(cityCode, 0, LIST_LIMIT.default);
+      const res = await reqGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse ||

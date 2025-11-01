@@ -59,7 +59,7 @@ export default function CompStagDetailPage({
 
   const fetchStagDetail = async () => {
     try {
-      const res = await reqGetStagDetail(stagCode, 0, LIST_LIMIT.default);
+      const res = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.dbResponse ||

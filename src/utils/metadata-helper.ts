@@ -1,9 +1,10 @@
 // 우선순위: i18n → base → default(dict)
-export const pick = (
-  i18n?: string | null,
-  base?: string | null,
-  def?: string,
-) => i18n ?? base ?? def ?? "";
+export const pick = (...values: (string | null | undefined)[]) => {
+  for (const value of values) {
+    if (value) return value;
+  }
+  return undefined;
+};
 
 // tag_set은 배열일 수 있으니 keywords 조합 헬퍼
 export const buildKeywords = (

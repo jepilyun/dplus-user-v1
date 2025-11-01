@@ -106,11 +106,12 @@ export const reqGetEventMetadata = async (
  */
 export const reqGetFolderDetail = async (
   folderCode: string,
+  langCode: string,
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseFolderDetailForUserFront>> => {
   const res = await fetch(
-    apiUrlFolder("detailGet", { folderCode, start, limit }),
+    apiUrlFolder("detailGet", { folderCode, langCode, start, limit }),
     {
       method: "GET",
       credentials: "include",
@@ -217,16 +218,18 @@ export const reqGetDateList = async (
 /**
  * City 상세 화면 조회 for User Front
  * @param dateString
+ * @param langCode
  * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetCityDetail = async (
   cityCode: string,
+  langCode: string,
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseCityDetailForUserFront>> => {
-  const res = await fetch(apiUrlCity("detailGet", { cityCode, start, limit }), {
+  const res = await fetch(apiUrlCity("detailGet", { cityCode, langCode, start, limit }), {
     method: "GET",
     credentials: "include",
   });
@@ -289,16 +292,18 @@ export const reqGetCityMetadata = async (
 /**
  * Stag 상세 화면 조회 for User Front
  * @param stagCode
+ * @param langCode
  * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetStagDetail = async (
   stagCode: string,
+  langCode: string,
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseStagDetailForUserFront>> => {
-  const res = await fetch(apiUrlStag("detailGet", { stagCode, start, limit }), {
+  const res = await fetch(apiUrlStag("detailGet", { stagCode, langCode, start, limit }), {
     method: "GET",
     credentials: "include",
   });
@@ -360,17 +365,19 @@ export const reqGetStagMetadata = async (
 /**
  * Group 상세 화면 조회 for User Front
  * @param groupCode
+ * @param langCode
  * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetGroupDetail = async (
   groupCode: string,
+  langCode: string,
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseGroupDetailForUserFront>> => {
   const res = await fetch(
-    apiUrlGroup("detailGet", { groupCode, start, limit }),
+    apiUrlGroup("detailGet", { groupCode, langCode, start, limit }),
     {
       method: "GET",
       credentials: "include",
@@ -488,17 +495,17 @@ export const reqGetTagEvents = async (
 export const reqGetCategoryDetail = async (
   countryCode: string,
   categoryCode: string,
+  langCode: string,
   start: number,
   limit: number,
-  langCode: string = "en",
 ): Promise<ResponseDplusAPI<ResponseCategoryDetailForUserFront>> => {
   const res = await fetch(
     apiUrlCategory("detailGet", {
       countryCode,
       categoryCode,
+      langCode,
       start,
       limit,
-      langCode,
     }),
     {
       method: "GET",
@@ -598,6 +605,7 @@ export const reqGetTodayList = async (
 /**
  * Country 상세 화면 조회 for User Front
  * @param dateString
+ * @param langCode
  * @param start
  * @param limit
  * @param langCode
@@ -605,9 +613,9 @@ export const reqGetTodayList = async (
  */
 export const reqGetCountryDetail = async (
   countryCode: string,
+  langCode: string,
   start: number,
   limit: number,
-  langCode: string = "en",
 ): Promise<ResponseDplusAPI<ResponseCountryDetailForUserFront>> => {
   const res = await fetch(
     apiUrlCountry("detailGet", { countryCode, start, limit, langCode }),
