@@ -1,5 +1,5 @@
 // 이 라우트 기본 재생성 주기: 4시간
-export const revalidate = 14400;
+export const revalidate = 60;
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
