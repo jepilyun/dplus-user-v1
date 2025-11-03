@@ -70,68 +70,64 @@ export default function CompCityDetailPage({
       
       const initItems = res?.dbResponse?.mapCityEvent?.items ?? [];
       
-      // ✅ 수정: restoredEvents 사용
-      if (hydratedFromRestoreRef.current && restoredEvents) {
-        console.log('[City Fetch] Hydrated from restore, merging with server data');
-        console.log('[City Fetch] Restored events:', restoredEvents.length);
+      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
+        console.log('[City Fetch] Merging server data with restored pagination');
         console.log('[City Fetch] Server events:', initItems.length);
+        console.log('[City Fetch] Restored total:', restoredEvents.length);
         
+        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        if (restoredEvents.length > LIST_LIMIT.default) {
-          // ✅ 복원된 전체 이벤트에서 서버에 없는 것만 추출
-          const extraLoadedEvents = restoredEvents.filter(item => {
+        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
+        const additionalEvents = restoredEvents
+          .slice(LIST_LIMIT.default)
+          .filter(item => {
             const code = item?.event_info?.event_code ?? item?.event_code;
             return code && !serverCodes.has(code);
           });
+        
+        console.log('[City Fetch] Additional events from restore:', additionalEvents.length);
+        
+        // 오늘 이후 이벤트만 필터링
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = today.getTime();
+        
+        const futureEvents = additionalEvents.filter(item => {
+          const eventDate = item.event_info?.date || item.date;
           
-          console.log('[City Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
-          
-          // ✅ 날짜 필터링 (과거 이벤트 제거)
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const todayTimestamp = today.getTime();
-          
-          const futureExtraEvents = extraLoadedEvents.filter(item => {
-            const eventDate = item.event_info?.date || item.date;
-            
-            if (eventDate) {
-              const date = new Date(eventDate);
-              return date.getTime() >= todayTimestamp;
-            }
-            return true; // 날짜 정보 없으면 일단 포함
-          });
-          
-          console.log('[City Fetch] Future extra events (after date filter):', futureExtraEvents.length);
-          
-          const finalEvents = [...initItems, ...futureExtraEvents];
-          console.log('[City Fetch] Final merged events:', finalEvents.length);
-          
-          setEvents(finalEvents);
-          setEventsStart(finalEvents.length);
-          
-          seenEventCodesRef.current.clear();
-          finalEvents.forEach(item => {
-            const code = item?.event_info?.event_code ?? item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        } else {
-          // 더보기 안 한 경우: 서버 데이터만
-          console.log('[City Fetch] No extra events, using server data');
-          setEvents(initItems);
-          setEventsStart(initItems.length);
-          
-          seenEventCodesRef.current.clear();
-          initItems.forEach(item => {
-            const code = item?.event_info?.event_code ?? item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        }
+          if (eventDate) {
+            const date = new Date(eventDate);
+            return date.getTime() >= todayTimestamp;
+          }
+          return true;
+        });
+        
+        console.log('[City Fetch] Future events after filter:', futureEvents.length);
+        
+        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
+        const finalEvents = [...initItems, ...futureEvents];
+        
+        console.log('[City Fetch] Final merged:', {
+          server: initItems.length,
+          additional: futureEvents.length,
+          total: finalEvents.length
+        });
+        
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
       } else {
-        // 복원 없음: 서버 데이터만
-        console.log('[City Fetch] No restore, using server data');
+        // 더보기를 안 한 경우: 서버 데이터만 사용
+        console.log('[City Fetch] Using server data only');
         setEvents(initItems);
         setEventsStart(initItems.length);
         

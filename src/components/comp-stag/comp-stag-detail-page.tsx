@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-carousel-stag";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
+import { useStagPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
 
 type StagPageState = {
   events: TMapStagEventWithEventInfo[];
@@ -33,8 +33,8 @@ export default function CompStagDetailPage({
 }) {
   const router = useRouter();
 
-  const { savePage, restorePage } = useScrollRestoration();
-  const STATE_KEY = `dplus:stag-${stagCode}`;
+  // ✅ 변경: 전용 hook 사용
+  const { save, restore } = useStagPageRestoration(stagCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,8 @@ export default function CompStagDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
-  const fetchStagDetail = async () => {
+  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
+  const fetchStagDetail = async (restoredEvents?: TMapStagEventWithEventInfo[]) => {
     try {
       const res = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
   
@@ -71,20 +72,53 @@ export default function CompStagDetailPage({
   
       const initItems = res?.dbResponse?.mapStagEvent?.items ?? [];
       
-      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
-      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
-        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
+        console.log('[Stag Fetch] Merging server data with restored pagination');
+        console.log('[Stag Fetch] Server events:', initItems.length);
+        console.log('[Stag Fetch] Restored total:', restoredEvents.length);
+        
+        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
-        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          return code && !serverCodes.has(code);
+        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
+        const additionalEvents = restoredEvents
+          .slice(LIST_LIMIT.default)
+          .filter(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            return code && !serverCodes.has(code);
+          });
+        
+        console.log('[Stag Fetch] Additional events from restore:', additionalEvents.length);
+        
+        // 오늘 이후 이벤트만 필터링
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = today.getTime();
+        
+        const futureEvents = additionalEvents.filter(item => {
+          const eventDate = item.event_info?.date || item.date;
+          
+          if (eventDate) {
+            const date = new Date(eventDate);
+            return date.getTime() >= todayTimestamp;
+          }
+          return true;
         });
         
-        const finalEvents = [...initItems, ...extraLoadedEvents];
+        console.log('[Stag Fetch] Future events after filter:', futureEvents.length);
+        
+        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
+        const finalEvents = [...initItems, ...futureEvents];
+        
+        console.log('[Stag Fetch] Final merged:', {
+          server: initItems.length,
+          additional: futureEvents.length,
+          total: finalEvents.length
+        });
+        
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
         
@@ -94,7 +128,8 @@ export default function CompStagDetailPage({
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        // 기본 케이스: 서버 데이터만 사용
+        // 더보기를 안 한 경우: 서버 데이터만 사용
+        console.log('[Stag Fetch] Using server data only');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -158,33 +193,49 @@ export default function CompStagDetailPage({
     }
   };
 
-  // ✅ 수정: 마운트 시 복원 + 최신 데이터 동기화
   useEffect(() => {
-    const saved = restorePage<StagPageState>(STATE_KEY);
+    console.log('[Stag Mount] Component mounted, attempting restore...');
+    const saved = restore<StagPageState>();
     
-    // 복원 데이터가 있고 이벤트가 있으면 즉시 화면에 표시
+    console.log('[Stag Mount] Restored data:', {
+      hasSaved: !!saved,
+      eventsCount: saved?.events?.length || 0,
+    });
+    
     if (saved && saved.events && saved.events.length > 0) {
+      console.log('[Stag Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
+      
+      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false); // 복원 화면 먼저 보여줌
+      setLoading(false);
+      
+      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
+      fetchStagDetail(saved.events);
+    } else {
+      console.log('[Stag Mount] No valid saved data found');
+      fetchStagDetail();
     }
-    
-    // 복원 유무와 무관하게 최신 데이터 가져오기 (백그라운드)
-    fetchStagDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stagCode]);
 
-  // ✅ 라우팅 직전 저장
+  // 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a") as HTMLAnchorElement | null;
       if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
 
-      savePage<StagPageState>(STATE_KEY, {
+      console.log('[Stag Save] Saving state:', {
+        eventsCount: events.length,
+        eventsStart,
+        eventsHasMore,
+      });
+
+      save<StagPageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -193,12 +244,12 @@ export default function CompStagDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
+  }, [events, eventsStart, eventsHasMore, save]);
 
-  // ✅ 새로고침/탭 숨김 시 저장
+  // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
-      savePage<StagPageState>(STATE_KEY, {
+      save<StagPageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -214,7 +265,7 @@ export default function CompStagDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
+  }, [events, eventsStart, eventsHasMore, save]);
 
   // ================= 렌더 =================
 

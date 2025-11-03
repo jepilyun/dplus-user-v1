@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import DateNavigation from "./comp-date-navigation";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
+import { useDatePageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
 
 type DatePageState = {
   events: TEventCardForDateDetail[];
@@ -29,8 +29,8 @@ export default function CompDateDetailPage({
 }) {
   const router = useRouter();
 
-  const { savePage, restorePage } = useScrollRestoration();
-  const STATE_KEY = `dplus:date-${countryCode}-${dateString}`;
+  // ✅ 변경: 전용 hook 사용
+  const { save, restore } = useDatePageRestoration(dateString, countryCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +43,6 @@ export default function CompDateDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
-  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
   const fetchDateDetail = async (restoredEvents?: TEventCardForDateDetail[]) => {
     try {
       const res = await reqGetDateList(countryCode, dateString, 0, LIST_LIMIT.default);
@@ -56,71 +55,65 @@ export default function CompDateDetailPage({
   
       const initItems = res?.dbResponse?.items ?? [];
       
-      // ✅ 수정: restoredEvents 사용
-      if (hydratedFromRestoreRef.current && restoredEvents) {
-        console.log('[Date Fetch] Hydrated from restore, merging with server data');
-        console.log('[Date Fetch] Restored events:', restoredEvents.length);
+      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
+        console.log('[Date Fetch] Merging server data with restored pagination');
         console.log('[Date Fetch] Server events:', initItems.length);
+        console.log('[Date Fetch] Restored total:', restoredEvents.length);
         
+        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
           initItems.map(item => item?.event_code).filter(Boolean)
         );
         
-        if (restoredEvents.length > LIST_LIMIT.default) {
-          // ✅ 복원된 전체 이벤트에서 서버에 없는 것만 추출
-          const extraLoadedEvents = restoredEvents.filter(item => {
+        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
+        const additionalEvents = restoredEvents
+          .slice(LIST_LIMIT.default)
+          .filter(item => {
             const code = item?.event_code;
             return code && !serverCodes.has(code);
           });
+        
+        console.log('[Date Fetch] Additional events from restore:', additionalEvents.length);
+        
+        // ✅ 날짜 필터링 (특정 날짜의 이벤트만)
+        const targetDate = new Date(dateString);
+        targetDate.setHours(0, 0, 0, 0);
+        const targetTimestamp = targetDate.getTime();
+        
+        const validEvents = additionalEvents.filter(item => {
+          const eventDate = item.date;
           
-          console.log('[Date Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
-          
-          // ✅ 날짜 필터링 (특정 날짜 페이지이므로 필터링 불필요할 수도 있음)
-          // 하지만 혹시 모를 과거 이벤트 처리를 위해 포함
-          const targetDate = new Date(dateString);
-          targetDate.setHours(0, 0, 0, 0);
-          const targetTimestamp = targetDate.getTime();
-          
-          const validExtraEvents = extraLoadedEvents.filter(item => {
-            const eventDate = item.date;
-            
-            if (eventDate) {
-              const date = new Date(eventDate);
-              date.setHours(0, 0, 0, 0);
-              // 같은 날짜의 이벤트만 포함
-              return date.getTime() === targetTimestamp;
-            }
-            return true; // 날짜 정보 없으면 일단 포함
-          });
-          
-          console.log('[Date Fetch] Valid extra events (after date filter):', validExtraEvents.length);
-          
-          const finalEvents = [...initItems, ...validExtraEvents];
-          console.log('[Date Fetch] Final merged events:', finalEvents.length);
-          
-          setEvents(finalEvents);
-          setEventsStart(finalEvents.length);
-          
-          seenEventCodesRef.current.clear();
-          finalEvents.forEach(item => {
-            const code = item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        } else {
-          // 더보기 안 한 경우: 서버 데이터만
-          console.log('[Date Fetch] No extra events, using server data');
-          setEvents(initItems);
-          setEventsStart(initItems.length);
-          
-          seenEventCodesRef.current.clear();
-          initItems.forEach(item => {
-            const code = item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        }
+          if (eventDate) {
+            const date = new Date(eventDate);
+            date.setHours(0, 0, 0, 0);
+            return date.getTime() === targetTimestamp;
+          }
+          return true;
+        });
+        
+        console.log('[Date Fetch] Valid events after filter:', validEvents.length);
+        
+        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
+        const finalEvents = [...initItems, ...validEvents];
+        
+        console.log('[Date Fetch] Final merged:', {
+          server: initItems.length,
+          additional: validEvents.length,
+          total: finalEvents.length
+        });
+        
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
       } else {
-        // 복원 없음: 서버 데이터만
-        console.log('[Date Fetch] No restore, using server data');
+        // 더보기를 안 한 경우: 서버 데이터만 사용
+        console.log('[Date Fetch] Using server data only');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -163,10 +156,9 @@ export default function CompDateDetailPage({
     }
   };
 
-  // ✅ 수정: 복원된 데이터를 fetchDateDetail에 전달
   useEffect(() => {
     console.log('[Date Mount] Component mounted, attempting restore...');
-    const saved = restorePage<DatePageState>(STATE_KEY);
+    const saved = restore<DatePageState>();
     
     console.log('[Date Mount] Restored data:', {
       hasSaved: !!saved,
@@ -176,13 +168,15 @@ export default function CompDateDetailPage({
     if (saved && saved.events && saved.events.length > 0) {
       console.log('[Date Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
+      
+      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 복원된 이벤트를 전달
+      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
       fetchDateDetail(saved.events);
     } else {
       console.log('[Date Mount] No valid saved data found');
@@ -204,7 +198,7 @@ export default function CompDateDetailPage({
         eventsHasMore,
       });
 
-      savePage<DatePageState>(STATE_KEY, {
+      save<DatePageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -213,12 +207,12 @@ export default function CompDateDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
+  }, [events, eventsStart, eventsHasMore, save]);
 
   // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
-      savePage<DatePageState>(STATE_KEY, {
+      save<DatePageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -235,7 +229,7 @@ export default function CompDateDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
+  }, [events, eventsStart, eventsHasMore, save]);
 
   // ================= 렌더 =================
 

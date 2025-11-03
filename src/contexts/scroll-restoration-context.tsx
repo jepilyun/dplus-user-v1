@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useRef, ReactNode } from "react";
 
-const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5분 (밀리초)
+const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10분 (밀리초)
 // const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10분
 // const CACHE_EXPIRY_TIME = 30 * 60 * 1000; // 30분
 
@@ -26,11 +26,33 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
   const savePage = <T = unknown>(key: string, data?: T) => {
     if (typeof window === "undefined") return;
     
+    // ✅ 먼저 메모리에서 확인
+    let existingState = pageStates.current.get(key);
+    
+    // ✅ 메모리에 없으면 sessionStorage에서 확인
+    if (!existingState) {
+      try {
+        const saved = sessionStorage.getItem(key);
+        if (saved) {
+          existingState = JSON.parse(saved) as PageState<T>;
+          console.log(`[Save] Loaded existing timestamp from sessionStorage for ${key}`);
+        }
+      } catch (error) {
+        console.warn("Failed to load existing state from sessionStorage:", error);
+      }
+    }
+    
     const state: PageState<T> = {
       scrollY: window.scrollY,
-      timestamp: Date.now(),
+      timestamp: existingState?.timestamp ?? Date.now(), // ✅ 기존 timestamp 유지
       data,
     };
+    
+    console.log(`[Save] ${key}:`, {
+      hadExisting: !!existingState,
+      timestamp: state.timestamp,
+      ageInSeconds: existingState ? Math.floor((Date.now() - state.timestamp) / 1000) : 0,
+    });
     
     pageStates.current.set(key, state);
     
@@ -57,14 +79,27 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     
     if (!state) return null;
 
-    // ✅ 수정: 5분 지났으면 무조건 null 반환 (데이터 무효화)
-    if (Date.now() - state.timestamp > CACHE_EXPIRY_TIME) {
-      console.log(`[Restore] Data expired (${key}), clearing and fetching fresh data`);
-      clearPage(key); // sessionStorage에서 삭제
-      return null; // null 반환 -> 서버에서 새로 받아옴
+    const now = Date.now();
+    const age = now - state.timestamp;
+    const ageInSeconds = Math.floor(age / 1000);
+    
+    console.log(`[Restore] Cache check for ${key}:`, {
+      timestamp: state.timestamp,
+      now: now,
+      age: age,
+      ageInSeconds: ageInSeconds,
+      expiryTime: CACHE_EXPIRY_TIME,
+      isExpired: age > CACHE_EXPIRY_TIME
+    });
+
+    if (age > CACHE_EXPIRY_TIME) {
+      console.log(`[Restore] ❌ Data expired (${key}), age: ${ageInSeconds}s, clearing and fetching fresh data`);
+      clearPage(key);
+      return null;
     }
 
-    // 스크롤 위치 복원 (데이터가 유효한 경우에만)
+    console.log(`[Restore] ✅ Data valid (${key}), age: ${ageInSeconds}s, restoring...`);
+
     if (typeof window !== "undefined") {
       setTimeout(() => {
         window.scrollTo(0, state.scrollY);
@@ -88,7 +123,6 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
   );
 }
 
-// ... 나머지 export 함수들은 동일
 export function useScrollRestoration() {
   const context = useContext(ScrollRestorationContext);
   if (!context) {

@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
+import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
 
 type CategoryPageState = {
   events: TMapCategoryEventWithEventInfo[];
@@ -32,8 +32,8 @@ export default function CompCategoryDetailPage({
 }) {
   const router = useRouter();
 
-  const { savePage, restorePage } = useScrollRestoration();
-  const STATE_KEY = `dplus:category-${countryCode}-${categoryCode}`;
+  // ✅ 변경: 전용 hook 사용
+  const { save, restore } = useCategoryPageRestoration(categoryCode, countryCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +47,6 @@ export default function CompCategoryDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
-  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
   const fetchCategoryDetail = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
     try {
       const res = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
@@ -61,68 +60,65 @@ export default function CompCategoryDetailPage({
       setCategoryDetail(res.dbResponse);
       const initItems = res?.dbResponse?.mapCategoryEvent?.items ?? [];
       
-      // ✅ 수정: restoredEvents 사용
-      if (hydratedFromRestoreRef.current && restoredEvents) {
-        console.log('[Category Fetch] Hydrated from restore, merging with server data');
-        console.log('[Category Fetch] Restored events:', restoredEvents.length);
+      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
+        console.log('[Category Fetch] Merging server data with restored pagination');
         console.log('[Category Fetch] Server events:', initItems.length);
+        console.log('[Category Fetch] Restored total:', restoredEvents.length);
         
+        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
           initItems.map(item => item?.event_code).filter(Boolean)
         );
         
-        if (restoredEvents.length > LIST_LIMIT.default) {
-          // ✅ 복원된 전체 이벤트에서 서버에 없는 것만 추출
-          const extraLoadedEvents = restoredEvents.filter(item => {
+        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
+        const additionalEvents = restoredEvents
+          .slice(LIST_LIMIT.default)
+          .filter(item => {
             const code = item?.event_code;
             return code && !serverCodes.has(code);
           });
+        
+        console.log('[Category Fetch] Additional events from restore:', additionalEvents.length);
+        
+        // 오늘 이후 이벤트만 필터링
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = today.getTime();
+        
+        const futureEvents = additionalEvents.filter(item => {
+          // ✅ 수정: event_info 구조 고려
+          const eventDate = item?.event_info?.date || item?.date;
           
-          console.log('[Category Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
-          
-          // ✅ 날짜 필터링 (과거 이벤트 제거)
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const todayTimestamp = today.getTime();
-          
-          const futureExtraEvents = extraLoadedEvents.filter(item => {
-            const eventDate = item?.event_info?.date || item?.date;
-            
-            if (eventDate) {
-              const date = new Date(eventDate);
-              return date.getTime() >= todayTimestamp;
-            }
-            return true; // 날짜 정보 없으면 일단 포함
-          });
-          
-          console.log('[Category Fetch] Future extra events (after date filter):', futureExtraEvents.length);
-          
-          const finalEvents = [...initItems, ...futureExtraEvents];
-          console.log('[Category Fetch] Final merged events:', finalEvents.length);
-          
-          setEvents(finalEvents);
-          setEventsStart(finalEvents.length);
-          
-          seenEventCodesRef.current.clear();
-          finalEvents.forEach(item => {
-            const code = item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        } else {
-          // 더보기 안 한 경우: 서버 데이터만
-          console.log('[Category Fetch] No extra events, using server data');
-          setEvents(initItems);
-          setEventsStart(initItems.length);
-          
-          seenEventCodesRef.current.clear();
-          initItems.forEach(item => {
-            const code = item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        }
+          if (eventDate) {
+            const date = new Date(eventDate);
+            return date.getTime() >= todayTimestamp;
+          }
+          return true;
+        });
+        
+        console.log('[Category Fetch] Future events after filter:', futureEvents.length);
+        
+        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
+        const finalEvents = [...initItems, ...futureEvents];
+        
+        console.log('[Category Fetch] Final merged:', {
+          server: initItems.length,
+          additional: futureEvents.length,
+          total: finalEvents.length
+        });
+        
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
       } else {
-        // 복원 없음: 서버 데이터만
-        console.log('[Category Fetch] No restore, using server data');
+        // 더보기를 안 한 경우: 서버 데이터만 사용
+        console.log('[Category Fetch] Using server data only');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -165,10 +161,9 @@ export default function CompCategoryDetailPage({
     }
   };
 
-  // ✅ 수정: 복원된 데이터를 fetchCategoryDetail에 전달
   useEffect(() => {
     console.log('[Category Mount] Component mounted, attempting restore...');
-    const saved = restorePage<CategoryPageState>(STATE_KEY);
+    const saved = restore<CategoryPageState>();
     
     console.log('[Category Mount] Restored data:', {
       hasSaved: !!saved,
@@ -178,13 +173,15 @@ export default function CompCategoryDetailPage({
     if (saved && saved.events && saved.events.length > 0) {
       console.log('[Category Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
+      
+      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 복원된 이벤트를 전달
+      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
       fetchCategoryDetail(saved.events);
     } else {
       console.log('[Category Mount] No valid saved data found');
@@ -206,7 +203,7 @@ export default function CompCategoryDetailPage({
         eventsHasMore,
       });
 
-      savePage<CategoryPageState>(STATE_KEY, {
+      save<CategoryPageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -215,12 +212,12 @@ export default function CompCategoryDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
+  }, [events, eventsStart, eventsHasMore, save]);
 
-  // 새로고침/탭 숨김 시 저장 (선택적)
+  // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
-      savePage<CategoryPageState>(STATE_KEY, {
+      save<CategoryPageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -236,7 +233,7 @@ export default function CompCategoryDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
+  }, [events, eventsStart, eventsHasMore, save]);
 
   // ========================= 렌더 =========================
   if (loading) {

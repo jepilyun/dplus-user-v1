@@ -81,72 +81,64 @@ export default function CompCountryDetailPage({
   
       const initItems = res.dbResponse?.mapCountryEvent?.items ?? [];
       
-      if (hydratedFromRestoreRef.current && restoredEvents) {
-        console.log('[Fetch] Hydrated from restore, merging with server data');
-        console.log('[Fetch] Restored events:', restoredEvents.length);
+      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
+        console.log('[Fetch] Merging server data with restored pagination');
         console.log('[Fetch] Server events:', initItems.length);
+        console.log('[Fetch] Restored total:', restoredEvents.length);
         
-        // ✅ 수정: 서버 데이터를 기준으로 시작 (항상 최신 36개)
+        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        if (restoredEvents.length > LIST_LIMIT.default) {
-          // ✅ 핵심: 복원된 이벤트 전체에서 서버에 없는 것만 추출
-          // (서버 = 최신 36개, 복원 = 과거에 로드한 72개)
-          const extraLoadedEvents = restoredEvents.filter(item => {
+        // 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
+        const additionalEvents = restoredEvents
+          .slice(LIST_LIMIT.default)
+          .filter(item => {
             const code = item?.event_info?.event_code ?? item?.event_code;
-            // 서버에 없는 이벤트만 = 과거 이벤트 + 더 미래 이벤트
+            // 서버에 없는 이벤트만 (중복 제거)
             return code && !serverCodes.has(code);
           });
-          
-          console.log('[Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
-          
-          // ✅ 추가: 오늘 이전 이벤트 필터링 (선택적)
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const todayTimestamp = today.getTime();
-          
-          const futureExtraEvents = extraLoadedEvents.filter(item => {
-            // date 필드가 있다면 날짜로 필터링
-            if (item.date) {
-              const eventDate = new Date(item.date);
-              return eventDate.getTime() >= todayTimestamp;
-            }
-            // date 필드가 없으면 일단 포함 (서버가 판단)
-            return true;
-          });
-          
-          console.log('[Fetch] Future extra events (after date filter):', futureExtraEvents.length);
-          
-          // ✅ 서버 최신 36개 + 과거에 더보기로 로드한 미래 이벤트
-          const finalEvents = [...initItems, ...futureExtraEvents];
-          
-          console.log('[Fetch] Final merged events:', finalEvents.length);
-          
-          setEvents(finalEvents);
-          setEventsStart(finalEvents.length);
-          
-          seenEventCodesRef.current.clear();
-          finalEvents.forEach(item => {
-            const code = item?.event_info?.event_code ?? item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        } else {
-          // 더보기를 안 한 경우: 서버 데이터만 사용
-          console.log('[Fetch] No extra events loaded, using server data only');
-          setEvents(initItems);
-          setEventsStart(initItems.length);
-          
-          seenEventCodesRef.current.clear();
-          initItems.forEach(item => {
-            const code = item?.event_info?.event_code ?? item?.event_code;
-            if (code) seenEventCodesRef.current.add(code);
-          });
-        }
+        
+        console.log('[Fetch] Additional events from restore:', additionalEvents.length);
+        
+        // 오늘 이후 이벤트만 필터링
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const todayTimestamp = today.getTime();
+        
+        const futureEvents = additionalEvents.filter(item => {
+          if (item.date) {
+            const eventDate = new Date(item.date);
+            return eventDate.getTime() >= todayTimestamp;
+          }
+          return true;
+        });
+        
+        console.log('[Fetch] Future events after filter:', futureEvents.length);
+        
+        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
+        const finalEvents = [...initItems, ...futureEvents];
+        
+        console.log('[Fetch] Final merged:', {
+          server: initItems.length,
+          additional: futureEvents.length,
+          total: finalEvents.length
+        });
+        
+        // ✅ 상태 업데이트 (화면에 이미 복원된 데이터가 표시된 상태에서 업데이트)
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
       } else {
-        // 복원 없음: 서버 데이터만 사용
-        console.log('[Fetch] No restore, using server data');
+        // 더보기를 안 한 경우: 서버 데이터만 사용
+        console.log('[Fetch] Using server data only');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -211,7 +203,7 @@ export default function CompCountryDetailPage({
   useEffect(() => {
     console.log('[Mount] Component mounted, attempting restore...');
     const saved = restore<CountryPageState>();
-    
+    console.log("restore>>>>>>>>>>>", saved);
     console.log('[Mount] Restored data:', {
       hasSaved: !!saved,
       eventsCount: saved?.events?.length || 0,
@@ -220,13 +212,15 @@ export default function CompCountryDetailPage({
     if (saved && saved.events && saved.events.length > 0) {
       console.log('[Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
+      
+      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 복원된 이벤트를 전달
+      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
       fetchCountryDetail(saved.events);
     } else {
       console.log('[Mount] No valid saved data found');
