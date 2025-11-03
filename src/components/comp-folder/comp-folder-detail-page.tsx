@@ -75,20 +75,43 @@ export default function CompFolderDetailPage({
       setFolderDetail(db);
       setImageUrls(getFolderImageUrls(db.folder));
 
-      // ✅ 복원으로 이미 채워졌다면 덮어쓰지 않음
-      if (!hydratedFromRestoreRef.current) {
-        const initItems = db?.folderEvent?.items ?? [];
+      const initItems = db?.folderEvent?.items ?? [];
+      
+      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
+      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
+        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+        const serverCodes = new Set(
+          initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
+        );
+        
+        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
+        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          return code && !serverCodes.has(code);
+        });
+        
+        const finalEvents = [...initItems, ...extraLoadedEvents];
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
+      } else {
+        // 기본 케이스: 서버 데이터만 사용
         setEvents(initItems);
         setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(db?.folderEvent?.hasMore));
-
+        
         seenEventCodesRef.current.clear();
-        for (const it of initItems) {
-          const code = it?.event_info?.event_code ?? it?.event_code;
+        initItems.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
-        }
+        });
       }
-
+      
+      setEventsHasMore(Boolean(db?.folderEvent?.hasMore));
       setError(null);
     } catch (e) {
       console.error("Failed to fetch folder detail:", e);

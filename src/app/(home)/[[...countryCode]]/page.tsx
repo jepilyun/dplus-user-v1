@@ -4,7 +4,6 @@ export const revalidate = 14400;
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
 
-// ✅ 배열로!
 export async function generateStaticParams() {
   return [
     // 루트("/")도 정적으로 만들고 싶으면 {} 도 추가 가능

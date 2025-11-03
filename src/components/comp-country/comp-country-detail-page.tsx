@@ -5,6 +5,7 @@ import {
   LIST_LIMIT,
   ResponseCountryDetailForUserFront,
   SUPPORT_LANG_CODES,
+  TCountryDetail,
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react"; // ✅ 수정: useRef 추가
@@ -62,39 +63,63 @@ export default function CompCountryDetailPage({
       console.log("res", res);
       
       const isEmptyObj =
+        !res?.success ||
         !res?.dbResponse ||
-        (typeof res?.dbResponse === "object" && !Array.isArray(res?.dbResponse) && Object.keys(res?.dbResponse).length === 0);
+        (typeof res.dbResponse === "object" && 
+          !Array.isArray(res.dbResponse) && 
+          Object.keys(res.dbResponse).length === 0) ||
+        !res.dbResponse.country;
   
-      if (!res?.success || isEmptyObj || !res?.dbResponse?.country) {
+      if (isEmptyObj) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
-      setCountryDetail(res.dbResponse);
-      setImageUrls(getCountryImageUrls(res.dbResponse.country));
-      setHasCategories((res.dbResponse.categories?.items?.length ?? 0) > 0);
-      setHasCities((res.dbResponse.cities?.items?.length ?? 0) > 0);
+      setCountryDetail(res.dbResponse ?? null);
+      setImageUrls(getCountryImageUrls(res.dbResponse?.country as TCountryDetail));
+      setHasCategories((res.dbResponse?.categories?.items?.length ?? 0) > 0);
+      setHasCities((res.dbResponse?.cities?.items?.length ?? 0) > 0);
   
-      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
-      if (!hydratedFromRestoreRef.current) {
-        const initItems = res.dbResponse.mapCountryEvent?.items ?? [];
+      const initItems = res.dbResponse?.mapCountryEvent?.items ?? [];
+      
+      // ✅ 수정: 복원된 데이터 처리 로직 개선
+      if (hydratedFromRestoreRef.current && events.length > 0) {
+        // 서버에서 받은 이벤트 코드 Set 생성
+        const serverEventCodes = new Set(
+          initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
+        );
+        
+        // 복원된 이벤트 중 서버에 없는 것들 (= 추가로 로드했던 미래 이벤트들)
+        const additionalEvents = events.filter(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          return code && !serverEventCodes.has(code);
+        });
+        
+        // 서버 데이터 + 추가 이벤트 병합
+        const mergedEvents = [...initItems, ...additionalEvents];
+        
+        setEvents(mergedEvents);
+        setEventsStart(mergedEvents.length);
+        setEventsHasMore(Boolean(res.dbResponse?.mapCountryEvent?.hasMore));
+        
+        // Set 재구성
+        seenEventCodesRef.current.clear();
+        for (const it of mergedEvents) {
+          const code = it?.event_info?.event_code ?? it?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        }
+      } else {
+        // 복원 데이터가 없는 경우: 서버 데이터로 초기화
         setEvents(initItems);
         setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(res.dbResponse.mapCountryEvent?.hasMore));
+        setEventsHasMore(Boolean(res.dbResponse?.mapCountryEvent?.hasMore));
         
-        // 중복 방지 Set 채우기
         seenEventCodesRef.current.clear();
         for (const it of initItems) {
           const code = it?.event_info?.event_code ?? it?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         }
-      }
-      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
-      else {
-        // 서버에서 받은 total과 현재 events 개수를 비교해서 hasMore 재계산
-        const serverTotal = res.dbResponse.mapCountryEvent?.total ?? 0;
-        setEventsHasMore(events.length < serverTotal);
       }
   
       setError(null);
@@ -146,7 +171,6 @@ export default function CompCountryDetailPage({
     }
   };
 
-  // ✅ 추가: ① 마운트 시 즉시 복원(있으면 로딩 플래시 없이 바로 그려주기)
   useEffect(() => {
     const saved = restore<CountryPageState>();
     if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
@@ -162,7 +186,7 @@ export default function CompCountryDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);
 
-  // ✅ 추가: ② 라우팅 직전(링크 클릭) 상태 저장 — pointerdown 캡처 단계가 가장 안전
+  // ✅ 라우팅 직전(링크 클릭) 상태 저장 — pointerdown 캡처 단계가 가장 안전
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
@@ -180,7 +204,7 @@ export default function CompCountryDetailPage({
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [events, eventsStart, eventsHasMore, save]);
 
-  // ✅ 추가: ③ 새로고침/탭 숨김 시에도 저장 (선택이지만 추천)
+  // ✅ 새로고침/탭 숨김 시에도 저장 (선택이지만 추천)
   useEffect(() => {
     const persist = () =>
       save<CountryPageState>({

@@ -39,7 +39,7 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     }
   };
 
-  const restorePage = <T = unknown>(key: string): T | null => {
+  const restorePage = <T = unknown>(key: string): (T & { timestamp?: number }) | null => {
     // 먼저 메모리에서 찾기
     let state = pageStates.current.get(key);
     
@@ -57,23 +57,14 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     
     if (!state) return null;
 
-    const FIVE_MINUTES = 5 * 60 * 1000;
-    if (Date.now() - state.timestamp > FIVE_MINUTES) {
-      pageStates.current.delete(key);
-      if (typeof window !== "undefined") {
-        sessionStorage.removeItem(key);
-      }
-      return null;
-    }
-
     if (typeof window !== "undefined") {
-      // 약간의 지연을 두고 스크롤 (DOM 렌더링 대기)
       setTimeout(() => {
         window.scrollTo(0, state.scrollY);
       }, 100);
     }
 
-    return state.data as T ?? null;
+    // ✅ timestamp도 함께 반환
+    return { ...state.data as T, timestamp: state.timestamp };
   };
 
   const clearPage = (key: string) => {
@@ -101,7 +92,7 @@ export function useScrollRestoration() {
 export function useCountryPageRestoration(countryCode: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
   const key = `country-${countryCode}`;
-
+  
   return {
     save: <T = unknown>(data: T) => savePage(key, data),
     restore: <T = unknown>() => restorePage<T>(key),

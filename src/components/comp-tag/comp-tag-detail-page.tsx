@@ -6,13 +6,12 @@ import {
   ResponseTagDetailForUserFront,
   TMapTagEventWithEventInfo,
 } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react"; // ✅ useRef 추가
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
+import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
 
-// ✅ 복원할 상태 타입
 type TagPageState = {
   events: TMapTagEventWithEventInfo[];
   eventsStart: number;
@@ -20,9 +19,6 @@ type TagPageState = {
   seenEventCodes: string[];
 };
 
-/**
- * Tag 상세 페이지
- */
 export default function CompTagDetailPage({
   tagCode,
   langCode,
@@ -34,7 +30,6 @@ export default function CompTagDetailPage({
 }) {
   const router = useRouter();
 
-  // ✅ 페이지 상태 저장/복원
   const { savePage, restorePage } = useScrollRestoration();
   const STATE_KEY = `dplus:tag-${tagCode}`;
 
@@ -48,9 +43,8 @@ export default function CompTagDetailPage({
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // ✅ 렌더 비의존 자료구조는 ref로
   const seenEventCodesRef = useRef<Set<string>>(new Set());
-  const hydratedFromRestoreRef = useRef(false); // ✅ 복원 여부
+  const hydratedFromRestoreRef = useRef(false);
 
   const fetchTagDetail = async () => {
     try {
@@ -68,25 +62,43 @@ export default function CompTagDetailPage({
   
       setTagDetail(db);
   
-      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
-      if (!hydratedFromRestoreRef.current) {
-        const initItems = db?.mapTagEvent?.items ?? [];
+      const initItems = db?.mapTagEvent?.items ?? [];
+      
+      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
+      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
+        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+        const serverCodes = new Set(
+          initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
+        );
+        
+        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
+        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          return code && !serverCodes.has(code);
+        });
+        
+        const finalEvents = [...initItems, ...extraLoadedEvents];
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
+      } else {
+        // 기본 케이스: 서버 데이터만 사용
         setEvents(initItems);
         setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(db?.mapTagEvent?.hasMore));
-  
+        
         seenEventCodesRef.current.clear();
-        for (const it of initItems) {
-          const code = it?.event_info?.event_code ?? it?.event_code;
+        initItems.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
-        }
+        });
       }
-      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
-      else {
-        const serverTotal = db?.mapTagEvent?.total ?? 0;
-        setEventsHasMore(events.length < serverTotal);
-      }
-  
+      
+      setEventsHasMore(Boolean(db?.mapTagEvent?.hasMore));
       setError(null);
     } catch (e) {
       console.error("Failed to fetch tag detail:", e);
@@ -122,7 +134,7 @@ export default function CompTagDetailPage({
     setEventsLoading(true);
 
     try {
-      const tagId = tagDetail?.tag.id; // ✅ 안전가드
+      const tagId = tagDetail?.tag.id;
       if (!tagId) {
         console.warn("tagDetail?.tag.id is not defined");
         return;
@@ -145,22 +157,26 @@ export default function CompTagDetailPage({
     }
   };
 
-  // ✅ ① 마운트 시 복원 → 있으면 즉시 렌더 후 서버 최신화
+  // ✅ 수정: 마운트 시 복원 + 최신 데이터 동기화
   useEffect(() => {
     const saved = restorePage<TagPageState>(STATE_KEY);
-    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
+    
+    // 복원 데이터가 있고 이벤트가 있으면 즉시 화면에 표시
+    if (saved && saved.events && saved.events.length > 0) {
       hydratedFromRestoreRef.current = true;
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
+      setLoading(false); // 복원 화면 먼저 보여줌
     }
+    
+    // 복원 유무와 무관하게 최신 데이터 가져오기 (백그라운드)
     fetchTagDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tagCode]);
 
-  // ✅ ② 라우팅 직전 상태 저장(pointerdown capture)
+  // ✅ 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
@@ -176,9 +192,9 @@ export default function CompTagDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, savePage]);
+  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
-  // ✅ ③ 새로고침/탭 숨김 시 상태 저장
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
       savePage<TagPageState>(STATE_KEY, {
@@ -197,7 +213,7 @@ export default function CompTagDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, savePage]);
+  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
   // ================= 렌더 =================
 
@@ -214,7 +230,7 @@ export default function CompTagDetailPage({
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Tag Not Found</h2>
-        <p className="text-gray-600 mb-6">해당 태그는 존재하지 않습니다.</p>
+          <p className="text-gray-600 mb-6">해당 태그는 존재하지 않습니다.</p>
           <button
             onClick={() => router.push(`/${langCode}`)}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

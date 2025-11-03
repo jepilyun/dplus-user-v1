@@ -76,25 +76,43 @@ export default function CompGroupDetailPage({
       setGroupDetail(res.dbResponse);
       setImageUrls(getGroupImageUrls(res.dbResponse.group));
   
-      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
-      if (!hydratedFromRestoreRef.current) {
-        const initItems = res?.dbResponse?.mapGroupEvent?.items ?? [];
+      const initItems = res?.dbResponse?.mapGroupEvent?.items ?? [];
+      
+      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
+      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
+        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+        const serverCodes = new Set(
+          initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
+        );
+        
+        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
+        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          return code && !serverCodes.has(code);
+        });
+        
+        const finalEvents = [...initItems, ...extraLoadedEvents];
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
+      } else {
+        // 기본 케이스: 서버 데이터만 사용
         setEvents(initItems);
         setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(res?.dbResponse?.mapGroupEvent?.hasMore));
-  
+        
         seenEventCodesRef.current.clear();
-        for (const it of initItems) {
-          const code = it?.event_info?.event_code ?? it?.event_code;
+        initItems.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
-        }
+        });
       }
-      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
-      else {
-        const serverTotal = res?.dbResponse?.mapGroupEvent?.total ?? 0;
-        setEventsHasMore(events.length < serverTotal);
-      }
-  
+      
+      setEventsHasMore(Boolean(res?.dbResponse?.mapGroupEvent?.hasMore));
       setError(null);
     } catch (e) {
       console.error("Failed to fetch group detail:", e);

@@ -13,7 +13,7 @@ import {
   Tz,
   detectBrowserLanguage,
 } from "@/utils/date-ymd";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
+import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
 
 // 최소 유효성 검사
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
@@ -54,9 +54,8 @@ export default function CompTodayDetailPage({
 }) {
   const router = useRouter();
 
-  // ✅ 스크롤/상태 복원 훅
   const { savePage, restorePage } = useScrollRestoration();
-  const STATE_KEY = `dplus:today:${countryCode}`; // 국가별 분리 저장
+  const STATE_KEY = `dplus:today:${countryCode}`;
 
   // 브라우저 TZ & 언어 감지
   const [tz, setTz] = useState<Tz>(defaultTz);
@@ -81,7 +80,7 @@ export default function CompTodayDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const requestIdRef = useRef(0);
   const nowYmdRef = useRef<string>("");
-  const hydratedFromRestoreRef = useRef(false); // 복원 여부
+  const hydratedFromRestoreRef = useRef(false);
 
   useEffect(() => {
     nowYmdRef.current = todayYmdInTz(tz);
@@ -110,9 +109,44 @@ export default function CompTodayDetailPage({
       const raw: unknown[] = res?.dbResponse?.items ?? [];
       const initItems = raw.filter(isValidEvent);
   
-      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
-      if (!hydratedFromRestoreRef.current) {
-        // 중복 제거
+      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
+      if (hydratedFromRestoreRef.current && eventsWithSections.length > LIST_LIMIT.default) {
+        // 현재 표시된 raw 이벤트 추출
+        const currentRaw = eventsWithSections.map(({ section, ...rest }) => rest);
+        
+        // 서버에서 받은 이벤트 코드 Set
+        const serverCodes = new Set(initItems.map(item => item.event_code));
+        
+        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
+        const extraLoadedEvents = currentRaw.slice(LIST_LIMIT.default).filter(item => {
+          return !serverCodes.has(item.event_code);
+        });
+        
+        // 중복 제거 후 병합
+        seenEventCodesRef.current.clear();
+        const merged: TEventCardForDateDetail[] = [];
+        
+        // 서버 데이터 먼저
+        for (const it of initItems) {
+          if (!seenEventCodesRef.current.has(it.event_code)) {
+            seenEventCodesRef.current.add(it.event_code);
+            merged.push(it);
+          }
+        }
+        
+        // 추가 로드한 이벤트
+        for (const it of extraLoadedEvents) {
+          if (!seenEventCodesRef.current.has(it.event_code)) {
+            seenEventCodesRef.current.add(it.event_code);
+            merged.push(it);
+          }
+        }
+        
+        const finalWithSections = attachSections(merged);
+        setEventsWithSections(finalWithSections);
+        setEventsStart(finalWithSections.length);
+      } else {
+        // 기본 케이스: 서버 데이터만 사용
         seenEventCodesRef.current.clear();
         const deduped: TEventCardForDateDetail[] = [];
         for (const it of initItems) {
@@ -125,14 +159,9 @@ export default function CompTodayDetailPage({
         const nextWithSections = attachSections(deduped);
         setEventsWithSections(nextWithSections);
         setEventsStart(nextWithSections.length);
-        setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       }
-      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
-      else {
-        const serverTotal = res?.dbResponse?.total ?? 0;
-        setEventsHasMore(eventsWithSections.length < serverTotal);
-      }
-  
+      
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       setError(null);
     } catch (error) {
       console.error("[today] fetch error", error);
@@ -174,10 +203,12 @@ export default function CompTodayDetailPage({
     }
   };
 
-  // ✅ ① 마운트 시 상태 복원 → 있으면 즉시 렌더
+  // ✅ 수정: 마운트 시 복원 + 최신 데이터 동기화
   useEffect(() => {
     const saved = restorePage<TodayPageState>(STATE_KEY);
-    if (saved && saved.rawEvents && saved.rawEvents.length > 0) {  // ✅ 빈 배열 체크 추가
+    
+    // 복원 데이터가 있고 이벤트가 있으면 즉시 화면에 표시
+    if (saved && saved.rawEvents && saved.rawEvents.length > 0) {
       hydratedFromRestoreRef.current = true;
       // TZ/Lang이 바뀌었을 수 있으므로 섹션은 현 TZ/Lang으로 재계산
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
@@ -185,17 +216,18 @@ export default function CompTodayDetailPage({
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
   
-      // 복원된 TZ/Lang이 있으면 우선 적용(브라우저 감지 전 임시 일관성)
+      // 복원된 TZ/Lang이 있으면 우선 적용
       if (saved.tz) setTz(saved.tz);
       if (saved.lang) setLang(saved.lang);
-      setLoading(false);
+      setLoading(false); // 복원 화면 먼저 보여줌
     }
-    // 서버 최신화(복원 여부와 무관)
+    
+    // 복원 유무와 무관하게 최신 데이터 가져오기 (백그라운드)
     fetchTodayList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);
 
-  // ✅ ② 라우팅 직전/링크 클릭 직전 저장(pointerdown capture)
+  // ✅ 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
@@ -219,9 +251,9 @@ export default function CompTodayDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, savePage]);
+  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, savePage, STATE_KEY]);
 
-  // ✅ ③ 새로고침/탭 숨김 시 상태 저장
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () => {
       const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
@@ -247,9 +279,9 @@ export default function CompTodayDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, savePage]);
+  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, savePage, STATE_KEY]);
 
-  // ✅ ④ TZ/Lang이 변하면 섹션만 재계산하여 화면 업데이트(데이터 재요청 불필요)
+  // ✅ TZ/Lang이 변하면 섹션만 재계산하여 화면 업데이트
   useEffect(() => {
     if (!eventsWithSections.length) return;
     setEventsWithSections((prev) =>

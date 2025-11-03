@@ -2,14 +2,13 @@
 
 import { reqGetDateList } from "@/actions/action";
 import { LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react"; // ✅ useRef 추가
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import DateNavigation from "./comp-date-navigation";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
+import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
 
-// ✅ 복원할 상태 타입
 type DatePageState = {
   events: TEventCardForDateDetail[];
   eventsStart: number;
@@ -17,10 +16,6 @@ type DatePageState = {
   seenEventCodes: string[];
 };
 
-/**
- * Date 상세 페이지
- * @param param0 - 날짜, 언어 코드, 전체 로케일
- */
 export default function CompDateDetailPage({
   dateString,
   countryCode,
@@ -34,7 +29,6 @@ export default function CompDateDetailPage({
 }) {
   const router = useRouter();
 
-  // ✅ 페이지 키 (네임스페이스 포함 권장)
   const { savePage, restorePage } = useScrollRestoration();
   const STATE_KEY = `dplus:date-${countryCode}-${dateString}`;
 
@@ -46,42 +40,56 @@ export default function CompDateDetailPage({
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // ✅ Set은 리렌더 불필요 → ref로 관리
   const seenEventCodesRef = useRef<Set<string>>(new Set());
-
-  // ✅ 복원으로 하이드레이트 여부
   const hydratedFromRestoreRef = useRef(false);
 
   const fetchDateDetail = async () => {
     try {
       const res = await reqGetDateList(countryCode, dateString, 0, LIST_LIMIT.default);
   
-      // 응답은 있지만 데이터가 없는 경우 (404)
       if (!res?.dbResponse || !res?.dbResponse?.items) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
-      // ✅ 수정: 복원된 데이터가 없을 때만 이벤트 초기화
-      if (!hydratedFromRestoreRef.current) {
-        const initItems = res?.dbResponse?.items ?? [];
+      const initItems = res?.dbResponse?.items ?? [];
+      
+      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
+      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
+        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+        const serverCodes = new Set(
+          initItems.map(item => item?.event_code).filter(Boolean)
+        );
+        
+        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
+        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
+          const code = item?.event_code;
+          return code && !serverCodes.has(code);
+        });
+        
+        const finalEvents = [...initItems, ...extraLoadedEvents];
+        setEvents(finalEvents);
+        setEventsStart(finalEvents.length);
+        
+        seenEventCodesRef.current.clear();
+        finalEvents.forEach(item => {
+          const code = item?.event_code;
+          if (code) seenEventCodesRef.current.add(code);
+        });
+      } else {
+        // 기본 케이스: 서버 데이터만 사용
         setEvents(initItems);
         setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
-  
+        
         seenEventCodesRef.current.clear();
-        for (const it of initItems) {
-          const code = it?.event_code;
+        initItems.forEach(item => {
+          const code = item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
-        }
+        });
       }
-      // ✅ 복원된 경우: 이벤트 데이터는 그대로 두고, hasMore만 업데이트
-      else {
-        const serverTotal = res?.dbResponse?.total ?? 0;
-        setEventsHasMore(events.length < serverTotal);
-      }
-  
+      
+      setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
       setError(null);
     } catch (e) {
       console.error("Failed to fetch date detail:", e);
@@ -113,22 +121,26 @@ export default function CompDateDetailPage({
     }
   };
 
-  // ✅ ① 마운트 시 복원 → 있으면 즉시 렌더 후 서버 최신화
+  // ✅ 수정: 마운트 시 복원 + 최신 데이터 동기화
   useEffect(() => {
     const saved = restorePage<DatePageState>(STATE_KEY);
-    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
+    
+    // 복원 데이터가 있고 이벤트가 있으면 즉시 화면에 표시
+    if (saved && saved.events && saved.events.length > 0) {
       hydratedFromRestoreRef.current = true;
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
+      setLoading(false); // 복원 화면 먼저 보여줌
     }
+    
+    // 복원 유무와 무관하게 최신 데이터 가져오기 (백그라운드)
     fetchDateDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode, dateString]);
 
-  // ✅ ② 라우팅 직전(링크 클릭) 저장 — pointerdown capture 단계
+  // ✅ 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
@@ -144,9 +156,9 @@ export default function CompDateDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, savePage]);
+  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
-  // ✅ ③ 새로고침/탭 숨김 시에도 저장 (권장)
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
       savePage<DatePageState>(STATE_KEY, {
@@ -166,7 +178,7 @@ export default function CompDateDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, savePage]);
+  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
   // ================= 렌더 =================
 
@@ -214,10 +226,8 @@ export default function CompDateDetailPage({
 
   return (
     <div className="flex flex-col gap-8">
-      {/* 날짜 네비게이션 */}
       <DateNavigation currentDate={dateString} langCode={langCode} />
 
-      {/* 이벤트 목록 */}
       {events?.length ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {events.map((item) => (
