@@ -2,6 +2,10 @@
 
 import React, { createContext, useContext, useRef, ReactNode } from "react";
 
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5분 (밀리초)
+// const CACHE_EXPIRY_TIME = 10 * 60 * 1000; // 10분
+// const CACHE_EXPIRY_TIME = 30 * 60 * 1000; // 30분
+
 interface PageState<T = unknown> {
   scrollY: number;
   timestamp: number;
@@ -53,14 +57,14 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     
     if (!state) return null;
 
-    // ✅ 수정: 5분 지났어도 복원은 하되, 콘솔에 경고만
-    const FIVE_MINUTES = 5 * 60 * 1000;
-    if (Date.now() - state.timestamp > FIVE_MINUTES) {
-      console.log(`[Restore] Data is older than 5 minutes (${key}), will fetch fresh data`);
-      // 만료된 데이터지만 일단 복원은 함 (깜빡임 방지)
-      // fetchCountryDetail이 최신 데이터로 업데이트할 것임
+    // ✅ 수정: 5분 지났으면 무조건 null 반환 (데이터 무효화)
+    if (Date.now() - state.timestamp > CACHE_EXPIRY_TIME) {
+      console.log(`[Restore] Data expired (${key}), clearing and fetching fresh data`);
+      clearPage(key); // sessionStorage에서 삭제
+      return null; // null 반환 -> 서버에서 새로 받아옴
     }
 
+    // 스크롤 위치 복원 (데이터가 유효한 경우에만)
     if (typeof window !== "undefined") {
       setTimeout(() => {
         window.scrollTo(0, state.scrollY);
