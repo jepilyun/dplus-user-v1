@@ -7,15 +7,14 @@ import {
   SUPPORT_LANG_CODES,
   TMapCityEventWithEventInfo,
 } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react"; // ✅ useRef 추가
+import { useEffect, useRef, useState } from "react";
 import { getCityImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-carousel-city";
-import { useCityPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
+import { useCityPageRestoration } from "@/contexts/scroll-restoration-context";
 
-// ✅ 복원할 상태 타입
 type CityPageState = {
   events: TMapCityEventWithEventInfo[];
   eventsStart: number;
@@ -33,8 +32,6 @@ export default function CompCityDetailPage({
   fullLocale: string;
 }) {
   const router = useRouter();
-
-  // ✅ 도시 키 기반 복원 훅
   const { save, restore } = useCityPageRestoration(cityCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
@@ -48,13 +45,11 @@ export default function CompCityDetailPage({
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // ✅ Set은 렌더와 무관하므로 ref로 관리 (불필요 리렌더 방지)
   const seenEventCodesRef = useRef<Set<string>>(new Set());
-
-  // ✅ 복원으로 하이드레이트 되었는지 표시
   const hydratedFromRestoreRef = useRef(false);
 
-  const fetchCityDetail = async () => {
+  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
+  const fetchCityDetail = async (restoredEvents?: TMapCityEventWithEventInfo[]) => {
     try {
       const res = await reqGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
   
@@ -75,30 +70,68 @@ export default function CompCityDetailPage({
       
       const initItems = res?.dbResponse?.mapCityEvent?.items ?? [];
       
-      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
-      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
-        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+      // ✅ 수정: restoredEvents 사용
+      if (hydratedFromRestoreRef.current && restoredEvents) {
+        console.log('[City Fetch] Hydrated from restore, merging with server data');
+        console.log('[City Fetch] Restored events:', restoredEvents.length);
+        console.log('[City Fetch] Server events:', initItems.length);
+        
         const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
-        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          return code && !serverCodes.has(code);
-        });
-        
-        const finalEvents = [...initItems, ...extraLoadedEvents];
-        setEvents(finalEvents);
-        setEventsStart(finalEvents.length);
-        
-        seenEventCodesRef.current.clear();
-        finalEvents.forEach(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          if (code) seenEventCodesRef.current.add(code);
-        });
+        if (restoredEvents.length > LIST_LIMIT.default) {
+          // ✅ 복원된 전체 이벤트에서 서버에 없는 것만 추출
+          const extraLoadedEvents = restoredEvents.filter(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            return code && !serverCodes.has(code);
+          });
+          
+          console.log('[City Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
+          
+          // ✅ 날짜 필터링 (과거 이벤트 제거)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayTimestamp = today.getTime();
+          
+          const futureExtraEvents = extraLoadedEvents.filter(item => {
+            const eventDate = item.event_info?.date || item.date;
+            
+            if (eventDate) {
+              const date = new Date(eventDate);
+              return date.getTime() >= todayTimestamp;
+            }
+            return true; // 날짜 정보 없으면 일단 포함
+          });
+          
+          console.log('[City Fetch] Future extra events (after date filter):', futureExtraEvents.length);
+          
+          const finalEvents = [...initItems, ...futureExtraEvents];
+          console.log('[City Fetch] Final merged events:', finalEvents.length);
+          
+          setEvents(finalEvents);
+          setEventsStart(finalEvents.length);
+          
+          seenEventCodesRef.current.clear();
+          finalEvents.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        } else {
+          // 더보기 안 한 경우: 서버 데이터만
+          console.log('[City Fetch] No extra events, using server data');
+          setEvents(initItems);
+          setEventsStart(initItems.length);
+          
+          seenEventCodesRef.current.clear();
+          initItems.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        }
       } else {
-        // 기본 케이스: 서버 데이터만 사용
+        // 복원 없음: 서버 데이터만
+        console.log('[City Fetch] No restore, using server data');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -162,27 +195,46 @@ export default function CompCityDetailPage({
     }
   };
 
-  // ✅ ① 마운트 시 복원: 있으면 즉시 렌더(플래시 제거), 이후 서버 최신화
+  // ✅ 수정: 복원된 데이터를 fetchCityDetail에 전달
   useEffect(() => {
+    console.log('[City Mount] Component mounted, attempting restore...');
     const saved = restore<CityPageState>();
-    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
+    
+    console.log('[City Mount] Restored data:', {
+      hasSaved: !!saved,
+      eventsCount: saved?.events?.length || 0,
+    });
+    
+    if (saved && saved.events && saved.events.length > 0) {
+      console.log('[City Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
+      
+      // ✅ 복원된 이벤트를 전달
+      fetchCityDetail(saved.events);
+    } else {
+      console.log('[City Mount] No valid saved data found');
+      fetchCityDetail();
     }
-    fetchCityDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cityCode]);
 
-  // ✅ ② 라우팅 직전 저장(pointerdown 캡처 단계)
+  // 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a") as HTMLAnchorElement | null;
       if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+
+      console.log('[City Save] Saving state:', {
+        eventsCount: events.length,
+        eventsStart,
+        eventsHasMore,
+      });
 
       save<CityPageState>({
         events,
@@ -195,7 +247,7 @@ export default function CompCityDetailPage({
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [events, eventsStart, eventsHasMore, save]);
 
-  // ✅ ③ 새로고침/탭 숨김 시에도 저장(권장)
+  // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
       save<CityPageState>({

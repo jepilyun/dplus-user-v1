@@ -28,10 +28,8 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
       data,
     };
     
-    // 메모리에 저장
     pageStates.current.set(key, state);
     
-    // SessionStorage에도 저장
     try {
       sessionStorage.setItem(key, JSON.stringify(state));
     } catch (error) {
@@ -39,11 +37,9 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     }
   };
 
-  const restorePage = <T = unknown>(key: string): (T & { timestamp?: number }) | null => {
-    // 먼저 메모리에서 찾기
+  const restorePage = <T = unknown>(key: string): T | null => {
     let state = pageStates.current.get(key);
     
-    // 메모리에 없으면 SessionStorage에서 찾기
     if (!state && typeof window !== "undefined") {
       try {
         const saved = sessionStorage.getItem(key);
@@ -57,14 +53,21 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
     
     if (!state) return null;
 
+    // ✅ 수정: 5분 지났어도 복원은 하되, 콘솔에 경고만
+    const FIVE_MINUTES = 5 * 60 * 1000;
+    if (Date.now() - state.timestamp > FIVE_MINUTES) {
+      console.log(`[Restore] Data is older than 5 minutes (${key}), will fetch fresh data`);
+      // 만료된 데이터지만 일단 복원은 함 (깜빡임 방지)
+      // fetchCountryDetail이 최신 데이터로 업데이트할 것임
+    }
+
     if (typeof window !== "undefined") {
       setTimeout(() => {
         window.scrollTo(0, state.scrollY);
       }, 100);
     }
 
-    // ✅ timestamp도 함께 반환
-    return { ...state.data as T, timestamp: state.timestamp };
+    return state.data as T ?? null;
   };
 
   const clearPage = (key: string) => {
@@ -81,6 +84,7 @@ export function ScrollRestorationProvider({ children }: { children: ReactNode })
   );
 }
 
+// ... 나머지 export 함수들은 동일
 export function useScrollRestoration() {
   const context = useContext(ScrollRestorationContext);
   if (!context) {

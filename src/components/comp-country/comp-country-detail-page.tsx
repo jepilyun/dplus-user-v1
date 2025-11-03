@@ -8,7 +8,7 @@ import {
   TCountryDetail,
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react"; // ✅ 수정: useRef 추가
+import { useEffect, useRef, useState } from "react";
 import { getCountryImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
@@ -16,9 +16,8 @@ import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
 import Link from "next/link";
 import { getCityBgUrl } from "@/utils/get-city-bg-image";
-import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
+import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 
-// ✅ 추가: 복원할 상태 타입
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
   eventsStart: number;
@@ -36,7 +35,7 @@ export default function CompCountryDetailPage({
   langCode: string;
 }) {
   const router = useRouter();
-  const { save, restore } = useCountryPageRestoration(countryCode); // ✅ 추가
+  const { save, restore } = useCountryPageRestoration(countryCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,7 +45,6 @@ export default function CompCountryDetailPage({
   const [hasCategories, setHasCategories] = useState(false);
   const [hasCities, setHasCities] = useState(false);
 
-  // ✅ 수정: Set은 렌더링과 무관하므로 useRef가 더 적합 (불필요한 리렌더 방지)
   const seenEventCodesRef = useRef<Set<string>>(new Set());
 
   const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>([]);
@@ -54,10 +52,10 @@ export default function CompCountryDetailPage({
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // ✅ 추가: 복원 여부 플래그
   const hydratedFromRestoreRef = useRef(false);
 
-  const fetchCountryDetail = async () => {
+  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
+  const fetchCountryDetail = async (restoredEvents?: TMapCountryEventWithEventInfo[]) => {
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
       console.log("res", res);
@@ -83,45 +81,83 @@ export default function CompCountryDetailPage({
   
       const initItems = res.dbResponse?.mapCountryEvent?.items ?? [];
       
-      // ✅ 수정: 복원된 데이터 처리 로직 개선
-      if (hydratedFromRestoreRef.current && events.length > 0) {
-        // 서버에서 받은 이벤트 코드 Set 생성
-        const serverEventCodes = new Set(
+      if (hydratedFromRestoreRef.current && restoredEvents) {
+        console.log('[Fetch] Hydrated from restore, merging with server data');
+        console.log('[Fetch] Restored events:', restoredEvents.length);
+        console.log('[Fetch] Server events:', initItems.length);
+        
+        // ✅ 수정: 서버 데이터를 기준으로 시작 (항상 최신 36개)
+        const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // 복원된 이벤트 중 서버에 없는 것들 (= 추가로 로드했던 미래 이벤트들)
-        const additionalEvents = events.filter(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          return code && !serverEventCodes.has(code);
-        });
-        
-        // 서버 데이터 + 추가 이벤트 병합
-        const mergedEvents = [...initItems, ...additionalEvents];
-        
-        setEvents(mergedEvents);
-        setEventsStart(mergedEvents.length);
-        setEventsHasMore(Boolean(res.dbResponse?.mapCountryEvent?.hasMore));
-        
-        // Set 재구성
-        seenEventCodesRef.current.clear();
-        for (const it of mergedEvents) {
-          const code = it?.event_info?.event_code ?? it?.event_code;
-          if (code) seenEventCodesRef.current.add(code);
+        if (restoredEvents.length > LIST_LIMIT.default) {
+          // ✅ 핵심: 복원된 이벤트 전체에서 서버에 없는 것만 추출
+          // (서버 = 최신 36개, 복원 = 과거에 로드한 72개)
+          const extraLoadedEvents = restoredEvents.filter(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            // 서버에 없는 이벤트만 = 과거 이벤트 + 더 미래 이벤트
+            return code && !serverCodes.has(code);
+          });
+          
+          console.log('[Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
+          
+          // ✅ 추가: 오늘 이전 이벤트 필터링 (선택적)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayTimestamp = today.getTime();
+          
+          const futureExtraEvents = extraLoadedEvents.filter(item => {
+            // date 필드가 있다면 날짜로 필터링
+            if (item.date) {
+              const eventDate = new Date(item.date);
+              return eventDate.getTime() >= todayTimestamp;
+            }
+            // date 필드가 없으면 일단 포함 (서버가 판단)
+            return true;
+          });
+          
+          console.log('[Fetch] Future extra events (after date filter):', futureExtraEvents.length);
+          
+          // ✅ 서버 최신 36개 + 과거에 더보기로 로드한 미래 이벤트
+          const finalEvents = [...initItems, ...futureExtraEvents];
+          
+          console.log('[Fetch] Final merged events:', finalEvents.length);
+          
+          setEvents(finalEvents);
+          setEventsStart(finalEvents.length);
+          
+          seenEventCodesRef.current.clear();
+          finalEvents.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        } else {
+          // 더보기를 안 한 경우: 서버 데이터만 사용
+          console.log('[Fetch] No extra events loaded, using server data only');
+          setEvents(initItems);
+          setEventsStart(initItems.length);
+          
+          seenEventCodesRef.current.clear();
+          initItems.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
         }
       } else {
-        // 복원 데이터가 없는 경우: 서버 데이터로 초기화
+        // 복원 없음: 서버 데이터만 사용
+        console.log('[Fetch] No restore, using server data');
         setEvents(initItems);
         setEventsStart(initItems.length);
-        setEventsHasMore(Boolean(res.dbResponse?.mapCountryEvent?.hasMore));
         
         seenEventCodesRef.current.clear();
-        for (const it of initItems) {
-          const code = it?.event_info?.event_code ?? it?.event_code;
+        initItems.forEach(item => {
+          const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
-        }
+        });
       }
-  
+      
+      setEventsHasMore(Boolean(res.dbResponse?.mapCountryEvent?.hasMore));
       setError(null);
     } catch (e) {
       console.error("Failed to fetch country detail:", e);
@@ -171,27 +207,46 @@ export default function CompCountryDetailPage({
     }
   };
 
+  // ✅ 수정: 복원된 데이터를 fetchCountryDetail에 전달
   useEffect(() => {
+    console.log('[Mount] Component mounted, attempting restore...');
     const saved = restore<CountryPageState>();
-    if (saved && saved.events && saved.events.length > 0) {  // ✅ 빈 배열 체크 추가
+    
+    console.log('[Mount] Restored data:', {
+      hasSaved: !!saved,
+      eventsCount: saved?.events?.length || 0,
+    });
+    
+    if (saved && saved.events && saved.events.length > 0) {
+      console.log('[Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
+      
+      // ✅ 복원된 이벤트를 전달
+      fetchCountryDetail(saved.events);
+    } else {
+      console.log('[Mount] No valid saved data found');
+      fetchCountryDetail();
     }
-    // saved 유무와 무관하게 최신화 시도
-    fetchCountryDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);
 
-  // ✅ 라우팅 직전(링크 클릭) 상태 저장 — pointerdown 캡처 단계가 가장 안전
+  // 라우팅 직전 상태 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a") as HTMLAnchorElement | null;
       if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+
+      console.log('[Save] Saving state:', {
+        eventsCount: events.length,
+        eventsStart,
+        eventsHasMore,
+      });
 
       save<CountryPageState>({
         events,
@@ -204,7 +259,7 @@ export default function CompCountryDetailPage({
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [events, eventsStart, eventsHasMore, save]);
 
-  // ✅ 새로고침/탭 숨김 시에도 저장 (선택이지만 추천)
+  // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
       save<CountryPageState>({

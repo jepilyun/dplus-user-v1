@@ -8,16 +8,15 @@ import {
   SUPPORT_LANG_CODES,
   TMapFolderEventWithEventInfo,
 } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react"; // ✅ useRef 추가
+import { useEffect, useRef, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import { getFolderImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-import { useScrollRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 추가
+import { useScrollRestoration } from "@/contexts/scroll-restoration-context";
 
-// ✅ 복원할 상태 타입
 type FolderPageState = {
   events: TMapFolderEventWithEventInfo[];
   eventsStart: number;
@@ -25,9 +24,6 @@ type FolderPageState = {
   seenEventCodes: string[];
 };
 
-/**
- * 폴더 상세 페이지
- */
 export default function CompFolderDetailPage({
   folderCode,
   langCode,
@@ -39,7 +35,6 @@ export default function CompFolderDetailPage({
 }) {
   const router = useRouter();
 
-  // ✅ 페이지별 상태 저장/복원 키
   const { savePage, restorePage } = useScrollRestoration();
   const STATE_KEY = `dplus:folder-${folderCode}`;
 
@@ -54,12 +49,11 @@ export default function CompFolderDetailPage({
   const [eventsHasMore, setEventsHasMore] = useState(false);
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  // ✅ 렌더 독립 자료구조는 ref로
   const seenEventCodesRef = useRef<Set<string>>(new Set());
-  // ✅ 복원 여부 플래그
   const hydratedFromRestoreRef = useRef(false);
 
-  const fetchFolderDetail = async () => {
+  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
+  const fetchFolderDetail = async (restoredEvents?: TMapFolderEventWithEventInfo[]) => {
     try {
       const res = await reqGetFolderDetail(folderCode, langCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
@@ -77,30 +71,69 @@ export default function CompFolderDetailPage({
 
       const initItems = db?.folderEvent?.items ?? [];
       
-      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
-      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
-        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+      // ✅ 수정: restoredEvents 사용
+      if (hydratedFromRestoreRef.current && restoredEvents) {
+        console.log('[Folder Fetch] Hydrated from restore, merging with server data');
+        console.log('[Folder Fetch] Restored events:', restoredEvents.length);
+        console.log('[Folder Fetch] Server events:', initItems.length);
+        
         const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
-        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          return code && !serverCodes.has(code);
-        });
-        
-        const finalEvents = [...initItems, ...extraLoadedEvents];
-        setEvents(finalEvents);
-        setEventsStart(finalEvents.length);
-        
-        seenEventCodesRef.current.clear();
-        finalEvents.forEach(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          if (code) seenEventCodesRef.current.add(code);
-        });
+        if (restoredEvents.length > LIST_LIMIT.default) {
+          // ✅ 복원된 전체 이벤트에서 서버에 없는 것만 추출
+          const extraLoadedEvents = restoredEvents.filter(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            return code && !serverCodes.has(code);
+          });
+          
+          console.log('[Folder Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
+          
+          // ✅ 날짜 필터링 (과거 이벤트 제거)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayTimestamp = today.getTime();
+          
+          const futureExtraEvents = extraLoadedEvents.filter(item => {
+            // ⚠️ 실제 날짜 필드명에 맞게 수정 필요
+            const eventDate = item.event_info?.date || item.date;
+            
+            if (eventDate) {
+              const date = new Date(eventDate);
+              return date.getTime() >= todayTimestamp;
+            }
+            return true; // 날짜 정보 없으면 일단 포함
+          });
+          
+          console.log('[Folder Fetch] Future extra events (after date filter):', futureExtraEvents.length);
+          
+          const finalEvents = [...initItems, ...futureExtraEvents];
+          console.log('[Folder Fetch] Final merged events:', finalEvents.length);
+          
+          setEvents(finalEvents);
+          setEventsStart(finalEvents.length);
+          
+          seenEventCodesRef.current.clear();
+          finalEvents.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        } else {
+          // 더보기 안 한 경우: 서버 데이터만
+          console.log('[Folder Fetch] No extra events, using server data');
+          setEvents(initItems);
+          setEventsStart(initItems.length);
+          
+          seenEventCodesRef.current.clear();
+          initItems.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        }
       } else {
-        // 기본 케이스: 서버 데이터만 사용
+        // 복원 없음: 서버 데이터만
+        console.log('[Folder Fetch] No restore, using server data');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -164,27 +197,46 @@ export default function CompFolderDetailPage({
     }
   };
 
-  // ✅ ① 마운트 시 복원 → 있으면 즉시 렌더(플래시 방지), 이후 서버 최신화
+  // ✅ 수정: 복원된 데이터를 fetchFolderDetail에 전달
   useEffect(() => {
+    console.log('[Folder Mount] Component mounted, attempting restore...');
     const saved = restorePage<FolderPageState>(STATE_KEY);
-    if (saved) {
+    
+    console.log('[Folder Mount] Restored data:', {
+      hasSaved: !!saved,
+      eventsCount: saved?.events?.length || 0,
+    });
+    
+    if (saved && saved.events && saved.events.length > 0) {
+      console.log('[Folder Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
-      setEvents(saved.events ?? []);
+      setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
+      
+      // ✅ 복원된 이벤트를 전달
+      fetchFolderDetail(saved.events);
+    } else {
+      console.log('[Folder Mount] No valid saved data found');
+      fetchFolderDetail();
     }
-    fetchFolderDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [folderCode]);
 
-  // ✅ ② 라우팅 직전 저장(pointerdown capture)
+  // 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a") as HTMLAnchorElement | null;
       if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+
+      console.log('[Folder Save] Saving state:', {
+        eventsCount: events.length,
+        eventsStart,
+        eventsHasMore,
+      });
 
       savePage<FolderPageState>(STATE_KEY, {
         events,
@@ -195,9 +247,9 @@ export default function CompFolderDetailPage({
     };
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, savePage]);
+  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
-  // ✅ ③ 새로고침/탭 숨김 시 저장
+  // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
       savePage<FolderPageState>(STATE_KEY, {
@@ -216,7 +268,7 @@ export default function CompFolderDetailPage({
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, savePage]);
+  }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
   // ================= 렌더 =================
 

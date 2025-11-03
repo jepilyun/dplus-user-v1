@@ -46,7 +46,8 @@ export default function CompTagDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
-  const fetchTagDetail = async () => {
+  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
+  const fetchTagDetail = async (restoredEvents?: TMapTagEventWithEventInfo[]) => {
     try {
       const res = await reqGetTagDetail(tagCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
@@ -64,30 +65,68 @@ export default function CompTagDetailPage({
   
       const initItems = db?.mapTagEvent?.items ?? [];
       
-      // ✅ 수정: 서버 데이터로 시작, 복원된 추가 로드 데이터만 병합
-      if (hydratedFromRestoreRef.current && events.length > LIST_LIMIT.default) {
-        // 사용자가 "더보기"로 추가 로드한 이벤트들만 보존
+      // ✅ 수정: restoredEvents 사용
+      if (hydratedFromRestoreRef.current && restoredEvents) {
+        console.log('[Tag Fetch] Hydrated from restore, merging with server data');
+        console.log('[Tag Fetch] Restored events:', restoredEvents.length);
+        console.log('[Tag Fetch] Server events:', initItems.length);
+        
         const serverCodes = new Set(
           initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // 초기 로드(36개) 이후의 이벤트 중 서버에 없는 것만 보존
-        const extraLoadedEvents = events.slice(LIST_LIMIT.default).filter(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          return code && !serverCodes.has(code);
-        });
-        
-        const finalEvents = [...initItems, ...extraLoadedEvents];
-        setEvents(finalEvents);
-        setEventsStart(finalEvents.length);
-        
-        seenEventCodesRef.current.clear();
-        finalEvents.forEach(item => {
-          const code = item?.event_info?.event_code ?? item?.event_code;
-          if (code) seenEventCodesRef.current.add(code);
-        });
+        if (restoredEvents.length > LIST_LIMIT.default) {
+          // ✅ 복원된 전체 이벤트에서 서버에 없는 것만 추출
+          const extraLoadedEvents = restoredEvents.filter(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            return code && !serverCodes.has(code);
+          });
+          
+          console.log('[Tag Fetch] Extra loaded events (before date filter):', extraLoadedEvents.length);
+          
+          // ✅ 날짜 필터링 (과거 이벤트 제거)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const todayTimestamp = today.getTime();
+          
+          const futureExtraEvents = extraLoadedEvents.filter(item => {
+            const eventDate = item.event_info?.date || item.date;
+            
+            if (eventDate) {
+              const date = new Date(eventDate);
+              return date.getTime() >= todayTimestamp;
+            }
+            return true; // 날짜 정보 없으면 일단 포함
+          });
+          
+          console.log('[Tag Fetch] Future extra events (after date filter):', futureExtraEvents.length);
+          
+          const finalEvents = [...initItems, ...futureExtraEvents];
+          console.log('[Tag Fetch] Final merged events:', finalEvents.length);
+          
+          setEvents(finalEvents);
+          setEventsStart(finalEvents.length);
+          
+          seenEventCodesRef.current.clear();
+          finalEvents.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        } else {
+          // 더보기 안 한 경우: 서버 데이터만
+          console.log('[Tag Fetch] No extra events, using server data');
+          setEvents(initItems);
+          setEventsStart(initItems.length);
+          
+          seenEventCodesRef.current.clear();
+          initItems.forEach(item => {
+            const code = item?.event_info?.event_code ?? item?.event_code;
+            if (code) seenEventCodesRef.current.add(code);
+          });
+        }
       } else {
-        // 기본 케이스: 서버 데이터만 사용
+        // 복원 없음: 서버 데이터만
+        console.log('[Tag Fetch] No restore, using server data');
         setEvents(initItems);
         setEventsStart(initItems.length);
         
@@ -157,31 +196,46 @@ export default function CompTagDetailPage({
     }
   };
 
-  // ✅ 수정: 마운트 시 복원 + 최신 데이터 동기화
+  // ✅ 수정: 복원된 데이터를 fetchTagDetail에 전달
   useEffect(() => {
+    console.log('[Tag Mount] Component mounted, attempting restore...');
     const saved = restorePage<TagPageState>(STATE_KEY);
     
-    // 복원 데이터가 있고 이벤트가 있으면 즉시 화면에 표시
+    console.log('[Tag Mount] Restored data:', {
+      hasSaved: !!saved,
+      eventsCount: saved?.events?.length || 0,
+    });
+    
     if (saved && saved.events && saved.events.length > 0) {
+      console.log('[Tag Mount] Restoring state with', saved.events.length, 'events');
       hydratedFromRestoreRef.current = true;
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false); // 복원 화면 먼저 보여줌
+      setLoading(false);
+      
+      // ✅ 복원된 이벤트를 전달
+      fetchTagDetail(saved.events);
+    } else {
+      console.log('[Tag Mount] No valid saved data found');
+      fetchTagDetail();
     }
-    
-    // 복원 유무와 무관하게 최신 데이터 가져오기 (백그라운드)
-    fetchTagDetail();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tagCode]);
 
-  // ✅ 라우팅 직전 저장
+  // 라우팅 직전 저장
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a") as HTMLAnchorElement | null;
       if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+
+      console.log('[Tag Save] Saving state:', {
+        eventsCount: events.length,
+        eventsStart,
+        eventsHasMore,
+      });
 
       savePage<TagPageState>(STATE_KEY, {
         events,
@@ -194,7 +248,7 @@ export default function CompTagDetailPage({
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [events, eventsStart, eventsHasMore, savePage, STATE_KEY]);
 
-  // ✅ 새로고침/탭 숨김 시 저장
+  // 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () =>
       savePage<TagPageState>(STATE_KEY, {
