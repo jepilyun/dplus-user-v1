@@ -82,7 +82,6 @@ export async function generateMetadata(
 }
 
 
-
 // ✅ 항상 배열을 반환하도록 방어 코딩
 export async function generateStaticParams() {
   try {
@@ -96,6 +95,7 @@ export async function generateStaticParams() {
     return []; // 실패해도 배열 반환
   }
 }
+
 
 /**
  * Country 상세 페이지

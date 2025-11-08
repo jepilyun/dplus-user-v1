@@ -45,8 +45,8 @@ body {
   font-family: var(--font-poppins);
 }
 
-.font-candal {
-  font-family: var(--font-candal);
+.font-rubik {
+  font-family: var(--font-rubik);
 }
 
 .font-logo {
@@ -92,16 +92,16 @@ body {
 
 
 .bg-tag-country {
-  @apply bg-rose-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-rose-600;
+  @apply bg-rose-500 text-white rounded-full px-4 py-2 font-bold hover:bg-rose-600;
   /* 또는 커스텀 핫핑크: */
   /* background-color: #e91e63; */
 }
 .bg-tag-city {
-  @apply bg-sky-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-sky-600;
+  @apply bg-sky-500 text-white rounded-full px-4 py-2 font-bold hover:bg-sky-600;
 }
 .bg-tag-repeat {
-  @apply bg-teal-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-teal-600;
+  @apply bg-teal-500 text-white rounded-full px-4 py-2 font-bold hover:bg-teal-600;
 }
 .bg-tag-category {
-  @apply bg-fuchsia-500 text-white rounded-xs px-2 py-1 font-bold hover:bg-fuchsia-600;
+  @apply bg-fuchsia-500 text-white rounded-full px-4 py-2 font-bold hover:bg-fuchsia-600;
 }

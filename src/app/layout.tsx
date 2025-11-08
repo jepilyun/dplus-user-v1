@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Monoton, Noto_Sans, Noto_Sans_KR, Poppins, Candal } from "next/font/google";
+import { Monoton, Noto_Sans, Noto_Sans_KR, Poppins, Rubik } from "next/font/google";
 import Script from "next/script";
 import { dplusI18nKO } from "@/i18n-data/dplus-i18n-ko";
 import { ScrollRestorationProvider } from "@/contexts/scroll-restoration-context";
@@ -46,13 +46,13 @@ const monoton = Monoton({ weight: ["400"], subsets: ["latin"], display: "swap", 
 const notoSans = Noto_Sans({ weight: ["100","300","400","500","700","900"], subsets: ["latin"], display: "swap", variable: "--font-noto-sans" });
 const notoSansKR = Noto_Sans_KR({ weight: ["100","300","400","500","700","900"], subsets: ["latin"], display: "swap", variable: "--font-noto-sans-kr" });
 const poppins = Poppins({ weight: ["400","700"], subsets: ["latin"], display: "swap", variable: "--font-poppins" });
-const candal = Candal({ weight: ["400"], subsets: ["latin"], display: "swap", variable: "--font-candal" });
+const rubik = Rubik({ weight: ["300","400","500","700","900"], subsets: ["latin"], display: "swap", variable: "--font-rubik" });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="ko"
-      className={`${notoSans.variable} ${notoSansKR.variable} ${monoton.variable} ${poppins.variable} ${candal.variable} antialiased`}
+      className={`${notoSans.variable} ${notoSansKR.variable} ${monoton.variable} ${poppins.variable} ${rubik.variable} antialiased`}
     >
       {/* GTM (head) */}
       <Script

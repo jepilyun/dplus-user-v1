@@ -1,14 +1,13 @@
 import { ICalendarEvent, ISODateInput } from "@/types";
 import { TEventDetail } from "dplus_common_v1";
-
-// date-utils에서 필요한 함수들을 정확하게 임포트합니다.
 import {
   addDaysToDate,
   addMinutes,
   formatDateAllDay,
-  formatDateToICS,
   toDate,
 } from "./date-utils";
+import { detectDevice, DeviceType } from "./device-detector";
+
 
 /**
  * 날짜를 Google Calendar 형식으로 변환 (YYYYMMDD 또는 YYYYMMDDTHHMMSSZ)
@@ -345,24 +344,87 @@ export const generateAppleCalendarEvent = (
   return { icsText, filename };
 };
 
-export const addToAppleCalendarFromDetail = (detail: TEventDetail | null) => {
+// export const addToAppleCalendarFromDetail = (detail: TEventDetail | null) => {
+//   if (!detail) return;
+
+//   const { icsText, filename } = generateAppleCalendarEvent(detail, {
+//     useTZID: true,
+//   });
+//   const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
+//   const url = URL.createObjectURL(blob);
+
+//   if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+//     window.open(url, "_blank");
+//   } else {
+//     const a = document.createElement("a");
+//     a.href = url;
+//     a.download = filename;
+//     document.body.appendChild(a);
+//     a.click();
+//     document.body.removeChild(a);
+//   }
+
+//   setTimeout(() => URL.revokeObjectURL(url), 1500);
+// };
+
+export const addToAndroidCalendar = (event: ICalendarEvent) => {
+  // Android Google Calendar 앱 딥링크
+  const url = createGoogleCalendarUrl(event);
+  
+  // intent:// 스킴으로 변경하여 앱으로 직접 연결
+  const intentUrl = url.replace(
+    'https://www.google.com/calendar',
+    'intent://www.google.com/calendar'
+  ) + '#Intent;scheme=https;package=com.google.android.calendar;end';
+  
+  window.location.href = intentUrl;
+};
+
+
+// 기존 addToAppleCalendarFromDetail 함수를 수정
+export const addToCalendar = (detail: TEventDetail | null, platform?: DeviceType) => {
   if (!detail) return;
 
+  const detectedPlatform = platform || detectDevice();
   const { icsText, filename } = generateAppleCalendarEvent(detail, {
     useTZID: true,
   });
+
   const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
-  if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-    window.open(url, "_blank");
-  } else {
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  switch (detectedPlatform) {
+    case 'ios':
+      // iOS: 새 탭에서 열기
+      window.open(url, "_blank");
+      break;
+      
+    case 'android':
+      try {
+        // 먼저 Google Calendar 앱으로 시도
+        addToAndroidCalendar(generateGoogleCalendarEvent(detail));
+      } catch {
+        // 실패하면 ICS 다운로드로 폴백
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      break;
+      
+    case 'desktop':
+
+    default:
+      // Desktop: ICS 파일 다운로드
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      break;
   }
 
   setTimeout(() => URL.revokeObjectURL(url), 1500);

@@ -5,7 +5,8 @@ import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import GoogleMap from "@/components/comp-google-map/google-map";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import { IconShare } from "@/icons/icon-share";
-import { addToAppleCalendarFromDetail, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
+import { addToCalendar, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
+import { detectDevice, DeviceType } from "@/utils/device-detector";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1";
@@ -18,6 +19,7 @@ import CompCommonDatetime from "../comp-common/comp-common-datetime";
 import { getEventImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
+import { IconCalendar } from "@/icons/icon-calendar";
 
 /**
  * 이벤트 상세 페이지
@@ -26,6 +28,7 @@ import CompEventContactLinks from "@/components/comp-event/comp-event-contact-li
  */
 export default function CompEventDetailPage({ eventCode, langCode, fullLocale }: { eventCode: string, langCode: string, fullLocale: string }) {
   const router = useRouter();
+  const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
 
   const [error, setError] = useState<'not-found' | 'network' | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,9 +101,23 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
 
   useEffect(() => {
     fetchEventDetail();
+    setDeviceType(detectDevice());
   }, [eventCode]);
 
-  // 로딩 중
+  // 버튼 레이블을 동적으로 생성
+  const getCalendarButtonLabel = () => {
+    switch (deviceType) {
+      case 'ios':
+        return 'Apple Calendar';
+      case 'android':
+        return 'Download ICS';
+      case 'desktop':
+      default:
+        return 'Download ICS';
+    }
+  };
+
+    // 로딩 중
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -155,7 +172,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       date-created-at={eventDetail?.event.created_at}
       date-updated-at={eventDetail?.event.updated_at}
     >
-      <div className="my-2 sm:my-4 md:my-6 text-center font-candal font-extrabold text-5xl sm:text-7xl md:text-8xl">
+      <div className="my-1 sm:my-2 md:my-3 text-center font-rubik font-bold text-6xl sm:text-7xl md:text-8xl">
         {eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
       </div>
       <CompCommonDatetime 
@@ -164,7 +181,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         time={eventDetail?.event.time ?? null}
         isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
       />
-      <div className="flex flex-col gap-2 sm:gap-4 md:gap-6 justify-center items-center my-2 sm:my-4 md:my-6">
+      <div className="flex flex-col gap-2 sm:gap-4 md:gap-6 justify-center items-center">
         <HeadlineTagsDetail
           targetCountryCode={eventDetail?.event.target_country_code || null}
           targetCountryName={eventDetail?.event.target_country_native || null}
@@ -175,8 +192,8 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         />
         <div
           id="event-title"
-          className="text-center px-4 sm:px-6 md:px-8 lg:px-10 font-extrabold
-                    text-2xl sm:text-3xl md:text-4xl leading-[1.8]"
+          className="py-2 text-center px-4 sm:px-6 md:px-8 lg:px-10 font-bold
+                    text-xl sm:text-2xl md:text-3xl leading-[1.8]"
           data-event-code={eventDetail?.event.event_code}
         >
           {eventDetail?.event.title}
@@ -184,21 +201,29 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       </div>
       <div className="flex gap-4 justify-center">
         <BtnWithIcon01 
-          title="Calendar" 
+          title="Google Calendar" 
           icon={<IconGoogleColor />} 
           onClick={() => addToGoogleCalendar(generateGoogleCalendarEvent(eventDetail?.event ?? null))} 
           width={22} 
           height={22} 
-          minWidth={180} />
+          minWidth={180} 
+        />
         <BtnWithIcon01
-          title="Calendar"
-          icon={<IconApple />}
-          onClick={() => addToAppleCalendarFromDetail(eventDetail?.event ?? null)}
+          title={getCalendarButtonLabel()}
+          icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
+          onClick={() => addToCalendar(eventDetail?.event ?? null)}
           width={22}
           height={22}
           minWidth={180}
         />
-        <BtnWithIcon01 title="Share" icon={<IconShare />} onClick={handleShareClick} width={22} height={22} minWidth={180} />
+        <BtnWithIcon01 
+          title="Share" 
+          icon={<IconShare />} 
+          onClick={handleShareClick} 
+          width={22} 
+          height={22} 
+          minWidth={180} 
+        />
       </div>
       <HeroImageSlider
         bucket="events"

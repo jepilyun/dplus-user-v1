@@ -13,7 +13,7 @@ import { getCountryImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
+// import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
 import Link from "next/link";
 import { getCityBgUrl } from "@/utils/get-city-bg-image";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
@@ -25,6 +25,14 @@ type CountryPageState = {
   seenEventCodes: string[];
 };
 
+
+/**
+ * Country 상세 페이지
+ * @param countryCode - 국가 코드
+ * @param fullLocale - 전체 로케일
+ * @param langCode - 언어 코드
+ * @returns 
+ */
 export default function CompCountryDetailPage({
   countryCode,
   fullLocale,
@@ -54,11 +62,11 @@ export default function CompCountryDetailPage({
 
   const hydratedFromRestoreRef = useRef(false);
 
-  // ✅ 수정: 복원된 이벤트를 매개변수로 받음
+  // 복원된 이벤트를 매개변수로 받음
   const fetchCountryDetail = async (restoredEvents?: TMapCountryEventWithEventInfo[]) => {
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
-      console.log("res", res);
+      console.log("res --->>>", res);
       
       const isEmptyObj =
         !res?.success ||
@@ -81,7 +89,7 @@ export default function CompCountryDetailPage({
   
       const initItems = res.dbResponse?.mapCountryEvent?.items ?? [];
       
-      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      // 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
         console.log('[Fetch] Merging server data with restored pagination');
         console.log('[Fetch] Server events:', initItems.length);
@@ -184,6 +192,7 @@ export default function CompCountryDetailPage({
     setEventsLoading(true);
     try {
       const res = await reqGetCountryEvents(countryCode, eventsStart, LIST_LIMIT.default);
+
       const fetchedItems = res?.dbResponse?.items ?? [];
       const newItems = fetchedItems.filter((it: TMapCountryEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
@@ -325,13 +334,14 @@ export default function CompCountryDetailPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <HeroImageBackgroundCarouselCountry
+      {/* 추후 국가가 다양해지면 국가 헤더 부분 추가하기 */}
+      {/* <HeroImageBackgroundCarouselCountry
         bucket="countries"
         imageUrls={imageUrls}
         interval={5000}
         countryDetail={countryDetail?.country || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
-      />
+      /> */}
 
       {hasCategories && (
         <div className="mx-auto w-full max-w-[1440px] px-4">
@@ -342,8 +352,8 @@ export default function CompCountryDetailPage({
                 href={`/category/${item.category_code}`}
                 className="block"
               >
-                <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-xs border border-gray-200 px-4 py-2 transition hover:bg-gray-50">
-                  <div className="text-md font-medium text-center">
+                <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-gray-200 px-6 py-3 transition hover:bg-gray-50 hover:font-bold">
+                  <div className="text-md text-center">
                     {item.name_i18n ?? item.name}
                   </div>
                   {/* <div className="text-xs text-muted-foreground text-center">{item.name}</div> */}
@@ -364,7 +374,7 @@ export default function CompCountryDetailPage({
                   href={`/city/${item.city_code}`}
                   className={[
                     "relative flex flex-col items-center justify-center gap-1",
-                    "h-full min-h-[120px] w-full rounded-xs border border-gray-200 p-4",
+                    "h-full min-h-[120px] w-full rounded-2xl border border-gray-200 p-4",
                     "transition-all duration-200 overflow-hidden",
                     "group", // ← 중요: group으로 설정
                     bg 
