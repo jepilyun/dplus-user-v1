@@ -49,6 +49,10 @@ body {
   font-family: var(--font-rubik);
 }
 
+.font-gamja-flower {
+  font-family: var(--font-gamja-flower);
+}
+
 .font-logo {
   font-family: var(--font-monoton);
   font-size: 2rem;

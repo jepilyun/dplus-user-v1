@@ -181,7 +181,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         time={eventDetail?.event.time ?? null}
         isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
       />
-      <div className="flex flex-col gap-2 sm:gap-4 md:gap-6 justify-center items-center">
+      <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 justify-center items-center">
         <HeadlineTagsDetail
           targetCountryCode={eventDetail?.event.target_country_code || null}
           targetCountryName={eventDetail?.event.target_country_native || null}
@@ -192,7 +192,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         />
         <div
           id="event-title"
-          className="py-2 text-center px-4 sm:px-6 md:px-8 lg:px-10 font-bold
+          className="py-3 text-center px-4 sm:px-6 sm:py-4 md:px-8 md:py-5 lg:px-10 lg:py-6 font-black
                     text-xl sm:text-2xl md:text-3xl leading-[1.8]"
           data-event-code={eventDetail?.event.event_code}
         >
