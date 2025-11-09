@@ -67,7 +67,7 @@ export default function CompCommonDdayItem({
 
         {/* 나머지 코드 동일 */}
         <div className="flex flex-col flex-grow gap-0">
-          <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 group-hover:text-base group-hover:md:text-lg transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
+          <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
             <span>
               {event?.event_info?.date
                 ? formatDateTime(
@@ -92,7 +92,7 @@ export default function CompCommonDdayItem({
             )}
           </div>
 
-          <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal">
+          <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200 group-hover:text-gray-800">
             {hasValidTime(event?.event_info?.time) && (
               <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
                 {formatTimeOnly(combinedDate, "ko-KR", null, null, {

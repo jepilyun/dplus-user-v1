@@ -67,7 +67,7 @@ export default function CompCommonDdayItemForDate({
 
         {/* 텍스트 */}
         <div className="flex flex-col flex-grow gap-0">
-        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 group-hover:text-base group-hover:md:text-lg transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
+        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
             <span>
               {event?.date
                 ? formatDateTime(

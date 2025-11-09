@@ -23,14 +23,14 @@ export default function BtnWithIcon01({
       disableElevation
       sx={{
         backgroundColor: "#f5f5f5",
-        color: "#000",
+        color: "#444",
         borderRadius: "9999px",
         boxShadow: "none",
         minWidth: minWidth ?? undefined,
         minHeight: minHeight ?? undefined,
         px: 4,                // ⬅️ 좌우 패딩 늘림
         py: 2,                // 세로 패딩은 그대로
-        "&:hover": { backgroundColor: "#f0f0f0", boxShadow: "none" },
+        "&:hover": { backgroundColor: "#efefef", boxShadow: "none" },
         "& .MuiButton-startIcon svg": { width: width, height: height },
         
         // 768px 이하에서 텍스트 숨기고 패딩 조정

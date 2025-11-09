@@ -20,6 +20,7 @@ import { getEventImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
 import { IconCalendar } from "@/icons/icon-calendar";
+import { getDplusI18n } from "@/utils/get-dplus-i18n";
 
 /**
  * 이벤트 상세 페이지
@@ -201,7 +202,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
       </div>
       <div className="flex gap-4 justify-center">
         <BtnWithIcon01 
-          title="Google Calendar" 
+          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
           icon={<IconGoogleColor />} 
           onClick={() => addToGoogleCalendar(generateCalendarEvent(eventDetail?.event ?? null))} 
           width={22} 
@@ -209,7 +210,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
           minWidth={180} 
         />
         <BtnWithIcon01
-          title={getCalendarButtonLabel()}
+          title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
           icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
           onClick={() => addToCalendar(eventDetail?.event ?? null)}
           width={22}
@@ -217,7 +218,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
           minWidth={180}
         />
         <BtnWithIcon01 
-          title="Share" 
+          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
           icon={<IconShare />} 
           onClick={handleShareClick} 
           width={22} 

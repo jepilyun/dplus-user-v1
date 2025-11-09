@@ -31,5 +31,11 @@ export const dplusI18nZH = {
     url: "URL",
     address: "地址",
     phone: "电话",
+  },
+  detail: {
+    google_calendar: "添加到 Google 日历",
+    apple_calendar: "添加到 Apple 日历",
+    ics_download: "下载日历文件",
+    share: "分享",
   }
 };

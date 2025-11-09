@@ -34,5 +34,11 @@ export const dplusI18nVI = {
     url: "URL",
     address: "Địa chỉ",
     phone: "Điện thoại",
+  },
+  detail: {
+    google_calendar: "Lịch Google",
+    apple_calendar: "Lịch Apple",
+    ics_download: "Tải xuống ICS",
+    share: "Chia sẻ",
   }
 };

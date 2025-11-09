@@ -34,5 +34,11 @@ export const dplusI18nJA = {
     url: "URL",
     address: "住所",
     phone: "電話番号",
+  },
+  detail: {
+    google_calendar: "Googleカレンダー",
+    apple_calendar: "Appleカレンダー",
+    ics_download: "ICSをダウンロード",
+    share: "共有",
   }
 };

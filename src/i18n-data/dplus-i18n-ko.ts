@@ -34,5 +34,11 @@ export const dplusI18nKO = {
     url: "URL",
     address: "주소",
     phone: "전화번호",
+  },
+  detail: {
+    google_calendar: "구글 캘린더",
+    apple_calendar: "애플 캘린더",
+    ics_download: "일정 다운로드",
+    share: "공유하기",
   }
 };

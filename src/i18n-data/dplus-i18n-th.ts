@@ -34,5 +34,11 @@ export const dplusI18nTH = {
     url: "URL",
     address: "ที่อยู่",
     phone: "เบอร์โทรศัพท์",
+  },
+  detail: {
+    google_calendar: "ปฏิทิน Google",
+    apple_calendar: "ปฏิทิน Apple",
+    ics_download: "ดาวน์โหลดไฟล์ ICS",
+    share: "แบ่งปัน",
   }
 };

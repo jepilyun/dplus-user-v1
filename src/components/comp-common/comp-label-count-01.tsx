@@ -16,8 +16,7 @@ export default function CompLabelCount01({
   return (
     <div
       className={[
-        "border border-gray-100/50 bg-gray-100/50 rounded-full flex items-center justify-center",
-        "aspect-square",      // 높이는 자동으로 폭과 동일
+        "flex items-center justify-center aspect-square",
         base,
         sm ?? "",
         md ?? "",
@@ -25,8 +24,8 @@ export default function CompLabelCount01({
       ].join(" ")}
     >
       <div className="flex flex-col items-center justify-center gap-1 sm:gap-2">
-        <div className="text-2xl sm:text-3xl md:text-4xl font-medium">{count}</div>
-        <div className="text-xs text-gray-400 font-poppins uppercase">{label}</div>
+        <div className={`text-2xl sm:text-3xl md:text-4xl font-rubik ${count > 0 ? "font-bold" : "font-light"} ${count > 0 ? "text-black" : "text-gray-400"}`}>{count}</div>
+        <div className="text-xs text-gray-400 font-rubik uppercase">{label}</div>
       </div>
     </div>
   );

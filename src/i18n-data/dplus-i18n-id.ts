@@ -34,5 +34,11 @@ export const dplusI18nID = {
     url: "URL",
     address: "Alamat",
     phone: "Telepon",
+  },
+  detail: {
+    google_calendar: "Kalender Google",
+    apple_calendar: "Apple Calendar",
+    ics_download: "Unduh ICS",
+    share: "Bagikan",
   }
 };
