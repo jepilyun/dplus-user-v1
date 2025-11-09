@@ -22,4 +22,17 @@ export const dplusI18nID = {
     og_image_alt:
       "dplus | Jadwal konser·festival·pameran·pertunjukan·pop-up, tambah sekali klik",
   },
+  labels: {
+    homepage: "Situs web",
+    email: "Email",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",  
+    tiktok: "Tiktok",
+    ticket_purchase: "Pembelian tiket",
+    url: "URL",
+    address: "Alamat",
+    phone: "Telepon",
+  }
 };

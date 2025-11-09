@@ -22,4 +22,17 @@ export const dplusI18nVI = {
     og_image_alt:
       "dplus | Lịch concert·lễ hội·triển lãm·biểu diễn·pop-up – thêm chỉ với một cú nhấp",
   },
+  labels: {
+    homepage: "Trang web",
+    email: "Email",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    tiktok: "Tiktok",
+    ticket_purchase: "Mua vé",
+    url: "URL",
+    address: "Địa chỉ",
+    phone: "Điện thoại",
+  }
 };

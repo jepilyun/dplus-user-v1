@@ -15,7 +15,7 @@ export default function TopNavMain() {
         <DplusLogo className="w-8 h-8" />
       </Link>
       <div className="text-lg sm:text-2xl font-gamja-flower">
-        모든 순간이 디데이, dplus
+        중요한 날들 놓치지 마세요, 디플러스
       </div>
     </nav>
   );

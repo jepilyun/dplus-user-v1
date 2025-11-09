@@ -29,58 +29,62 @@ const toGoogleDate = (date: ISODateInput, allDay = false): string => {
   return d.toISOString().replace(/-|:|\.\d+/g, "");
 };
 
+
 /**
- * TEventDetail 객체로부터 Google Calendar Event 형식의 객체를 생성합니다.
+ * TEventDetail 객체로부터 Calendar Event 형식의 객체를 생성합니다.
+ * Google Calendar, Apple Calendar, ICS 등 모든 캘린더 형식의 기본이 되는 객체를 생성합니다.
  * @param eventDetail - 원본 이벤트 상세 정보
- * @returns Google Calendar Event 객체
+ * @returns Calendar Event 객체
  * @throws {Error} 이벤트 정보가 없는 경우
- * * @example
- * const detail = {
- * title: "팀 미팅",
- * date: "2025-08-28",
- * time: "14:00:00",
- * duration: 60, // 60분
- * description: "주간 업무 보고",
- * address_native: "사무실 101호",
- * tz: "Asia/Seoul",
- * url: "http://example.com/meeting",
- * url_label: "미팅 링크"
- * };
- * const googleEvent = generateGoogleCalendarEvent(detail);
- * // => { title: "팀 미팅", startDate: Date 객체, endDate: Date 객체, ... }
  */
-export const generateGoogleCalendarEvent = (
+export const generateCalendarEvent = (
   eventDetail: TEventDetail | null,
 ): ICalendarEvent => {
   if (!eventDetail) throw new Error("이벤트 정보가 없습니다.");
 
   let startDate: Date;
   if (eventDetail.time) {
-    // 날짜와 시간을 합쳐 Date 객체 생성
     startDate = toDate(`${eventDetail.date} ${eventDetail.time}`);
   } else {
-    // 날짜만 사용하여 Date 객체 생성
     startDate = toDate(eventDetail.date);
   }
 
   const event: ICalendarEvent = {
     title: eventDetail.title,
-    startDate: startDate, // 이제 항상 Date 객체
-    allDay: !eventDetail.time, // 시간이 없으면 종일 이벤트
+    startDate: startDate,
+    allDay: !eventDetail.time,
   };
 
   if (eventDetail.duration) {
-    // startDate가 Date 객체임을 보장 후 addMinutes 호출
     event.endDate = addMinutes(toDate(event.startDate), eventDetail.duration);
   }
-  if (eventDetail.description) event.description = eventDetail.description;
+  
+  // Description 구성 (DPlus URL 포함)
+  const description = eventDetail.description || '';
+
+  if (eventDetail.event_code) {
+    const dplusUrl = `https://dplus.app/event/${eventDetail.event_code}`;
+    const dplusLink = description 
+      ? `${description}\n\n━━━━━━━━━━━━━━━━\n📱 View on DPlus: ${dplusUrl}`
+      : `📱 View on DPlus: ${dplusUrl}`;
+    event.description = dplusLink;
+  } else if (description) {
+    event.description = description;
+  }
+  
   if (eventDetail.address_native) event.location = eventDetail.address_native;
   if (eventDetail.tz) event.timezone = eventDetail.tz;
+  
   if (eventDetail.url) {
-    event.website = { name: eventDetail.url_label ?? "", url: eventDetail.url };
+    event.website = { 
+      name: eventDetail.url_label ?? "Event Website", 
+      url: eventDetail.url 
+    };
   }
+  
   return event;
 };
+
 
 /**
  * Google Calendar 이벤트 추가 URL을 생성합니다.
@@ -319,7 +323,7 @@ export const generateAppleCalendarEvent = (
   opts?: Partial<GenerateICSOptions>,
 ): { icsText: string; filename: string } => {
   // 1) 기존 정규화 로직 재사용
-  const baseEvent: ICalendarEvent = generateGoogleCalendarEvent(detail);
+  const baseEvent: ICalendarEvent = generateCalendarEvent(detail);
 
   // 2) RRULE/좌표 등 Apple-친화적 옵션 구성
   const rrule = detail.is_repeat_annually ? "FREQ=YEARLY" : undefined;
@@ -344,29 +348,6 @@ export const generateAppleCalendarEvent = (
   return { icsText, filename };
 };
 
-// export const addToAppleCalendarFromDetail = (detail: TEventDetail | null) => {
-//   if (!detail) return;
-
-//   const { icsText, filename } = generateAppleCalendarEvent(detail, {
-//     useTZID: true,
-//   });
-//   const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
-//   const url = URL.createObjectURL(blob);
-
-//   if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-//     window.open(url, "_blank");
-//   } else {
-//     const a = document.createElement("a");
-//     a.href = url;
-//     a.download = filename;
-//     document.body.appendChild(a);
-//     a.click();
-//     document.body.removeChild(a);
-//   }
-
-//   setTimeout(() => URL.revokeObjectURL(url), 1500);
-// };
-
 export const addToAndroidCalendar = (event: ICalendarEvent) => {
   // Android Google Calendar 앱 딥링크
   const url = createGoogleCalendarUrl(event);
@@ -381,7 +362,6 @@ export const addToAndroidCalendar = (event: ICalendarEvent) => {
 };
 
 
-// 기존 addToAppleCalendarFromDetail 함수를 수정
 export const addToCalendar = (detail: TEventDetail | null, platform?: DeviceType) => {
   if (!detail) return;
 
@@ -402,7 +382,7 @@ export const addToCalendar = (detail: TEventDetail | null, platform?: DeviceType
     case 'android':
       try {
         // 먼저 Google Calendar 앱으로 시도
-        addToAndroidCalendar(generateGoogleCalendarEvent(detail));
+        addToAndroidCalendar(generateCalendarEvent(detail));
       } catch {
         // 실패하면 ICS 다운로드로 폴백
         const a = document.createElement("a");

@@ -67,7 +67,7 @@ export default function CompCommonDdayItem({
 
         {/* 나머지 코드 동일 */}
         <div className="flex flex-col flex-grow gap-0">
-          <div className="flex items-center gap-2 text-sm md:text-base text-gray-400">
+          <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 group-hover:text-base group-hover:md:text-lg transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
             <span>
               {event?.event_info?.date
                 ? formatDateTime(
@@ -121,109 +121,6 @@ export default function CompCommonDdayItem({
     </Link>
   );
 }
-
-// export default function CompCommonDdayItem({
-//   event,
-//   fullLocale,
-// }: { event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo; fullLocale: string }) {
-//   const code = event?.event_info?.event_code ?? event?.event_code ?? "default";
-//   const { bg, fg } = computeBadgeColors(
-//     event?.event_info?.date ?? null,
-//     event?.event_info?.bg_color ?? undefined,
-//     event?.event_info?.fg_color ?? undefined
-//   );
-
-//   const combinedDate = new Date(event?.event_info?.date ?? "");
-
-//   if (event?.event_info?.time) {
-//     parseAndSetTime(combinedDate, event.event_info.time);
-//   }
-
-//   // 컴포넌트 상단에 추가
-//   const hasValidTime = (timeStr: string | null | undefined): boolean => {
-//     return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
-//   };
-
-//   return (
-//     <Link href={`/event/${code}`}>
-//       <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center p-4 rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
-//         <div
-//           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
-//           style={{ backgroundColor: bg }}
-//           aria-label="D-day badge"
-//         >
-//           <div
-//             className="w-full h-full flex items-center justify-center p-2 md:p-3"
-//             style={{ color: fg }}
-//           >
-//             <span className="font-candal font-extrabold text-lg sm:text-xl md:text-3xl tracking-tight">
-//               {event?.event_info?.date
-//                 ? getDdayLabel(calculateDaysFromToday(event?.event_info?.date))
-//                 : ""}
-//             </span>
-//           </div>
-//         </div>
-
-//         {/* 텍스트 */}
-//         <div className="flex flex-col flex-grow gap-0">
-//           {/* 모바일: 날짜 + 시간을 한 줄에 */}
-//           <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 font-noto-sans font-medium">
-//             <span>
-//               {event?.event_info?.date
-//                 ? formatDateTime(
-//                     new Date(event?.event_info?.date),
-//                     fullLocale,
-//                     null,
-//                     null,
-//                     {
-//                       includeTime: false,
-//                       style: 'long'
-//                     }
-//                   )
-//                 : ""}
-//             </span>
-//             {/* 모바일에서만 시간 표시 */}
-//             {hasValidTime(event?.event_info?.time) && (
-//               <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
-//                 {formatTimeOnly(combinedDate, "ko-KR", null, null, {
-//                   timeFormat: "12h",
-//                   compactTime: true
-//                 })}
-//               </span>
-//             )}
-//           </div>
-
-//           {/* 제목 (md 이상에서는 시간 포함) */}
-//           <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal">
-//             {/* md 이상에서만 시간 표시 */}
-//             {hasValidTime(event?.event_info?.time) && (
-//               <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
-//                 {formatTimeOnly(combinedDate, "ko-KR", null, null, {
-//                   timeFormat: "12h",
-//                   compactTime: true
-//                 })}
-//               </span>
-//             )}
-//             <span>{event?.event_info?.title}</span>
-//           </div>
-//         </div>
-
-//         {checkIfThumbnailExists(event) && (
-//           <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
-//             <Image
-//               src={generateStorageImageUrl("events", getThumbnailUrl(event) || null) || ""}
-//               alt={event?.event_info?.title ?? "thumbnail"}
-//               width={128}
-//               height={128}
-//               className="w-full h-full object-cover"
-//               sizes="(min-width: 768px) 8rem, 6rem"
-//             />
-//           </div>
-//         )}
-//       </div>
-//     </Link>
-//   );
-// }
 
 
 function checkIfThumbnailExists(event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo) {

@@ -19,4 +19,17 @@ export const dplusI18nTW = {
     og_image_height: 630,
     og_image_alt: "dplus｜音樂會・慶典・展覽・演出・快閃行程，一鍵加入",
   },
+  labels: {
+    homepage: "網站",
+    email: "電子郵件",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    tiktok: "Tiktok",
+    ticket_purchase: "票券購買",
+    url: "URL",
+    address: "地址",
+    phone: "電話",
+  }
 };

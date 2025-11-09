@@ -18,7 +18,6 @@ export default function CompCommonDdayItemForDate({
     event?.bg_color ?? undefined,
     event?.fg_color ?? undefined
   );
-
   
   const combinedDate = new Date(event?.date ?? "");
 
@@ -31,59 +30,86 @@ export default function CompCommonDdayItemForDate({
     return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
   };
 
+  const ddayLabel = event?.date
+    ? getDdayLabel(calculateDaysFromToday(event?.date))
+    : "";
+
+  const getDdayFontSize = (label: string | undefined) => {
+    if (!label) return "text-lg sm:text-xl md:text-3xl";
+
+    const length = label.length;
+    if (label === "Today") return "text-lg sm:text-xl md:text-2xl";
+    if (length <= 6) return "text-lg sm:text-xl md:text-3xl"; // D-100
+    if (length <= 7) return "text-base sm:text-xl md:text-2xl"; // D-1000
+    if (length <= 8) return "text-sm sm:text-lg md:text-xl"; // D-10000
+    if (length <= 9) return "text-xs sm:text-sm md:text-xl"; // D-10000
+
+    return "text-[10px] sm:text-xs md:text-base"; // D-10000+
+  };
+
   return (
     <Link href={`/event/${code}`}>
-      <div className="m-auto w-full flex flex-row gap-4 sm:gap-6 md:gap-8 items-center p-4 rounded-xs border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
+      <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center p-4 rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
         <div
-          className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-sm"
+          className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
           style={{ backgroundColor: bg }}
           aria-label="D-day badge"
         >
           <div
-            className="w-full h-full flex items-center justify-center rounded-[1rem] p-2 md:p-3"
+            className="w-full h-full flex items-center justify-center p-2 md:p-3"
             style={{ color: fg }}
           >
-            <span className="font-rubik text-lg sm:text-xl md:text-3xl tracking-tight">
-              {event?.date
-                ? getDdayLabel(calculateDaysFromToday(event?.date))
-                : ""}
+            <span className={`font-rubik font-bold tracking-tight ${getDdayFontSize(ddayLabel)}`}>
+              {ddayLabel}
             </span>
           </div>
         </div>
 
         {/* 텍스트 */}
-        <div className="flex flex-col flex-grow gap-1 md:gap-2">
-          <div className="text-sm md:text-base text-gray-600">
-          {event?.date
-            ? formatDateTime(
-                new Date(event?.date),
-                fullLocale,
-                null,
-                null,
-                {
-                  includeTime: false,
-                  style: 'long'
-                }
-              )
-            : ""}
-          </div>
-          <div className="flex flex-col sm:flex-row sm:inline-flex gap-2 items-center">
+        <div className="flex flex-col flex-grow gap-0">
+        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 group-hover:text-base group-hover:md:text-lg transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
+            <span>
+              {event?.date
+                ? formatDateTime(
+                    new Date(event?.date),
+                    fullLocale,
+                    null,
+                    null,
+                    {
+                      includeTime: false,
+                      style: 'long'
+                    }
+                  )
+                : ""}
+            </span>
+            {/* 모바일에서만 시간 표시 */}
             {hasValidTime(event?.time) && (
-              <div className="px-2 py-1 whitespace-nowrap rounded-md text-gray-600 bg-gray-100 text-xs sm:text-sm">
+              <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
                 {formatTimeOnly(combinedDate, "ko-KR", null, null, {
                   timeFormat: "12h",
                   compactTime: true
                 })}
-              </div>
+              </span>
             )}
-            <div className="text-base sm:text-lg md:text-2xl font-medium">
-              {event?.title}
-            </div>
+          </div>
+
+          {/* 제목 (md 이상에서는 시간 포함) */}
+          <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal">
+            {/* md 이상에서만 시간 표시 */}
+            {hasValidTime(event?.time) && (
+              <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
+                {formatTimeOnly(combinedDate, "ko-KR", null, null, {
+                  timeFormat: "12h",
+                  compactTime: true
+                })}
+              </span>
+            )}
+            <span>{event?.title}</span>
           </div>
         </div>
 
         {checkIfThumbnailExistsForDate(event) && (
-          <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-sm overflow-hidden">
+          <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
             <Image
               src={generateStorageImageUrl("events", getThumbnailUrlForDate(event) || null) || ""}
               alt={event?.title ?? "thumbnail"}

@@ -53,8 +53,6 @@ export default function CompTodayDetailPage({
   defaultTz?: Tz;
 }) {
   const router = useRouter();
-
-  // ✅ 변경: 전용 hook 사용
   const { save, restore } = useTodayPageRestoration(countryCode);
 
   // 브라우저 TZ & 언어 감지
@@ -395,7 +393,7 @@ export default function CompTodayDetailPage({
                 lastKey = item.section.key;
                 blocks.push(
                   <div key={`sec-${item.section.key}`} className="sticky top-[80px]">
-                    <div className="px-4 lg:px-8 py-3 text-gray-800 bg-gray-100 rounded-sm border border-gray-200">
+                    <div className="px-4 lg:px-8 py-3 text-gray-800 bg-gray-100 rounded-sm border-gray-200">
                       <div className="text-sm sm:text-md md:text-lg uppercase tracking-wide text-gray-600 font-semibold">
                         {item.section.label}{" "}
                         <span className="text-gray-400">{item.section.sub}</span>

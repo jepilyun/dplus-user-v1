@@ -22,4 +22,17 @@ export const dplusI18nKO = {
     og_image_height: 630,
     og_image_alt: "dplus | 콘서트·축제·전시·공연·팝업 일정, 한 번에 추가",
   },
+  labels: {
+    homepage: "홈페이지",
+    email: "이메일",
+    youtube: "Youtube",
+    instagram: "인스타그램",
+    facebook: "페이스북",
+    twitter: "트위터",
+    tiktok: "Tiktok",
+    ticket_purchase: "티켓 구매",
+    url: "URL",
+    address: "주소",
+    phone: "전화번호",
+  }
 };

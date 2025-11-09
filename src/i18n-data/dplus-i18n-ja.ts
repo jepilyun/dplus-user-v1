@@ -22,4 +22,17 @@ export const dplusI18nJA = {
     og_image_alt:
       "dplus｜コンサート・フェス・展示・公演・ポップアップの予定をワンクリック追加",
   },
+  labels: {
+    homepage: "ウェブサイト",
+    email: "メール",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    tiktok: "Tiktok",
+    ticket_purchase: "チケット購入",
+    url: "URL",
+    address: "住所",
+    phone: "電話番号",
+  }
 };

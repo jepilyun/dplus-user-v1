@@ -5,7 +5,7 @@ import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import GoogleMap from "@/components/comp-google-map/google-map";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import { IconShare } from "@/icons/icon-share";
-import { addToCalendar, addToGoogleCalendar, generateGoogleCalendarEvent } from "@/utils/save-calendar";
+import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
 import { detectDevice, DeviceType } from "@/utils/device-detector";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
@@ -203,7 +203,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
         <BtnWithIcon01 
           title="Google Calendar" 
           icon={<IconGoogleColor />} 
-          onClick={() => addToGoogleCalendar(generateGoogleCalendarEvent(eventDetail?.event ?? null))} 
+          onClick={() => addToGoogleCalendar(generateCalendarEvent(eventDetail?.event ?? null))} 
           width={22} 
           height={22} 
           minWidth={180} 
@@ -243,7 +243,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale }:
           <div>{item.tag_info?.tag_code}</div>
         </div>
       ))}
-      <CompEventContactLinks event={eventDetail?.event} />
+      <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
       {eventDetail?.event.latitude && eventDetail?.event.longitude && (
         <div className="m-auto w-full max-w-[1440px] h-48 bg-red-500 overflow-hidden">
           <GoogleMap 

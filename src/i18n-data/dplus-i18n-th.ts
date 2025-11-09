@@ -22,4 +22,17 @@ export const dplusI18nTH = {
     og_image_alt:
       "dplus | คอนเสิร์ต·เทศกาล·นิทรรศการ·การแสดง·ป๊อปอัพ เพิ่มลงปฏิทินในคลิกเดียว",
   },
+  labels: {
+    homepage: "เว็บไซต์",
+    email: "อีเมล",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    tiktok: "Tiktok",
+    ticket_purchase: "ซื้อบัตรเข้างาน",
+    url: "URL",
+    address: "ที่อยู่",
+    phone: "เบอร์โทรศัพท์",
+  }
 };

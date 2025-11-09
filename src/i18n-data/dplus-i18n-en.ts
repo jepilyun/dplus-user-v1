@@ -22,4 +22,17 @@ export const dplusI18nEN = {
     og_image_alt:
       "dplus | Concerts·Festivals·Exhibitions·Shows·Pop-ups, Add in One Click",
   },
+  labels: {
+    homepage: "Website",
+    email: "Email",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    tiktok: "Tiktok",
+    ticket_purchase: "Ticket Purchase",
+    url: "URL",
+    address: "Address",
+    phone: "Phone",
+  }
 };

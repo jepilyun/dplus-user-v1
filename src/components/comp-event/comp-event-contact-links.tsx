@@ -11,6 +11,7 @@ import { IconInstagramRound } from "@/icons/icon-instagram-round";
 import { IconWebsiteRound } from "@/icons/icon-website-round";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { IconTicketRound } from "@/icons/icon-ticket-round";
+import { getDplusI18n } from "@/utils/get-dplus-i18n";
 
 type TEventMinimal = {
   address_native?: string | null;
@@ -34,11 +35,13 @@ type TLinkItem = {
   breakWords?: boolean;
 };
 
-export default function CompEventContactLinks({ event }: { event: TEventMinimal | null | undefined }) {
+export default function CompEventContactLinks({ event, langCode }: { event: TEventMinimal | null | undefined, langCode: string }) {
   const items = useMemo<TLinkItem[]>(() => {
     if (!event) return [];
 
     const list: TLinkItem[] = [];
+
+    const i18n = getDplusI18n(langCode);
 
     // 주소
     if (event.address_native) {
@@ -71,7 +74,7 @@ export default function CompEventContactLinks({ event }: { event: TEventMinimal 
       list.push({
         key: "homepage",
         icon: <IconHomepageRound className="h-12 w-12 text-gray-700" />,
-        text: event.homepage.replace(/^https?:\/\//i, ""),
+        text: i18n.labels.homepage,
         href: toAbsoluteUrl(event.homepage),
       });
     }
@@ -91,7 +94,7 @@ export default function CompEventContactLinks({ event }: { event: TEventMinimal 
       list.push({
         key: "youtube",
         icon: <IconYoutubeRound className="h-12 w-12 text-gray-700" />,
-        text: "Youtube",
+        text: i18n.labels.youtube,
         href: toYoutubeChannelUrl(event.youtube_ch_id),
       });
     }
@@ -101,7 +104,7 @@ export default function CompEventContactLinks({ event }: { event: TEventMinimal 
       list.push({
         key: "instagram",
         icon: <IconInstagramRound className="h-12 w-12 text-gray-700" />,
-        text: "Instagram",
+        text: i18n.labels.instagram,
         href: toInstagramUrl(event.instagram_id),
       });
     }
@@ -111,7 +114,7 @@ export default function CompEventContactLinks({ event }: { event: TEventMinimal 
       list.push({
         key: "ticket_purchase",
         icon: <IconTicketRound className="h-12 w-12 text-gray-700" />,
-        text: event.ticket_purchase.replace(/^https?:\/\//i, ""),
+        text: i18n.labels.ticket_purchase,
         href: toAbsoluteUrl(event.ticket_purchase),
       });
     }
@@ -121,7 +124,7 @@ export default function CompEventContactLinks({ event }: { event: TEventMinimal 
       list.push({
         key: "url",
         icon: <IconWebsiteRound className="h-12 w-12 text-gray-700" />,
-        text: "URL",
+        text: i18n.labels.url,
         href: event.url,
       });
     }

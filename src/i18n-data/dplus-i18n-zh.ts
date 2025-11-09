@@ -19,4 +19,17 @@ export const dplusI18nZH = {
     og_image_height: 630,
     og_image_alt: "dplus | 音乐会·庆典·展览·演出·快闪日程，一键添加",
   },
+  labels: {
+    homepage: "网站",
+    email: "电子邮件",
+    youtube: "Youtube",
+    instagram: "Instagram",
+    facebook: "Facebook",
+    twitter: "Twitter",
+    tiktok: "Tiktok",
+    ticket_purchase: "票券购买",
+    url: "URL",
+    address: "地址",
+    phone: "电话",
+  }
 };
