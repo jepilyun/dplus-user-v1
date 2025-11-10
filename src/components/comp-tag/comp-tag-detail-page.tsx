@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useTagPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { incrementTagViewCount } from "@/utils/increment-count";
 
 type TagPageState = {
   events: TMapTagEventWithEventInfo[];
@@ -33,6 +34,9 @@ export default function CompTagDetailPage({
   // ✅ 변경: 전용 hook 사용
   const { save, restore } = useTagPageRestoration(tagCode);
 
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
+
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +49,9 @@ export default function CompTagDetailPage({
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
+
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(0);
 
   const fetchTagDetail = async (restoredEvents?: TMapTagEventWithEventInfo[]) => {
     try {
@@ -62,6 +69,9 @@ export default function CompTagDetailPage({
   
       setTagDetail(db);
   
+      // ✅ view_count 업데이트
+      setViewCount(db?.tag?.view_count ?? 0);
+
       const initItems = db?.mapTagEvent?.items ?? [];
       
       // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
@@ -190,6 +200,16 @@ export default function CompTagDetailPage({
       setEventsLoading(false);
     }
   };
+
+  // 페이지 진입 시
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && tagCode) {
+      viewCountIncrementedRef.current = true;
+      incrementTagViewCount(tagCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [tagCode]);
 
   useEffect(() => {
     console.log('[Tag Mount] Component mounted, attempting restore...');

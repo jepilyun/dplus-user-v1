@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { incrementCategoryViewCount } from "@/utils/increment-count";
 
 type CategoryPageState = {
   events: TMapCategoryEventWithEventInfo[];
@@ -37,6 +38,9 @@ export default function CompCategoryDetailPage({
   // ✅ 변경: 전용 hook 사용
   const { save, restore } = useCategoryPageRestoration(categoryCode, countryCode);
 
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
+
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
@@ -58,6 +62,9 @@ export default function CompCategoryDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(initialData?.category.view_count ?? 0);
+
   const fetchCategoryDetail = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
     // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
     if (initialData && !restoredEvents) {
@@ -75,6 +82,10 @@ export default function CompCategoryDetailPage({
       }
   
       setCategoryDetail(res.dbResponse);
+
+      // ✅ view_count 업데이트
+      setViewCount(res.dbResponse?.category?.view_count ?? 0);
+
       const initItems = res?.dbResponse?.mapCategoryEvent?.items ?? [];
       
       // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
@@ -177,6 +188,16 @@ export default function CompCategoryDetailPage({
       setEventsLoading(false);
     }
   };
+
+  // 페이지 진입 시
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && categoryCode) {
+      viewCountIncrementedRef.current = true;
+      incrementCategoryViewCount(categoryCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [categoryCode]);
 
   useEffect(() => {
     console.log('[Category Mount] Component mounted, attempting restore...');

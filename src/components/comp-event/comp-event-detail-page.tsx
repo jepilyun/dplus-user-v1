@@ -10,7 +10,7 @@ import { detectDevice, DeviceType } from "@/utils/device-detector";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import { IconGoogleColor } from "@/icons/icon-google-color";
 import { IconApple } from "@/icons/icon-apple";
@@ -21,6 +21,8 @@ import { useRouter } from "next/navigation";
 import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
 import { IconCalendar } from "@/icons/icon-calendar";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
+import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
+
 
 /**
  * 이벤트 상세 페이지
@@ -31,11 +33,20 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const router = useRouter();
   const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
 
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
+
   const [error, setError] = useState<'not-found' | 'network' | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(initialData ?? null);
   const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventImageUrls(initialData.event) : []);
+
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(initialData?.event.view_count ?? 0);
+  const [savedCount, setSavedCount] = useState(initialData?.event.saved_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.event.shared_count ?? 0);
+
 
   const fetchEventDetail = async () => {
     // ✅ 초기 데이터가 있으면 fetch 생략
@@ -59,6 +70,12 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       } 
 
       setEventDetail(db);
+
+      // ✅ view_count 업데이트
+      setViewCount(db?.event?.view_count ?? 0);
+      setSavedCount(db?.event?.saved_count ?? 0);
+      setSharedCount(db?.event?.shared_count ?? 0);
+
       setImageUrls(getEventImageUrls(db.event));
       setError(null);
     } catch (e) {
@@ -70,7 +87,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
     }
   };
   
-  // 공유 기능 핸들러
+  // ✅ 공유 기능 핸들러 (shared_count 증가)
   const handleShareClick = async () => {
     const shareData = {
       title: eventDetail?.event.title || '이벤트 공유',
@@ -83,14 +100,42 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       try {
         await navigator.share(shareData);
         console.log('공유 성공');
+        
+        // ✅ 공유 성공 시 카운트 증가
+        const newCount = await incrementEventSharedCount(eventCode);
+        if (newCount !== null) {
+          setSharedCount(newCount);
+        }
       } catch (error) {
         console.error('공유 실패:', error);
       }
     } else {
-      // Web Share API가 지원되지 않을 경우, 대체 로직 구현 (예: 모달 띄우기)
-      // 여기서는 예시로 Twitter 공유 창을 띄웁니다.
+      // Web Share API가 지원되지 않을 경우
       const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareData.text)}&url=${encodeURIComponent(shareData.url)}`;
       window.open(twitterUrl, '_blank', 'width=600,height=400');
+      
+      // ✅ 트위터 공유 시에도 카운트 증가
+      const newCount = await incrementEventSharedCount(eventCode);
+      if (newCount !== null) {
+        setSharedCount(newCount);
+      }
+    }
+  };
+
+  // ✅ 캘린더 저장 핸들러 (saved_count 증가)
+  const handleCalendarSave = async (type: 'google' | 'apple' | 'ics') => {
+    const calendarEvent = generateCalendarEvent(eventDetail?.event ?? null);
+    
+    if (type === 'google') {
+      addToGoogleCalendar(calendarEvent);
+    } else {
+      addToCalendar(eventDetail?.event ?? null);
+    }
+
+    // ✅ 캘린더 저장 시 카운트 증가
+    const newCount = await incrementEventSavedCount(eventCode);
+    if (newCount !== null) {
+      setSavedCount(newCount);
     }
   };
 
@@ -106,7 +151,23 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
     }
   };
 
+  // ✅ 페이지 진입 시 view_count 증가 (한 번만)
   useEffect(() => {
+    const incrementViewCount = async () => {
+      if (!viewCountIncrementedRef.current && eventCode) {
+        viewCountIncrementedRef.current = true;
+        
+        const newCount = await incrementEventViewCount(eventCode);
+        if (newCount !== null) {
+          setViewCount(newCount);
+        }
+      }
+    };
+
+    incrementViewCount();
+  }, [eventCode]);
+
+    useEffect(() => {
     fetchEventDetail();
     setDeviceType(detectDevice());
   }, [eventCode]);
@@ -206,7 +267,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           {eventDetail?.event.title}
         </div>
       </div>
-      <div className="flex gap-4 justify-center">
+      {/* <div className="flex gap-4 justify-center">
         <BtnWithIcon01 
           title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
           icon={<IconGoogleColor />} 
@@ -219,6 +280,33 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
           icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
           onClick={() => addToCalendar(eventDetail?.event ?? null)}
+          width={22}
+          height={22}
+          minWidth={180}
+        />
+        <BtnWithIcon01 
+          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
+          icon={<IconShare />} 
+          onClick={handleShareClick} 
+          width={22} 
+          height={22} 
+          minWidth={180} 
+        />
+      </div> */}
+      {/* ✅ 버튼들 수정 */}
+      <div className="flex gap-4 justify-center">
+        <BtnWithIcon01 
+          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
+          icon={<IconGoogleColor />} 
+          onClick={() => handleCalendarSave('google')} 
+          width={22} 
+          height={22} 
+          minWidth={180} 
+        />
+        <BtnWithIcon01
+          title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
+          icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
+          onClick={() => handleCalendarSave(deviceType === 'ios' ? 'apple' : 'ics')}
           width={22}
           height={22}
           minWidth={180}

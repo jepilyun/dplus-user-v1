@@ -14,6 +14,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-carousel-stag";
 import { useStagPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { incrementStagViewCount } from "@/utils/increment-count";
 
 type StagPageState = {
   events: TMapStagEventWithEventInfo[];
@@ -37,6 +38,9 @@ export default function CompStagDetailPage({
 
   // ✅ 변경: 전용 hook 사용
   const { save, restore } = useStagPageRestoration(stagCode);
+
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
@@ -68,6 +72,9 @@ export default function CompStagDetailPage({
   );
   const hydratedFromRestoreRef = useRef(false);
 
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(initialData?.stag.view_count ?? 0);
+
   // ✅ 수정: 복원된 이벤트를 매개변수로 받음
   const fetchStagDetail = async (restoredEvents?: TMapStagEventWithEventInfo[]) => {
     // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
@@ -93,6 +100,9 @@ export default function CompStagDetailPage({
   
       setStagDetail(res.dbResponse);
       setImageUrls(getStagImageUrls(res.dbResponse.stag));
+
+      // ✅ view_count 업데이트
+      setViewCount(res.dbResponse?.stag?.view_count ?? 0);
   
       const initItems = res?.dbResponse?.mapStagEvent?.items ?? [];
       
@@ -216,6 +226,16 @@ export default function CompStagDetailPage({
       setEventsLoading(false);
     }
   };
+
+  // 페이지 진입 시
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && stagCode) {
+      viewCountIncrementedRef.current = true;
+      incrementStagViewCount(stagCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [stagCode]);
 
   useEffect(() => {
     console.log('[Stag Mount] Component mounted, attempting restore...');

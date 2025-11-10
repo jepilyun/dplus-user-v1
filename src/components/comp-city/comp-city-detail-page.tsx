@@ -14,6 +14,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-carousel-city";
 import { useCityPageRestoration } from "@/contexts/scroll-restoration-context";
+import { incrementCityViewCount } from "@/utils/increment-count";
 
 type CityPageState = {
   events: TMapCityEventWithEventInfo[];
@@ -35,6 +36,9 @@ export default function CompCityDetailPage({
 }) {
   const router = useRouter();
   const { save, restore } = useCityPageRestoration(cityCode);
+
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
@@ -59,6 +63,9 @@ export default function CompCityDetailPage({
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
+
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(initialData?.city.view_count ?? 0);
 
   // ✅ 수정: 복원된 이벤트를 매개변수로 받음
   const fetchCityDetail = async (restoredEvents?: TMapCityEventWithEventInfo[]) => {
@@ -85,7 +92,10 @@ export default function CompCityDetailPage({
   
       setCityDetail(res.dbResponse);
       setImageUrls(getCityImageUrls(res.dbResponse.city));
-      
+
+      // ✅ view_count 업데이트
+      setViewCount(res.dbResponse?.city?.view_count ?? 0);
+
       const initItems = res?.dbResponse?.mapCityEvent?.items ?? [];
       
       // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
@@ -208,6 +218,16 @@ export default function CompCityDetailPage({
       setEventsLoading(false);
     }
   };
+
+  // 페이지 진입 시
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && cityCode) {
+      viewCountIncrementedRef.current = true;
+      incrementCityViewCount(cityCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [cityCode]);
 
   // ✅ 수정: 복원된 데이터를 fetchCityDetail에 전달
   useEffect(() => {

@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
 
 type FolderPageState = {
   events: TMapFolderEventWithEventInfo[];
@@ -40,6 +41,9 @@ export default function CompFolderDetailPage({
   // ✅ 변경: 전용 hook 사용
   const { save, restore } = useFolderPageRestoration(folderCode);
 
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
+
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
@@ -63,6 +67,10 @@ export default function CompFolderDetailPage({
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
+
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(initialData?.folder.view_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.folder.shared_count ?? 0);
 
   const fetchFolderDetail = async (restoredEvents?: TMapFolderEventWithEventInfo[]) => {
     // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
@@ -137,7 +145,11 @@ export default function CompFolderDetailPage({
         
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
-        
+
+        // ✅ view_count 업데이트
+        setViewCount(db?.folder?.view_count ?? 0);
+        setSharedCount(db?.folder?.shared_count ?? 0);
+
         seenEventCodesRef.current.clear();
         finalEvents.forEach(item => {
           const code = item?.event_info?.event_code ?? item?.event_code;
@@ -176,6 +188,13 @@ export default function CompFolderDetailPage({
     if (navigator.share) {
       try {
         await navigator.share(shareData);
+        console.log('공유 성공');
+        
+        // ✅ 공유 성공 시 카운트 증가
+        const newCount = await incrementFolderSharedCount(folderCode);
+        if (newCount !== null) {
+          setSharedCount(newCount);
+        }
       } catch (error) {
         console.error("공유 실패:", error);
       }
@@ -208,6 +227,16 @@ export default function CompFolderDetailPage({
       setEventsLoading(false);
     }
   };
+
+  // 페이지 진입 시
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && folderCode) {
+      viewCountIncrementedRef.current = true;
+      incrementFolderViewCount(folderCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [folderCode]);
 
   useEffect(() => {
     console.log('[Folder Mount] Component mounted, attempting restore...');

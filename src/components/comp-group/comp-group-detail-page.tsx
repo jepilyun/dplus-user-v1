@@ -14,6 +14,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselGroup } from "../comp-image/hero-background-carousel-group";
 import { useGroupPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { incrementGroupSharedCount, incrementGroupViewCount } from "@/utils/increment-count";
 
 type GroupPageState = {
   events: TMapGroupEventWithEventInfo[];
@@ -37,6 +38,9 @@ export default function CompGroupDetailPage({
 
   // ✅ 변경: 전용 hook 사용
   const { save, restore } = useGroupPageRestoration(groupCode);
+
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
@@ -62,13 +66,17 @@ export default function CompGroupDetailPage({
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  const [viewCount, setViewCount] = useState(initialData?.group.view_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.group.shared_count ?? 0);
+
   const fetchGroupDetail = async (restoredEvents?: TMapGroupEventWithEventInfo[]) => {
     // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
     } 
-   
+
     try {
       const res = await reqGetGroupDetail(groupCode, langCode, 0, LIST_LIMIT.default);
   
@@ -87,6 +95,10 @@ export default function CompGroupDetailPage({
       setGroupDetail(res.dbResponse);
       setImageUrls(getGroupImageUrls(res.dbResponse.group));
   
+      // ✅ view_count 업데이트
+      setViewCount(res.dbResponse?.group?.view_count ?? 0);
+      setSharedCount(res.dbResponse?.group?.shared_count ?? 0);
+
       const initItems = res?.dbResponse?.mapGroupEvent?.items ?? [];
       
       // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
@@ -138,7 +150,7 @@ export default function CompGroupDetailPage({
         
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
-        
+
         seenEventCodesRef.current.clear();
         finalEvents.forEach(item => {
           const code = item?.event_info?.event_code ?? item?.event_code;
@@ -177,6 +189,13 @@ export default function CompGroupDetailPage({
     if (navigator.share) {
       try {
         await navigator.share(shareData);
+        console.log('공유 성공');
+        
+        // ✅ 공유 성공 시 카운트 증가
+        const newCount = await incrementGroupSharedCount(groupCode);
+        if (newCount !== null) {
+          setSharedCount(newCount);
+        }
       } catch (error) {
         console.error("공유 실패:", error);
       }
@@ -209,6 +228,16 @@ export default function CompGroupDetailPage({
       setEventsLoading(false);
     }
   };
+
+  // 페이지 진입 시
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && groupCode) {
+      viewCountIncrementedRef.current = true;
+      incrementGroupViewCount(groupCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [groupCode]);  
 
   useEffect(() => {
     console.log('[Group Mount] Component mounted, attempting restore...');

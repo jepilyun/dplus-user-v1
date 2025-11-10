@@ -17,6 +17,7 @@ import { CompLoadMore } from "../comp-common/comp-load-more";
 import Link from "next/link";
 import { getCityBgUrl } from "@/utils/get-city-bg-image";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
+import { incrementCountryViewCount } from "@/utils/increment-count";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -46,6 +47,9 @@ export default function CompCountryDetailPage({
 }) {
   const router = useRouter();
   const { save, restore } = useCountryPageRestoration(countryCode);
+
+  // ✅ 조회수 증가 여부 추적
+  const viewCountIncrementedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
@@ -84,6 +88,11 @@ export default function CompCountryDetailPage({
 
   const hydratedFromRestoreRef = useRef(false);
 
+  // ✅ 안전하게 초기값 설정
+  const [viewCount, setViewCount] = useState(
+    initialData?.country?.view_count ?? 0
+  );
+
   // 복원된 이벤트를 매개변수로 받음
   const fetchCountryDetail = async (restoredEvents?: TMapCountryEventWithEventInfo[]) => {
     // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
@@ -114,6 +123,9 @@ export default function CompCountryDetailPage({
       setImageUrls(getCountryImageUrls(res.dbResponse?.country as TCountryDetail));
       setHasCategories((res.dbResponse?.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse?.cities?.items?.length ?? 0) > 0);
+
+      // ✅ view_count 업데이트
+      setViewCount(res.dbResponse?.country?.view_count ?? 0);
   
       const initItems = res.dbResponse?.mapCountryEvent?.items ?? [];
       
@@ -235,6 +247,15 @@ export default function CompCountryDetailPage({
       setEventsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!viewCountIncrementedRef.current && countryCode) {
+      viewCountIncrementedRef.current = true;
+      incrementCountryViewCount(countryCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [countryCode]);
 
   // ✅ 수정: 복원된 데이터를 fetchCountryDetail에 전달
   useEffect(() => {
