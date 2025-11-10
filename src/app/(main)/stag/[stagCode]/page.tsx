@@ -8,6 +8,7 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { reqGetStagDetail } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 
 
@@ -148,15 +149,17 @@ export default async function StagDetailPage({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
+  const stagCode = params.stagCode;
 
-  // 여기에 서버 전용 로직(데이터 fetch 등) 수행
-  // const data = await fetch(...);
+  const response = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default).catch(() => null);
+  const initialData = response?.dbResponse ?? null;
 
   return (
     <CompStagDetailPage
       stagCode={params.stagCode}
       fullLocale={fullLocale}
       langCode={langCode}
+      initialData={initialData}
     />
   );
 }

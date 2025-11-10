@@ -4,6 +4,8 @@ import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { reqGetTodayList } from "@/actions/action";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 
 /**
@@ -64,15 +66,17 @@ export default async function TodayPage({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
+  const countryCode = params.countryCode?.[0] ?? "KR";
 
-  // 여기에 서버 전용 로직(데이터 fetch 등) 수행
-  // const data = await fetch(...);
+  const response = await reqGetTodayList(countryCode, 0, LIST_LIMIT.default).catch(() => null);
+  const initialData = response?.dbResponse ?? null;
 
   return (
     <CompTodayDetailPage 
       countryCode={params.countryCode}
       fullLocale={fullLocale}
       langCode={langCode}
+      initialData={initialData}
     />
   );
 }

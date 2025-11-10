@@ -1,7 +1,7 @@
 "use client";
 
 import { reqGetTodayList } from "@/actions/action";
-import { LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
+import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -45,11 +45,13 @@ export default function CompTodayDetailPage({
   countryCode,
   langCode,
   fullLocale,
+  initialData,
   defaultTz = "Asia/Seoul",
 }: {
   countryCode: string;
   langCode: string;
   fullLocale: string;
+  initialData: DplusGetListDataResponse<TEventCardForDateDetail> | null;
   defaultTz?: Tz;
 }) {
   const router = useRouter();
@@ -66,19 +68,32 @@ export default function CompTodayDetailPage({
   }, [defaultTz]);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // ✅ 렌더용(섹션 포함) 상태
-  const [eventsWithSections, setEventsWithSections] = useState<EventWithSection[]>([]);
-  const [eventsStart, setEventsStart] = useState(0);
-  const [eventsHasMore, setEventsHasMore] = useState(false);
-  const [eventsLoading, setEventsLoading] = useState(false);
+  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
   // ✅ 복원/중복 제어
-  const seenEventCodesRef = useRef<Set<string>>(new Set());
+  const seenEventCodesRef = useRef<Set<string>>(
+    new Set(
+      initialData?.items?.map(item => item.event_code).filter(Boolean) ?? []
+    )
+  );
   const requestIdRef = useRef(0);
   const nowYmdRef = useRef<string>("");
   const hydratedFromRestoreRef = useRef(false);
+
+  // ✅ 렌더용(섹션 포함) 상태
+  const [eventsWithSections, setEventsWithSections] = useState<EventWithSection[]>(
+    initialData?.items?.map(item => ({
+      ...item,
+      section: getSectionForDate(item.date ?? "", nowYmdRef.current, tz, lang)
+    })) ?? []
+  );
+  const [eventsStart, setEventsStart] = useState(
+    initialData?.items?.length ?? 0 // ✅ 초기 시작점 설정
+  );
+  const [eventsHasMore, setEventsHasMore] = useState(
+    Boolean(initialData?.hasMore) // ✅ 초기 hasMore 설정
+  );
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   useEffect(() => {
     nowYmdRef.current = todayYmdInTz(tz);
@@ -93,6 +108,12 @@ export default function CompTodayDetailPage({
   };
 
   const fetchTodayList = async (restoredRawEvents?: TEventCardForDateDetail[]) => {
+    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+    if (initialData && !restoredRawEvents) {
+      setLoading(false);
+      return;
+    }
+
     const reqId = ++requestIdRef.current;
     try {
       const res = await reqGetTodayList(countryCode, 0, LIST_LIMIT.default);
@@ -250,7 +271,10 @@ export default function CompTodayDetailPage({
       fetchTodayList(saved.rawEvents);
     } else {
       console.log('[Today Mount] No valid saved data found');
-      fetchTodayList();
+      // ✅ 초기 데이터가 있으면 fetch 생략
+      if (!initialData) {
+        fetchTodayList();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);

@@ -26,10 +26,12 @@ export default function CompStagDetailPage({
   stagCode,
   langCode,
   fullLocale,
+  initialData,
 }: {
   stagCode: string;
   langCode: string;
   fullLocale: string;
+  initialData: ResponseStagDetailForUserFront | null;
 }) {
   const router = useRouter();
 
@@ -37,21 +39,43 @@ export default function CompStagDetailPage({
   const { save, restore } = useStagPageRestoration(stagCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
-  const [stagDetail, setStagDetail] = useState<ResponseStagDetailForUserFront | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [stagDetail, setStagDetail] = useState<ResponseStagDetailForUserFront | null>(
+    initialData ?? null // ✅ 초기 데이터로 시작
+  );
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialData ? getStagImageUrls(initialData.stag) : [] // ✅ 초기 이미지도 설정
+  );
 
-  const [events, setEvents] = useState<TMapStagEventWithEventInfo[]>([]);
-  const [eventsStart, setEventsStart] = useState(0);
-  const [eventsHasMore, setEventsHasMore] = useState(false);
+  const [events, setEvents] = useState<TMapStagEventWithEventInfo[]>(
+    initialData?.mapStagEvent?.items ?? [] // ✅ 초기 이벤트도 설정
+  );
+  const [eventsStart, setEventsStart] = useState(
+    initialData?.mapStagEvent?.items?.length ?? 0 // ✅ 초기 시작점 설정
+  );
+  const [eventsHasMore, setEventsHasMore] = useState(
+    Boolean(initialData?.mapStagEvent?.hasMore) // ✅ 초기 hasMore 설정
+  );
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  const seenEventCodesRef = useRef<Set<string>>(new Set());
+  const seenEventCodesRef = useRef<Set<string>>(
+    new Set(
+      initialData?.mapStagEvent?.items
+        ?.map(item => item?.event_info?.event_code ?? item?.event_code)
+        .filter(Boolean) ?? []
+    )
+  );
   const hydratedFromRestoreRef = useRef(false);
 
   // ✅ 수정: 복원된 이벤트를 매개변수로 받음
   const fetchStagDetail = async (restoredEvents?: TMapStagEventWithEventInfo[]) => {
+    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+    if (initialData && !restoredEvents) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
   
@@ -217,7 +241,10 @@ export default function CompStagDetailPage({
       fetchStagDetail(saved.events);
     } else {
       console.log('[Stag Mount] No valid saved data found');
-      fetchStagDetail();
+      // ✅ 초기 데이터가 있으면 fetch 생략
+      if (!initialData) {
+        fetchStagDetail();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stagCode]);

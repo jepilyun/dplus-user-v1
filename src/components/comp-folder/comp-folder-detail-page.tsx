@@ -28,10 +28,12 @@ export default function CompFolderDetailPage({
   folderCode,
   langCode,
   fullLocale,
+  initialData,
 }: {
   folderCode: string;
   langCode: string;
   fullLocale: string;
+  initialData: ResponseFolderDetailForUserFront | null;
 }) {
   const router = useRouter();
 
@@ -39,20 +41,36 @@ export default function CompFolderDetailPage({
   const { save, restore } = useFolderPageRestoration(folderCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
-  const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(
+    initialData ?? null
+  );
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialData ? getFolderImageUrls(initialData.folder) : []
+  );
 
-  const [events, setEvents] = useState<TMapFolderEventWithEventInfo[]>([]);
-  const [eventsStart, setEventsStart] = useState(0);
-  const [eventsHasMore, setEventsHasMore] = useState(false);
+  const [events, setEvents] = useState<TMapFolderEventWithEventInfo[]>(
+    initialData?.folderEvent?.items ?? []
+  );
+  const [eventsStart, setEventsStart] = useState(
+    initialData?.folderEvent?.items?.length ?? 0
+  );
+  const [eventsHasMore, setEventsHasMore] = useState(
+    Boolean(initialData?.folderEvent?.hasMore)
+  );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
   const fetchFolderDetail = async (restoredEvents?: TMapFolderEventWithEventInfo[]) => {
+    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+    if (initialData && !restoredEvents) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await reqGetFolderDetail(folderCode, langCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
@@ -215,7 +233,10 @@ export default function CompFolderDetailPage({
       fetchFolderDetail(saved.events);
     } else {
       console.log('[Folder Mount] No valid saved data found');
-      fetchFolderDetail();
+      // ✅ 초기 데이터가 있으면 fetch 생략
+      if (!initialData) {
+        fetchFolderDetail();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [folderCode]);

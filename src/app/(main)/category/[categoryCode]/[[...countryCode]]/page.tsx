@@ -8,6 +8,7 @@ import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/actions/action";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 
 /**
@@ -112,9 +113,18 @@ export default async function CategoryDetailPage({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
+  const countryCode = params.countryCode?.[0] ?? "AA";
 
-  // 여기에 서버 전용 로직(데이터 fetch 등) 수행
-  // const data = await fetch(...);
+  // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
+  const response = await reqGetCategoryDetail(
+    countryCode,
+    params.categoryCode,
+    langCode,
+    0,
+    LIST_LIMIT.default
+  ).catch(() => null);
+
+  const initialData = response?.dbResponse ?? null;
 
   return (
     <CompCategoryDetailPage
@@ -122,6 +132,7 @@ export default async function CategoryDetailPage({
       countryCode={params.countryCode}
       fullLocale={fullLocale}
       langCode={langCode}
+      initialData={initialData}
     />
   );
 }

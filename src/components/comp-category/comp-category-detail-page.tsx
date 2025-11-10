@@ -24,11 +24,13 @@ export default function CompCategoryDetailPage({
   countryCode,
   langCode,
   fullLocale,
+  initialData,
 }: {
   categoryCode: string;
   countryCode: string;
   langCode: string;
   fullLocale: string;
+  initialData: ResponseCategoryDetailForUserFront | null;
 }) {
   const router = useRouter();
 
@@ -36,18 +38,33 @@ export default function CompCategoryDetailPage({
   const { save, restore } = useCategoryPageRestoration(categoryCode, countryCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
-  const [categoryDetail, setCategoryDetail] = useState<ResponseCategoryDetailForUserFront | null>(null);
-  const [events, setEvents] = useState<TMapCategoryEventWithEventInfo[]>([]);
-  const [eventsStart, setEventsStart] = useState(0);
-  const [eventsHasMore, setEventsHasMore] = useState(false);
+  const [categoryDetail, setCategoryDetail] = useState<ResponseCategoryDetailForUserFront | null>(
+    initialData ?? null // ✅ 초기 데이터로 시작
+  );
+
+  const [events, setEvents] = useState<TMapCategoryEventWithEventInfo[]>(
+    initialData?.mapCategoryEvent?.items ?? [] // ✅ 초기 이벤트도 설정
+  );
+  const [eventsStart, setEventsStart] = useState(
+    initialData?.mapCategoryEvent?.items?.length ?? 0 // ✅ 초기 시작점 설정
+  );
+  const [eventsHasMore, setEventsHasMore] = useState(
+    Boolean(initialData?.mapCategoryEvent?.hasMore) // ✅ 초기 hasMore 설정
+  );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
   const fetchCategoryDetail = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
+    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+    if (initialData && !restoredEvents) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
   
@@ -185,7 +202,10 @@ export default function CompCategoryDetailPage({
       fetchCategoryDetail(saved.events);
     } else {
       console.log('[Category Mount] No valid saved data found');
-      fetchCategoryDetail();
+      // ✅ 초기 데이터가 있으면 fetch 생략
+      if (!initialData) {
+        fetchCategoryDetail();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryCode, countryCode]);

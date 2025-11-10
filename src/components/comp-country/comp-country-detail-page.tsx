@@ -37,33 +37,61 @@ export default function CompCountryDetailPage({
   countryCode,
   fullLocale,
   langCode,
+  initialData,
 }: {
   countryCode: string;
   fullLocale: string;
   langCode: string;
+  initialData: ResponseCountryDetailForUserFront | null;
 }) {
   const router = useRouter();
   const { save, restore } = useCountryPageRestoration(countryCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
-  const [countryDetail, setCountryDetail] = useState<ResponseCountryDetailForUserFront | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [hasCategories, setHasCategories] = useState(false);
-  const [hasCities, setHasCities] = useState(false);
+  const [countryDetail, setCountryDetail] = useState<ResponseCountryDetailForUserFront | null>(
+    initialData ?? null // ✅ 초기 데이터로 시작
+  );
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialData ? getCountryImageUrls(initialData.country as TCountryDetail) : []
+  );
+  const [hasCategories, setHasCategories] = useState(
+    (initialData?.categories?.items?.length ?? 0) > 0
+  );
+  const [hasCities, setHasCities] = useState(
+    (initialData?.cities?.items?.length ?? 0) > 0
+  );
 
-  const seenEventCodesRef = useRef<Set<string>>(new Set());
+  const seenEventCodesRef = useRef<Set<string>>(
+    new Set(
+      initialData?.mapCountryEvent?.items
+        ?.map(item => item?.event_info?.event_code ?? item?.event_code)
+        .filter(Boolean) ?? []
+    )
+  );
 
-  const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>([]);
-  const [eventsStart, setEventsStart] = useState(0);
-  const [eventsHasMore, setEventsHasMore] = useState(false);
+  const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>(
+    initialData?.mapCountryEvent?.items ?? []
+  );
+  const [eventsStart, setEventsStart] = useState(
+    initialData?.mapCountryEvent?.items?.length ?? 0
+  );
+  const [eventsHasMore, setEventsHasMore] = useState(
+    Boolean(initialData?.mapCountryEvent?.hasMore)
+  );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const hydratedFromRestoreRef = useRef(false);
 
   // 복원된 이벤트를 매개변수로 받음
   const fetchCountryDetail = async (restoredEvents?: TMapCountryEventWithEventInfo[]) => {
+    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+    if (initialData && !restoredEvents) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
       console.log("res --->>>", res);
@@ -233,7 +261,10 @@ export default function CompCountryDetailPage({
       fetchCountryDetail(saved.events);
     } else {
       console.log('[Mount] No valid saved data found');
-      fetchCountryDetail();
+      // ✅ 초기 데이터가 있으면 fetch 생략
+      if (!initialData) {
+        fetchCountryDetail();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);

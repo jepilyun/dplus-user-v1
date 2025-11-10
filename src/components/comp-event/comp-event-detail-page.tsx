@@ -27,17 +27,23 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n";
  * @param param0 - 이벤트 ID, 언어 코드, 전체 로케일
  * @returns 이벤트 상세 페이지
  */
-export default function CompEventDetailPage({ eventCode, langCode, fullLocale }: { eventCode: string, langCode: string, fullLocale: string }) {
+export default function CompEventDetailPage({ eventCode, langCode, fullLocale, initialData }: { eventCode: string, langCode: string, fullLocale: string, initialData: ResponseEventDetailForUserFront | null }) {
   const router = useRouter();
   const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
 
   const [error, setError] = useState<'not-found' | 'network' | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(initialData ?? null);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventImageUrls(initialData.event) : []);
 
   const fetchEventDetail = async () => {
+    // ✅ 초기 데이터가 있으면 fetch 생략
+    if (initialData) {
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await reqGetEventDetail(eventCode, langCode);
       const db = res?.dbResponse;

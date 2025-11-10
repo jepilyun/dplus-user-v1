@@ -26,10 +26,12 @@ export default function CompGroupDetailPage({
   groupCode,
   langCode,
   fullLocale,
+  initialData,
 }: {
   groupCode: string;
   langCode: string;
   fullLocale: string;
+  initialData: ResponseGroupDetailForUserFront | null;
 }) {
   const router = useRouter();
 
@@ -37,20 +39,36 @@ export default function CompGroupDetailPage({
   const { save, restore } = useGroupPageRestoration(groupCode);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
 
-  const [groupDetail, setGroupDetail] = useState<ResponseGroupDetailForUserFront | null>(null);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [groupDetail, setGroupDetail] = useState<ResponseGroupDetailForUserFront | null>(
+    initialData ?? null // ✅ 초기 데이터로 시작
+  );
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialData ? getGroupImageUrls(initialData.group) : [] // ✅ 초기 이미지도 설정
+  );
 
-  const [events, setEvents] = useState<TMapGroupEventWithEventInfo[]>([]);
-  const [eventsStart, setEventsStart] = useState(0);
-  const [eventsHasMore, setEventsHasMore] = useState(false);
+  const [events, setEvents] = useState<TMapGroupEventWithEventInfo[]>(
+    initialData?.mapGroupEvent?.items ?? [] // ✅ 초기 이벤트도 설정
+  );
+  const [eventsStart, setEventsStart] = useState(
+    initialData?.mapGroupEvent?.items?.length ?? 0 // ✅ 초기 시작점 설정
+  );
+  const [eventsHasMore, setEventsHasMore] = useState(
+    Boolean(initialData?.mapGroupEvent?.hasMore) // ✅ 초기 hasMore 설정
+  );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
   const hydratedFromRestoreRef = useRef(false);
 
   const fetchGroupDetail = async (restoredEvents?: TMapGroupEventWithEventInfo[]) => {
+    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+    if (initialData && !restoredEvents) {
+      setLoading(false);
+      return;
+    } 
+   
     try {
       const res = await reqGetGroupDetail(groupCode, langCode, 0, LIST_LIMIT.default);
   
@@ -216,7 +234,10 @@ export default function CompGroupDetailPage({
       fetchGroupDetail(saved.events);
     } else {
       console.log('[Group Mount] No valid saved data found');
-      fetchGroupDetail();
+      // ✅ 초기 데이터가 있으면 fetch 생략
+      if (!initialData) {
+        fetchGroupDetail();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupCode]);

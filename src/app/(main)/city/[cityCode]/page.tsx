@@ -8,6 +8,7 @@ import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 
 
@@ -111,14 +112,22 @@ export default async function CityDetailPage({
 }) {
   const { fullLocale, langCode } = getRequestLocale();
 
-  // 여기에 서버 전용 로직(데이터 fetch 등) 수행
-  // const data = await fetch(...);
+  // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
+  const response = await reqGetCityDetail(
+    params.cityCode,
+    langCode,
+    0,
+    LIST_LIMIT.default
+  ).catch(() => null);
+
+  const initialData = response?.dbResponse ?? null;
 
   return (
     <CompCityDetailPage
       cityCode={params.cityCode}
       fullLocale={fullLocale}
       langCode={langCode}
+      initialData={initialData}
     />
   );
 }

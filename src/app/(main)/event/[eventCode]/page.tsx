@@ -113,14 +113,15 @@ export default async function EventDetailPage({
 }) {
   const { fullLocale, langCode } = getRequestLocale();
 
-  // 여기에 서버 전용 로직(데이터 fetch 등) 수행
-  // const data = await fetch(...);
+  const response = await reqGetEventDetail(params.eventCode, langCode);
+  const eventDetail = response?.dbResponse ?? null;
 
   return (
     <CompEventDetailPage
       eventCode={params.eventCode}
       fullLocale={fullLocale}
       langCode={langCode}
+      initialData={eventDetail}
     />
   );
 }
