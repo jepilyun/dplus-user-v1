@@ -22,6 +22,7 @@ import CompEventContactLinks from "@/components/comp-event/comp-event-contact-li
 import { IconCalendar } from "@/icons/icon-calendar";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
+import { CountdownTimer } from "@/components/comp-event/comp-event-countdown-timer";
 
 
 /**
@@ -42,11 +43,10 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(initialData ?? null);
   const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventImageUrls(initialData.event) : []);
 
-  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+    // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
   const [viewCount, setViewCount] = useState(initialData?.event.view_count ?? 0);
   const [savedCount, setSavedCount] = useState(initialData?.event.saved_count ?? 0);
   const [sharedCount, setSharedCount] = useState(initialData?.event.shared_count ?? 0);
-
 
   const fetchEventDetail = async () => {
     // ✅ 초기 데이터가 있으면 fetch 생략
@@ -240,9 +240,11 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       date-created-at={eventDetail?.event.created_at}
       date-updated-at={eventDetail?.event.updated_at}
     >
-      <div className="my-1 sm:my-2 md:my-3 text-center font-rubik font-bold text-6xl sm:text-7xl md:text-8xl">
-        {eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
-      </div>
+      {/* ✅ 타이머 컴포넌트 분리 */}
+      <CountdownTimer 
+        startAtUtc={eventDetail?.event.start_at_utc || ''}
+        ddayLabel={eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
+      />
       <CompCommonDatetime 
         datetime={eventDetail?.event.date ?? null}
         fullLocale={fullLocale}
