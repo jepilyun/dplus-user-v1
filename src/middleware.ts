@@ -46,13 +46,29 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${country}`, request.url));
   }
 
-  // ✅ /<2-letter> 형태도 국가코드로 간주해서 필터링
-  if (segs.length === 1 && /^[A-Za-z]{2}$/.test(firstSeg)) {
-    const code = firstSeg.toUpperCase();
-    if (!ALLOWED_COUNTRIES.includes(code)) {
-      return NextResponse.redirect(new URL(`/AA`, request.url));
+  // ✅ 첫 세그먼트가 1개일 때 (루트 레벨 경로)
+  if (segs.length === 1) {
+    const lowerFirst = firstSeg.toLowerCase();
+    
+    // ✅ 지원되는 경로면 통과 (date, event, folder 등)
+    if (SUPPORTED_PATH_PREFIXES.has(lowerFirst)) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
+    
+    const isTwoLetters = /^[A-Za-z]{2}$/.test(firstSeg);
+    
+    // ✅ 2글자 영문이면서 지원되는 prefix가 아닌 경우 → 국가 코드로 간주
+    if (isTwoLetters) {
+      const code = firstSeg.toUpperCase();
+      // 허용된 국가 코드면 통과, 아니면 AA로 리다이렉트
+      if (!ALLOWED_COUNTRIES.includes(code)) {
+        return NextResponse.redirect(new URL(`/AA`, request.url));
+      }
+      return NextResponse.next();
+    }
+    
+    // ✅ 2글자 영문도 아니고 지원되는 경로도 아님 → AA로 리다이렉트
+    return NextResponse.redirect(new URL(`/AA`, request.url));
   }
 
   // /date/:date  → /date/:date/:country(AA|KR)
@@ -96,12 +112,10 @@ export function middleware(request: NextRequest) {
     const category = segs[1];
     const current = (segs[2] || "").toUpperCase();
 
-    // 2글자 아니면/허용 외면 AA로
     const isTwoLetters = /^[A-Z]{2}$/.test(current);
     const target =
       isTwoLetters && ALLOWED_COUNTRIES.includes(current) ? current : "AA";
 
-    // 이미 올바르면 통과, 아니면 리다이렉트
     if (current !== target) {
       return NextResponse.redirect(
         new URL(`/category/${category}/${target}`, request.url),
@@ -126,11 +140,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/today/${country}`, request.url));
   }
 
-  if (SUPPORTED_PATH_PREFIXES.has(firstSeg)) {
+  // ✅ 그 외 지원되는 경로면 통과 (event/xxx, folder/xxx 등)
+  if (SUPPORTED_PATH_PREFIXES.has(firstSeg.toLowerCase())) {
     return NextResponse.next();
   }
 
-  return NextResponse.next();
+  // ✅ 여기까지 왔다면 알 수 없는 경로 → AA로 리다이렉트
+  return NextResponse.redirect(new URL(`/AA`, request.url));
 }
 
 export const config = {
