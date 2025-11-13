@@ -34,18 +34,18 @@ export default function BtnWithIcon01({
         "& .MuiButton-startIcon svg": { width: width, height: height },
         
         // 768px 이하에서 텍스트 숨기고 패딩 조정
-        "@media (max-width: 768px)": {
-          minWidth: "64px",
-          minHeight: "64px",
-          px: 2, // 패딩 줄임
-          "& .button-text": {
-            display: "none", // 텍스트 숨김
-          },
-          "& .MuiButton-startIcon": {
-            marginRight: 0, // 아이콘 오른쪽 마진 제거
-            marginLeft: 0, // 아이콘 왼쪽 마진 제거
-          },
-        },
+        // "@media (max-width: 768px)": {
+        //   minWidth: "64px",
+        //   minHeight: "64px",
+        //   px: 2, // 패딩 줄임
+        //   "& .button-text": {
+        //     display: "none", // 텍스트 숨김
+        //   },
+        //   "& .MuiButton-startIcon": {
+        //     marginRight: 0, // 아이콘 오른쪽 마진 제거
+        //     marginLeft: 0, // 아이콘 왼쪽 마진 제거
+        //   },
+        // },
       }}
       startIcon={icon ?? null}
       onClick={onClick}

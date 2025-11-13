@@ -14,9 +14,11 @@ export default function TopNavMain() {
       <Link href="/">
         <DplusLogo className="w-8 h-8" />
       </Link>
+      <Link href="/">
       <div className="text-lg sm:text-2xl font-gamja-flower">
         중요한 날들 놓치지 마세요, 디플러스
       </div>
+      </Link>
     </nav>
   );
 }

@@ -49,7 +49,7 @@ export default function CompCommonDdayItem({
 
   return (
     <Link href={`/event/${code}`}>
-      <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center p-4 rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
+      <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center p-4 rounded-sm sm:rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
           style={{ backgroundColor: bg }}
@@ -64,9 +64,9 @@ export default function CompCommonDdayItem({
             </span>
           </div>
         </div>
-
-        {/* 나머지 코드 동일 */}
+  
         <div className="flex flex-col flex-grow gap-0">
+          {/* 날짜 */}
           <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
             <span>
               {event?.event_info?.date
@@ -91,7 +91,8 @@ export default function CompCommonDdayItem({
               </span>
             )}
           </div>
-
+  
+          {/* 제목 & 시간 */}
           <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200 group-hover:text-gray-800">
             {hasValidTime(event?.event_info?.time) && (
               <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
@@ -102,13 +103,34 @@ export default function CompCommonDdayItem({
               </span>
             )}
             <span>{event?.event_info?.title}</span>
-            <span>{JSON.stringify(event?.event_info?.city?.name_native)}</span>
-            {event?.event_info?.categories?.map((category) => (
-              <span key={category.category_code}>{category.name_display}</span>
-            ))}
           </div>
-        </div>
 
+          {/* ✅ City & Categories 태그 - 클릭 가능 */}
+          {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
+            <div className="mt-1 flex items-center gap-1 flex-wrap">
+              {event?.event_info?.city && (
+                <Link 
+                  href={`/city/${event.event_info.city.city_code}`}
+                  onClick={(e) => e.stopPropagation()} // ✅ 부모 Link 클릭 방지
+                  className="text-xs md:text-sm bg-tag-city-for-list hover:opacity-80 transition-opacity"
+                >
+                  {event.event_info.city.name_native}
+                </Link>
+              )}
+              {event?.event_info?.categories?.map((category) => (
+                <Link
+                  key={category.category_code}
+                  href={`/category/${category.category_code}`}
+                  onClick={(e) => e.stopPropagation()} // ✅ 부모 Link 클릭 방지
+                  className="text-xs md:text-sm bg-tag-category-for-list hover:opacity-80 transition-opacity"
+                >
+                  {category.name_display}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+  
         {checkIfThumbnailExists(event) && (
           <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
             <Image

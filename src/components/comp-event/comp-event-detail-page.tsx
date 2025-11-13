@@ -296,14 +296,14 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         />
       </div> */}
       {/* ✅ 버튼들 수정 */}
-      <div className="flex gap-4 justify-center">
+      <div className="px-6 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 justify-center">
         <BtnWithIcon01 
           title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
           icon={<IconGoogleColor />} 
           onClick={() => handleCalendarSave('google')} 
           width={22} 
           height={22} 
-          minWidth={180} 
+          minWidth={240} 
         />
         <BtnWithIcon01
           title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
@@ -311,7 +311,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           onClick={() => handleCalendarSave(deviceType === 'ios' ? 'apple' : 'ics')}
           width={22}
           height={22}
-          minWidth={180}
+          minWidth={240}
         />
         <BtnWithIcon01 
           title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
@@ -319,7 +319,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           onClick={handleShareClick} 
           width={22} 
           height={22} 
-          minWidth={180} 
+          minWidth={240} 
         />
       </div>
       <HeroImageSlider

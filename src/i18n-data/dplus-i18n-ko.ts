@@ -36,9 +36,9 @@ export const dplusI18nKO = {
     phone: "전화번호",
   },
   detail: {
-    google_calendar: "구글 캘린더",
-    apple_calendar: "애플 캘린더",
-    ics_download: "일정 다운로드",
+    google_calendar: "구글 캘린더에 저장하기",
+    apple_calendar: "애플 캘린더에 저장하기",
+    ics_download: "일정 파일 다운로드",
     share: "공유하기",
   }
 };
