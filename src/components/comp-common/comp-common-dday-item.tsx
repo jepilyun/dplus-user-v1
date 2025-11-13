@@ -1,3 +1,5 @@
+"use client";
+
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
 import { computeBadgeColors } from "@/utils/color-generator";
