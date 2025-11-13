@@ -102,6 +102,10 @@ export default function CompCommonDdayItem({
               </span>
             )}
             <span>{event?.event_info?.title}</span>
+            <span>{JSON.stringify(event?.event_info?.city?.name_native)}</span>
+            {event?.event_info?.categories?.map((category) => (
+              <span key={category.category_code}>{category.name_display}</span>
+            ))}
           </div>
         </div>
 

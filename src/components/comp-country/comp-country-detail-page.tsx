@@ -260,7 +260,7 @@ export default function CompCountryDetailPage({
   useEffect(() => {
     console.log('[Mount] Component mounted, attempting restore...');
     const saved = restore<CountryPageState>();
-    console.log("restore>>>>>>>>>>>", saved);
+
     console.log('[Mount] Restored data:', {
       hasSaved: !!saved,
       eventsCount: saved?.events?.length || 0,
