@@ -649,9 +649,10 @@ export const apiUrlCountry = (
       if (
         optionalParams?.countryCode &&
         typeof optionalParams?.start === "number" &&
-        typeof optionalParams?.limit === "number"
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
       ) {
-        path = `/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,

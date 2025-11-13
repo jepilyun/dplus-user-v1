@@ -720,17 +720,19 @@ export const reqGetCountryDetail = async (
  * @param countryCode
  * @param start
  * @param limit
+ * @param langCode
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetCountryEvents = async (
   countryCode: string,
   start: number,
   limit: number,
+  langCode: string,
 ): Promise<
   ResponseDplusAPI<DplusGetListDataResponse<TMapCountryEventWithEventInfo>>
 > => {
   const res = await fetch(
-    apiUrlCountry("eventsGet", { countryCode, start, limit }),
+    apiUrlCountry("eventsGet", { countryCode, start, limit, langCode }),
     {
       method: "GET",
       credentials: "include",

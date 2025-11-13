@@ -230,7 +230,7 @@ export default function CompCountryDetailPage({
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
     try {
-      const res = await reqGetCountryEvents(countryCode, eventsStart, LIST_LIMIT.default);
+      const res = await reqGetCountryEvents(countryCode, eventsStart, LIST_LIMIT.default, langCode);
 
       const fetchedItems = res?.dbResponse?.items ?? [];
       const newItems = fetchedItems.filter((it: TMapCountryEventWithEventInfo) => {
