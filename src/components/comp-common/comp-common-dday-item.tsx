@@ -5,6 +5,7 @@ import { getDdayLabel } from "@/utils/dday-label";
 import { computeBadgeColors } from "@/utils/color-generator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react"; // ✅ 추가
 import { TMapCategoryEventWithEventInfo, TMapCityEventWithEventInfo, TMapCountryEventWithEventInfo, TMapFolderEventWithEventInfo, TMapGroupEventWithEventInfo, TMapStagEventWithEventInfo, TMapTagEventWithEventInfo } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
@@ -16,6 +17,13 @@ export default function CompCommonDdayItem({
   fullLocale,
 }: { event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo; fullLocale: string }) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false); // ✅ 추가
+
+  // ✅ 클라이언트 마운트 감지
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const code = event?.event_info?.event_code ?? event?.event_code ?? "default";
   const { bg, fg } = computeBadgeColors(
     event?.event_info?.date ?? null,
@@ -33,7 +41,6 @@ export default function CompCommonDdayItem({
     return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
   };
 
-  // D-day 레이블과 폰트 크기 계산
   const ddayLabel = event?.event_info?.date
     ? getDdayLabel(calculateDaysFromToday(event?.event_info?.date))
     : "";
@@ -51,9 +58,7 @@ export default function CompCommonDdayItem({
     return "text-[10px] sm:text-xs md:text-base";
   };
 
-  // ✅ 전체 카드 클릭 핸들러
   const handleCardClick = (e: React.MouseEvent) => {
-    // 태그나 다른 Link를 클릭한 경우 무시
     const target = e.target as HTMLElement;
     if (target.closest('a[data-tag-link]')) {
       return;
@@ -85,7 +90,7 @@ export default function CompCommonDdayItem({
       <div className="flex flex-col flex-grow gap-0">
         {/* 날짜 */}
         <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
-          <span>
+          <span suppressHydrationWarning> {/* ✅ hydration 경고 억제 */}
             {event?.event_info?.date
               ? formatDateTime(
                   new Date(event?.event_info?.date),
@@ -99,9 +104,10 @@ export default function CompCommonDdayItem({
                 )
               : ""}
           </span>
-          {hasValidTime(event?.event_info?.time) && (
+          {/* ✅ 클라이언트에서만 시간 표시 */}
+          {mounted && hasValidTime(event?.event_info?.time) && (
             <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
-              {formatTimeOnly(combinedDate, "ko-KR", null, null, {
+              {formatTimeOnly(combinedDate, fullLocale, null, null, {
                 timeFormat: "12h",
                 compactTime: true
               })}
@@ -111,9 +117,10 @@ export default function CompCommonDdayItem({
 
         {/* 제목 & 시간 */}
         <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200 group-hover:text-gray-800">
-          {hasValidTime(event?.event_info?.time) && (
+          {/* ✅ 클라이언트에서만 시간 표시 */}
+          {mounted && hasValidTime(event?.event_info?.time) && (
             <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
-              {formatTimeOnly(combinedDate, "ko-KR", null, null, {
+              {formatTimeOnly(combinedDate, fullLocale, null, null, {
                 timeFormat: "12h",
                 compactTime: true
               })}
@@ -122,13 +129,13 @@ export default function CompCommonDdayItem({
           <span>{event?.event_info?.title}</span>
         </div>
 
-        {/* ✅ City & Categories 태그 - 독립적인 Link */}
+        {/* City & Categories 태그 */}
         {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
           <div className="mt-1 flex items-center gap-1 flex-wrap">
             {event?.event_info?.city && (
               <Link 
                 href={`/city/${event.event_info.city.city_code}`}
-                data-tag-link // ✅ 태그임을 표시
+                data-tag-link
                 className="text-xs md:text-sm bg-tag-city-for-list hover:opacity-80 transition-opacity"
               >
                 {event.event_info.city.name_native}
@@ -138,7 +145,7 @@ export default function CompCommonDdayItem({
               <Link
                 key={category.category_code}
                 href={`/category/${category.category_code}`}
-                data-tag-link // ✅ 태그임을 표시
+                data-tag-link
                 className="text-xs md:text-sm bg-tag-category-for-list hover:opacity-80 transition-opacity"
               >
                 {category.name_display}
