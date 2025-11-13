@@ -103,7 +103,6 @@ export default function CompCountryDetailPage({
 
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
-      console.log("res --->>>", res);
       
       const isEmptyObj =
         !res?.success ||
