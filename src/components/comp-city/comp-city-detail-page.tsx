@@ -202,7 +202,7 @@ export default function CompCityDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCityEvents(cityCode, eventsStart, LIST_LIMIT.default);
+      const res = await reqGetCityEvents(cityCode, eventsStart, LIST_LIMIT.default, langCode);
       const fetchedItems = res?.dbResponse?.items ?? [];
       const newItems = fetchedItems.filter((it: TMapCityEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

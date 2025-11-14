@@ -276,9 +276,10 @@ export const apiUrlCity = (
       if (
         optionalParams?.cityCode &&
         typeof optionalParams?.start === "number" &&
-        typeof optionalParams?.limit === "number"
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
       ) {
-        path = `/api/city/events/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/city/events/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
@@ -638,7 +639,7 @@ export const apiUrlCountry = (
         typeof optionalParams?.limit === "number" &&
         optionalParams?.langCode
       ) {
-        path = `/api/country/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
+        path = `/api/country/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
@@ -652,7 +653,7 @@ export const apiUrlCountry = (
         typeof optionalParams?.limit === "number" &&
         optionalParams?.langCode
       ) {
-        path = `/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
+        path = `/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,

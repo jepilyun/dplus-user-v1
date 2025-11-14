@@ -257,7 +257,7 @@ export const reqGetCityDetail = async (
     method: "GET",
     credentials: "include",
     next: { 
-      revalidate: 14400, // ✅ 4시간 캐시
+      revalidate: 7200, // ✅ 2시간 캐시
       tags: [`city-${cityCode}-${langCode}`]
     }
   });
@@ -269,16 +269,18 @@ export const reqGetCityDetail = async (
  * @param cityCode
  * @param start
  * @param limit
+ * @param langCode
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetCityEvents = async (
   cityCode: string,
   start: number,
   limit: number,
+  langCode: string,
 ): Promise<
   ResponseDplusAPI<DplusGetListDataResponse<TMapCityEventWithEventInfo>>
 > => {
-  const res = await fetch(apiUrlCity("eventsGet", { cityCode, start, limit }), {
+  const res = await fetch(apiUrlCity("eventsGet", { cityCode, start, limit, langCode }), {
     method: "GET",
     credentials: "include",
     next: { 
