@@ -1,5 +1,5 @@
 // app/[[...countryCode]]/page.tsx
-export const revalidate = 14400;
+export const revalidate = 10;
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";

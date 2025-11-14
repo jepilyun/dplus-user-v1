@@ -26,31 +26,31 @@ interface ShareModalProps {
 const socialPlatforms: { platform: SocialPlatform; icon: React.ReactNode; label: string; color: string }[] = [
   {
     platform: 'twitter',
-    icon: <IconTwitter color="#FFFFFF" />,
+    icon: <IconTwitter className="w-6 h-6" color="white" />,
     label: 'X (Twitter)',
     color: '#000000'
   },
   {
     platform: 'facebook',
-    icon: <IconFacebook color="#FFFFFF" />,
+    icon: <IconFacebook className="w-6 h-6" color="white" />,
     label: 'Facebook',
     color: '#1877F2'
   },
   {
     platform: 'threads',
-    icon: <IconThreads color="#FFFFFF" />,
+    icon: <IconThreads className="w-6 h-6" color="white" />,
     label: 'Threads',
     color: '#000000'
   },
   {
     platform: 'linkedin',
-    icon: <IconLinkedIn color="#FFFFFF" />,
+    icon: <IconLinkedIn className="w-6 h-6" color="white" />,
     label: 'LinkedIn',
     color: '#0A66C2'
   },
   {
     platform: 'whatsapp',
-    icon: <IconWhatsApp color="#FFFFFF" />,
+    icon: <IconWhatsApp className="w-6 h-6" color="white" />,
     label: 'WhatsApp',
     color: '#25D366'
   }

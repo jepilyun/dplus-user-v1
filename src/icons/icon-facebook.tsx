@@ -5,10 +5,9 @@ export const IconFacebook = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="currentColor"  // ✅ 추가
-      {...props} 
-      className="w-8 h-8"  // ✅ 크기 조정
+      viewBox="0 0 24 24"  // ✅ 통일
+      fill="currentColor"
+      {...props}
     >
       <desc>
         Facebook Streamline Icon: https://streamlinehq.com
