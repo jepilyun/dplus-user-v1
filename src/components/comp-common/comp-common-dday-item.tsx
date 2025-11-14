@@ -17,9 +17,8 @@ export default function CompCommonDdayItem({
   fullLocale,
 }: { event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo; fullLocale: string }) {
   const router = useRouter();
-  const [mounted, setMounted] = useState(false); // ✅ 추가
+  const [mounted, setMounted] = useState(false);
 
-  // ✅ 클라이언트 마운트 감지
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -67,106 +66,123 @@ export default function CompCommonDdayItem({
   };
 
   return (
-    <div 
-      onClick={handleCardClick}
-      className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center p-4 rounded-sm sm:rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200 cursor-pointer" 
-      data-event-code={code}
-    >
-      <div
-        className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
-        style={{ backgroundColor: bg }}
-        aria-label="D-day badge"
+    <div className="group m-auto w-full cursor-pointer" data-event-code={code}>
+      {/* ✅ 기존 카드 레이아웃 */}
+      <div 
+        onClick={handleCardClick}
+        className="flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center p-4 rounded-sm sm:rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200"
       >
         <div
-          className="w-full h-full flex items-center justify-center p-2 md:p-3"
-          style={{ color: fg }}
+          className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
+          style={{ backgroundColor: bg }}
+          aria-label="D-day badge"
         >
-          <span className={`font-rubik font-bold tracking-tight ${getDdayFontSize(ddayLabel)}`}>
-            {ddayLabel}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-col flex-grow gap-0">
-        {/* 날짜 */}
-        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
-          <span suppressHydrationWarning> {/* ✅ hydration 경고 억제 */}
-            {event?.event_info?.date
-              ? formatDateTime(
-                  new Date(event?.event_info?.date),
-                  fullLocale,
-                  null,
-                  null,
-                  {
-                    includeTime: false,
-                    style: 'long'
-                  }
-                )
-              : ""}
-          </span>
-          {/* ✅ 클라이언트에서만 시간 표시 */}
-          {mounted && hasValidTime(event?.event_info?.time) && (
-            <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
-              {formatTimeOnly(combinedDate, fullLocale, null, null, {
-                timeFormat: "12h",
-                compactTime: true
-              })}
+          <div
+            className="w-full h-full flex items-center justify-center p-2 md:p-3"
+            style={{ color: fg }}
+          >
+            <span className={`font-rubik font-bold tracking-tight ${getDdayFontSize(ddayLabel)}`}>
+              {ddayLabel}
             </span>
-          )}
+          </div>
         </div>
 
-        {/* 제목 & 시간 */}
-        <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200 group-hover:text-gray-800">
-          {/* ✅ 클라이언트에서만 시간 표시 */}
-          {mounted && hasValidTime(event?.event_info?.time) && (
-            <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
-              {formatTimeOnly(combinedDate, fullLocale, null, null, {
-                timeFormat: "12h",
-                compactTime: true
-              })}
+        <div className="flex flex-col flex-grow gap-0">
+          {/* 날짜 */}
+          <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
+            <span suppressHydrationWarning>
+              {event?.event_info?.date
+                ? formatDateTime(
+                    new Date(event?.event_info?.date),
+                    fullLocale,
+                    null,
+                    null,
+                    {
+                      includeTime: false,
+                      style: 'long'
+                    }
+                  )
+                : ""}
             </span>
-          )}
-          <span>{event?.event_info?.title}</span>
-        </div>
-
-        {/* City & Categories 태그 */}
-        {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
-          <div className="mt-1 flex items-center gap-1 flex-wrap">
-            {event?.event_info?.city && (
-              <Link 
-                href={`/city/${event.event_info.city.city_code}`}
-                data-tag-link
-                className="text-xs md:text-sm bg-tag-city-for-list hover:opacity-80 transition-opacity"
-              >
-                {event.event_info.city.name_native}
-              </Link>
+            {mounted && hasValidTime(event?.event_info?.time) && (
+              <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
+                {formatTimeOnly(combinedDate, fullLocale, null, null, {
+                  timeFormat: "12h",
+                  compactTime: true
+                })}
+              </span>
             )}
-            {event?.event_info?.categories?.map((category) => (
-              <Link
-                key={category.category_code}
-                href={`/category/${category.category_code}`}
-                data-tag-link
-                className="text-xs md:text-sm bg-tag-category-for-list hover:opacity-80 transition-opacity"
-              >
-                {category.name_display}
-              </Link>
-            ))}
+          </div>
+
+          {/* 제목 & 시간 */}
+          <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200 group-hover:text-gray-800">
+            {mounted && hasValidTime(event?.event_info?.time) && (
+              <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs sm:text-sm md:text-base">
+                {formatTimeOnly(combinedDate, fullLocale, null, null, {
+                  timeFormat: "12h",
+                  compactTime: true
+                })}
+              </span>
+            )}
+            <span>{event?.event_info?.title}</span>
+          </div>
+
+          {/* City & Categories 태그 */}
+          {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
+            <div className="mt-1 flex items-center gap-1 flex-wrap">
+              {event?.event_info?.city && (
+                <Link 
+                  href={`/city/${event.event_info.city.city_code}`}
+                  data-tag-link
+                  className="text-xs md:text-sm bg-tag-city-for-list hover:opacity-80 transition-opacity"
+                >
+                  {event.event_info.city.name_native}
+                </Link>
+              )}
+              {event?.event_info?.categories?.map((category) => (
+                <Link
+                  key={category.category_code}
+                  href={`/category/${category.category_code}`}
+                  data-tag-link
+                  className="text-xs md:text-sm bg-tag-category-for-list hover:opacity-80 transition-opacity"
+                >
+                  {category.name_display}
+                </Link>
+              ))}
+            </div>
+          )}
+          {/* ✅ 모바일: 직사각형 이미지 (상단) */}
+          {checkIfThumbnailExists(event) && (
+            <div 
+              onClick={handleCardClick}
+              className="sm:hidden w-full aspect-[16/9] rounded-lg overflow-hidden mt-2 mb-3"
+            >
+              <Image
+                src={generateStorageImageUrl("events", getThumbnailUrl(event) || null) || ""}
+                alt={event?.event_info?.title ?? "thumbnail"}
+                width={600}
+                height={338}
+                className="w-full h-full object-cover"
+                sizes="100vw"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* ✅ 데스크톱: 원형 썸네일 (우측) */}
+        {checkIfThumbnailExists(event) && (
+          <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
+            <Image
+              src={generateStorageImageUrl("events", getThumbnailUrl(event) || null) || ""}
+              alt={event?.event_info?.title ?? "thumbnail"}
+              width={128}
+              height={128}
+              className="w-full h-full object-cover"
+              sizes="(min-width: 768px) 8rem, 6rem"
+            />
           </div>
         )}
       </div>
-
-      {checkIfThumbnailExists(event) && (
-        <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
-          <Image
-            src={generateStorageImageUrl("events", getThumbnailUrl(event) || null) || ""}
-            alt={event?.event_info?.title ?? "thumbnail"}
-            width={128}
-            height={128}
-            className="w-full h-full object-cover"
-            sizes="(min-width: 768px) 8rem, 6rem"
-          />
-        </div>
-      )}
     </div>
   );
 }

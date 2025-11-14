@@ -37,5 +37,7 @@ export const dplusI18nTW = {
     apple_calendar: "新增至 Apple 日曆",
     ics_download: "下載日曆檔案",
     share: "分享",
+    copy_link: "複製連結",
+    link_copied: "連結已複製",
   }
 };

@@ -23,6 +23,7 @@ import { IconCalendar } from "@/icons/icon-calendar";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
 import { CountdownTimer } from "@/components/comp-event/comp-event-countdown-timer";
+import ShareModal from "../comp-share/comp-share-modal";
 
 
 /**
@@ -33,7 +34,7 @@ import { CountdownTimer } from "@/components/comp-event/comp-event-countdown-tim
 export default function CompEventDetailPage({ eventCode, langCode, fullLocale, initialData }: { eventCode: string, langCode: string, fullLocale: string, initialData: ResponseEventDetailForUserFront | null }) {
   const router = useRouter();
   const [deviceType, setDeviceType] = useState<DeviceType>('desktop');
-
+  // console.log('initialData', initialData);
   // ✅ 조회수 증가 여부 추적
   const viewCountIncrementedRef = useRef(false);
 
@@ -47,6 +48,8 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const [viewCount, setViewCount] = useState(initialData?.event.view_count ?? 0);
   const [savedCount, setSavedCount] = useState(initialData?.event.saved_count ?? 0);
   const [sharedCount, setSharedCount] = useState(initialData?.event.shared_count ?? 0);
+  
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const fetchEventDetail = async () => {
     // ✅ 초기 데이터가 있으면 fetch 생략
@@ -86,14 +89,18 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       setLoading(false);
     }
   };
-  
-  // ✅ 공유 기능 핸들러 (shared_count 증가)
+
+  // ✅ 공유 기능 핸들러 (개선)
   const handleShareClick = async () => {
     const shareData = {
       title: eventDetail?.event.title || '이벤트 공유',
       text: eventDetail?.event.description || '이벤트 정보를 확인해보세요!',
       url: window.location.href,
     };
+
+    // ✅ 테스트를 위해 항상 모달 표시
+    // setShowShareModal(true);
+    // return;
 
     // Web Share API 지원 여부 확인
     if (navigator.share) {
@@ -110,15 +117,19 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         console.error('공유 실패:', error);
       }
     } else {
-      // Web Share API가 지원되지 않을 경우
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareData.text)}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, '_blank', 'width=600,height=400');
-      
-      // ✅ 트위터 공유 시에도 카운트 증가
-      const newCount = await incrementEventSharedCount(eventCode);
-      if (newCount !== null) {
-        setSharedCount(newCount);
-      }
+      // ✅ Web Share API가 지원되지 않을 경우 모달 표시
+      setShowShareModal(true);
+    }
+  };
+
+  // ✅ 소셜 미디어 공유 콜백
+  const handleSocialShare = async (platform: string) => {
+    console.log(`${platform}으로 공유`);
+    
+    // ✅ 공유 카운트 증가
+    const newCount = await incrementEventSharedCount(eventCode);
+    if (newCount !== null) {
+      setSharedCount(newCount);
     }
   };
 
@@ -235,134 +246,122 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   }
 
   return (
-    <div className="flex flex-col gap-8"
-      data-event-code={eventDetail?.event.event_code}
-      date-created-at={eventDetail?.event.created_at}
-      date-updated-at={eventDetail?.event.updated_at}
-    >
-      {/* ✅ 타이머 컴포넌트 분리 */}
-      <CountdownTimer 
-        startAtUtc={eventDetail?.event.start_at_utc || ''}
-        ddayLabel={eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
-      />
-      <CompCommonDatetime 
-        datetime={eventDetail?.event.date ?? null}
-        fullLocale={fullLocale}
-        time={eventDetail?.event.time ?? null}
-        isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
-      />
-      <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 justify-center items-center">
-        <HeadlineTagsDetail
-          targetCountryCode={eventDetail?.event.target_country_code || null}
-          targetCountryName={eventDetail?.event.target_country_native || null}
-          targetCityCode={eventDetail?.event.target_city_code || null}
-          targetCityName={eventDetail?.event.target_city_native || null}
-          categories={eventDetail?.mapCategoryEvent?.items ?? null}
-          langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
+    <>
+      <div className="flex flex-col gap-8"
+        data-event-code={eventDetail?.event.event_code}
+        date-created-at={eventDetail?.event.created_at}
+        date-updated-at={eventDetail?.event.updated_at}
+      >
+        {/* ✅ 타이머 컴포넌트 분리 */}
+        <CountdownTimer 
+          startAtUtc={eventDetail?.event.start_at_utc || ''}
+          ddayLabel={eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
         />
-        <div
-          id="event-title"
-          className="py-3 text-center px-4 sm:px-6 sm:py-4 md:px-8 md:py-5 lg:px-10 lg:py-6 font-black
-                    text-xl sm:text-2xl md:text-3xl leading-[1.8]"
-          data-event-code={eventDetail?.event.event_code}
-        >
-          {eventDetail?.event.title}
+        <CompCommonDatetime 
+          datetime={eventDetail?.event.date ?? null}
+          fullLocale={fullLocale}
+          time={eventDetail?.event.time ?? null}
+          isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+        />
+        <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 justify-center items-center">
+          <HeadlineTagsDetail
+            targetCountryCode={eventDetail?.event.target_country_code || null}
+            targetCountryName={eventDetail?.event.target_country_native || null}
+            targetCityCode={eventDetail?.event.target_city_code || null}
+            targetCityName={eventDetail?.event.target_city_native || null}
+            categories={eventDetail?.mapCategoryEvent?.items ?? null}
+            langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
+          />
+          <div
+            id="event-title"
+            className="py-3 text-center px-4 sm:px-6 sm:py-4 md:px-8 md:py-5 lg:px-10 lg:py-6 font-black
+                      text-xl sm:text-2xl md:text-3xl leading-[1.8]"
+            data-event-code={eventDetail?.event.event_code}
+          >
+            {eventDetail?.event.title}
+          </div>
         </div>
-      </div>
-      {/* <div className="flex gap-4 justify-center">
-        <BtnWithIcon01 
-          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
-          icon={<IconGoogleColor />} 
-          onClick={() => addToGoogleCalendar(generateCalendarEvent(eventDetail?.event ?? null))} 
-          width={22} 
-          height={22} 
-          minWidth={180} 
-        />
-        <BtnWithIcon01
-          title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
-          icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
-          onClick={() => addToCalendar(eventDetail?.event ?? null)}
-          width={22}
-          height={22}
-          minWidth={180}
-        />
-        <BtnWithIcon01 
-          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
-          icon={<IconShare />} 
-          onClick={handleShareClick} 
-          width={22} 
-          height={22} 
-          minWidth={180} 
-        />
-      </div> */}
-      {/* ✅ 버튼들 수정 */}
-      <div className="px-6 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 justify-center">
-        <BtnWithIcon01 
-          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
-          icon={<IconGoogleColor />} 
-          onClick={() => handleCalendarSave('google')} 
-          width={22} 
-          height={22} 
-          minWidth={240} 
-        />
-        <BtnWithIcon01
-          title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
-          icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
-          onClick={() => handleCalendarSave(deviceType === 'ios' ? 'apple' : 'ics')}
-          width={22}
-          height={22}
-          minWidth={240}
-        />
-        <BtnWithIcon01 
-          title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
-          icon={<IconShare />} 
-          onClick={handleShareClick} 
-          width={22} 
-          height={22} 
-          minWidth={240} 
-        />
-      </div>
-      <HeroImageSlider
-        bucket="events"
-        imageUrls={imageUrls}
-        className="m-auto w-full flex max-w-[1440px]"
-      />
-      {eventDetail?.event.description && (
-        <div className="m-auto p-4 px-8 text-center w-full text-lg max-w-[1024px] whitespace-pre-line">{eventDetail?.event.description}</div>
-      )}
-      {eventDetail?.mapStagEvent?.items.map(item => (
-        <div key={item.stag_info?.stag_code}>
-          <div>{item.stag_info?.stag_native}</div>
-        </div>
-      ))}
-      {eventDetail?.mapTagEvent?.items.map(item => (
-        <div key={item.tag_info?.tag_code}>
-          <div>{item.tag_info?.tag_code}</div>
-        </div>
-      ))}
-      <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
-      {eventDetail?.event.latitude && eventDetail?.event.longitude && (
-        <div className="m-auto w-full max-w-[1440px] h-48 bg-red-500 overflow-hidden">
-          <GoogleMap 
-            latitude={eventDetail?.event.latitude || 0}
-            longitude={eventDetail?.event.longitude || 0}
-            title={eventDetail?.event.title}
-            zoom={15}
-            className="w-full h-full"
-            style={{ minHeight: '192px' }}
-            onMapClick={handleMapClick}
-            onMarkerClick={handleMarkerClick}
-            // showClickHint={true}
-            clickHintText={eventDetail?.event.address_native ?? ''}
+        <div className="px-6 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 justify-center items-center">
+          <BtnWithIcon01 
+            title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
+            icon={<IconGoogleColor />} 
+            onClick={() => handleCalendarSave('google')} 
+            width={22} 
+            height={22} 
+            minWidth={240} 
+            maxWidth={340}
+          />
+          <BtnWithIcon01
+            title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
+            icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
+            onClick={() => handleCalendarSave(deviceType === 'ios' ? 'apple' : 'ics')}
+            width={22}
+            height={22}
+            minWidth={240}
+            maxWidth={340}
+          />
+          <BtnWithIcon01 
+            title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
+            icon={<IconShare />} 
+            onClick={handleShareClick} 
+            width={22} 
+            height={22} 
+            minWidth={240} 
+            maxWidth={340}
           />
         </div>
-      )}
-      {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
-      <div className="my-6 sm:my-8 md:my-10 flex gap-4 justify-center flex-wrap">
-        <CompLabelCount01 label="Views" count={eventDetail?.event.view_count ?? 0} />
-        <CompLabelCount01 label="Saved" count={eventDetail?.event.saved_count ?? 0} />
-        <CompLabelCount01 label="Shared" count={eventDetail?.event.shared_count ?? 0} />
+        <HeroImageSlider
+          bucket="events"
+          imageUrls={imageUrls}
+          className="m-auto w-full flex max-w-[1440px]"
+        />
+        {eventDetail?.event.description && (
+          <div className="m-auto p-4 px-8 text-center w-full text-lg max-w-[1024px] whitespace-pre-line">{eventDetail?.event.description}</div>
+        )}
+        {eventDetail?.mapStagEvent?.items.map(item => (
+          <div key={item.stag_info?.stag_code}>
+            <div>{item.stag_info?.stag_native}</div>
+          </div>
+        ))}
+        {eventDetail?.mapTagEvent?.items.map(item => (
+          <div key={item.tag_info?.tag_code}>
+            <div>{item.tag_info?.tag_code}</div>
+          </div>
+        ))}
+        <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
+        {eventDetail?.event.latitude && eventDetail?.event.longitude && (
+          <div className="m-auto w-full max-w-[1440px] h-48 bg-red-500 overflow-hidden">
+            <GoogleMap 
+              latitude={eventDetail?.event.latitude || 0}
+              longitude={eventDetail?.event.longitude || 0}
+              title={eventDetail?.event.title}
+              zoom={15}
+              className="w-full h-full"
+              style={{ minHeight: '192px' }}
+              onMapClick={handleMapClick}
+              onMarkerClick={handleMarkerClick}
+              // showClickHint={true}
+              clickHintText={eventDetail?.event.address_native ?? ''}
+            />
+          </div>
+        )}
+        {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
+        <div className="my-6 sm:my-8 md:my-10 flex gap-4 justify-center flex-wrap">
+          <CompLabelCount01 label="Views" count={eventDetail?.event.view_count ?? 0} />
+          <CompLabelCount01 label="Saved" count={eventDetail?.event.saved_count ?? 0} />
+          <CompLabelCount01 label="Shared" count={eventDetail?.event.shared_count ?? 0} />
+        </div>
       </div>
-    </div>
+      {/* ✅ 공유 모달 */}
+      <ShareModal
+        open={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title={eventDetail?.event.title || '이벤트 공유'}
+        text={eventDetail?.event.description || ''}
+        url={typeof window !== 'undefined' ? window.location.href : ''}
+        onShare={handleSocialShare}
+        langCode={langCode}
+      />
+    </>
   );
 }

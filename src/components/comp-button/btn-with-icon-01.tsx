@@ -6,6 +6,7 @@ export default function BtnWithIcon01({
   onClick,
   minWidth = null,
   minHeight = null,
+  maxWidth = null,
   width = 24,
   height = 24,
 }: {
@@ -14,6 +15,7 @@ export default function BtnWithIcon01({
   onClick?: () => void;
   minWidth?: number | null;
   minHeight?: number | null;
+  maxWidth?: number | null;
   width?: number;
   height?: number;
 }) {
@@ -26,8 +28,9 @@ export default function BtnWithIcon01({
         color: "#444",
         borderRadius: "9999px",
         boxShadow: "none",
-        minWidth: minWidth ?? undefined,
-        minHeight: minHeight ?? undefined,
+        minWidth: minWidth ?? null,
+        minHeight: minHeight ?? null,
+        maxWidth: maxWidth ?? null,
         px: 4,                // ⬅️ 좌우 패딩 늘림
         py: 2,                // 세로 패딩은 그대로
         "&:hover": { backgroundColor: "#efefef", boxShadow: "none" },

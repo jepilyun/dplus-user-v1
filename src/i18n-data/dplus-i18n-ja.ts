@@ -40,5 +40,7 @@ export const dplusI18nJA = {
     apple_calendar: "Appleカレンダー",
     ics_download: "ICSをダウンロード",
     share: "共有",
+    copy_link: "リンクをコピー",
+    link_copied: "リンクがコピーされました。",
   }
 };

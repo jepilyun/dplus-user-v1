@@ -26,10 +26,25 @@ export default function DateNavigation({ currentDate, langCode }: DateNavigation
     return `${year}-${month}-${day}`;
   };
 
-  // 요일 표시 (간단 버전)
-  const getDayOfWeek = (date: Date): string => {
-    const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    return days[date.getDay()];
+  // ✅ 언어별 요일 표시
+  const getDayOfWeek = (date: Date, lang: string): string => {
+    const dayIndex = date.getDay();
+    
+    const daysMap: Record<string, string[]> = {
+      ko: ["일", "월", "화", "수", "목", "금", "토"],
+      en: ["SUN.", "MON.", "TUE.", "WED.", "THU.", "FRI.", "SAT."],
+      ja: ["日", "月", "火", "水", "木", "金", "土"],
+      zh: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+      "zh-Hans": ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
+      "zh-Hant": ["週日", "週一", "週二", "週三", "週四", "週五", "週六"],
+      vi: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+      th: ["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"],
+      id: ["MIN", "SEN", "SEL", "RAB", "KAM", "JUM", "SAB"],
+    };
+
+    // 언어 코드에 해당하는 요일 배열 가져오기, 없으면 영어 기본값
+    const days = daysMap[lang] || daysMap.en;
+    return days[dayIndex];
   };
 
   // 하루 전으로 이동
@@ -73,7 +88,7 @@ export default function DateNavigation({ currentDate, langCode }: DateNavigation
   }, [showCalendar]);
 
   const currentDateObj = parseDate(currentDate);
-  const displayDate = `${currentDate} ${getDayOfWeek(currentDateObj)}.`;
+  const displayDate = `${currentDate} ${getDayOfWeek(currentDateObj, langCode)}`;
 
   return (
     <div className="relative flex items-center justify-center gap-4 py-6 mx-4">
@@ -97,7 +112,7 @@ export default function DateNavigation({ currentDate, langCode }: DateNavigation
       <div className="relative" ref={calendarRef}>
         <button
           onClick={() => setShowCalendar(!showCalendar)}
-          className="px-6 py-3 text-2xl sm:text-3xl min-w-[260px] sm:min-w-[320px] font-bold text-gray-800 bg-white rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-2 py-3 text-xl sm:text-3xl sm:px-3 md:text-4xl md:px-4 min-w-[180px] sm:min-w-[320px] font-bold text-gray-800 bg-white rounded-lg hover:bg-gray-50 transition-colors"
         >
           {displayDate}
         </button>

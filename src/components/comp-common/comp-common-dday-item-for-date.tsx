@@ -6,12 +6,15 @@ import { TEventCardForDateDetail } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
+import { useRouter } from "next/navigation";
 
 
 export default function CompCommonDdayItemForDate({
   event,
   fullLocale,
 }: { event: TEventCardForDateDetail; fullLocale: string }) {
+  const router = useRouter();
+
   const code = event?.event_code ?? "default";
   const { bg, fg } = computeBadgeColors(
     event?.date ?? null,
@@ -47,9 +50,17 @@ export default function CompCommonDdayItemForDate({
     return "text-[10px] sm:text-xs md:text-base"; // D-10000+
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('a[data-tag-link]')) {
+      return;
+    }
+    router.push(`/event/${code}`);
+  };
+
   return (
     <Link href={`/event/${code}`}>
-      <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center p-4 rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
+      <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center p-4 rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
           style={{ backgroundColor: bg }}
@@ -106,6 +117,22 @@ export default function CompCommonDdayItemForDate({
             )}
             <span>{event?.title}</span>
           </div>
+          {/* ✅ 모바일: 직사각형 이미지 (상단) */}
+          {checkIfThumbnailExistsForDate(event) && (
+            <div 
+              onClick={handleCardClick}
+              className="sm:hidden w-full aspect-[16/9] rounded-lg overflow-hidden mt-2 mb-3"
+            >
+              <Image
+                src={generateStorageImageUrl("events", getThumbnailUrlForDate(event) || null) || ""}
+                alt={event?.title ?? "thumbnail"}
+                width={600}
+                height={338}
+                className="w-full h-full object-cover"
+                sizes="100vw"
+              />
+            </div>
+          )}
         </div>
 
         {checkIfThumbnailExistsForDate(event) && (

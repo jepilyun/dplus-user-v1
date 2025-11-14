@@ -40,5 +40,7 @@ export const dplusI18nKO = {
     apple_calendar: "애플 캘린더에 저장하기",
     ics_download: "일정 파일 다운로드",
     share: "공유하기",
+    copy_link: "링크 복사",
+    link_copied: "링크가 복사되었습니다.",
   }
 };

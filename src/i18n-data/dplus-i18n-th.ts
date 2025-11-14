@@ -40,5 +40,7 @@ export const dplusI18nTH = {
     apple_calendar: "ปฏิทิน Apple",
     ics_download: "ดาวน์โหลดไฟล์ ICS",
     share: "แบ่งปัน",
+    copy_link: "คัดลอกลิงค์",
+    link_copied: "ลิงค์ถูกคัดลอกแล้ว",
   }
 };

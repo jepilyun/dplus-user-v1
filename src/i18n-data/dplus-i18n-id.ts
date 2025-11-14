@@ -40,5 +40,7 @@ export const dplusI18nID = {
     apple_calendar: "Apple Calendar",
     ics_download: "Unduh ICS",
     share: "Bagikan",
+    copy_link: "Salin tautan",
+    link_copied: "Tautan telah disalin.",
   }
 };

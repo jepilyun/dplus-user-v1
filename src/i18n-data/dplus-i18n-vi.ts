@@ -40,5 +40,7 @@ export const dplusI18nVI = {
     apple_calendar: "Lịch Apple",
     ics_download: "Tải xuống ICS",
     share: "Chia sẻ",
+    copy_link: "Sao chép liên kết",
+    link_copied: "Liên kết đã được sao chép.",
   }
 };
