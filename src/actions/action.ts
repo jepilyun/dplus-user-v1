@@ -709,7 +709,7 @@ export const reqGetCountryDetail = async (
       method: "GET",
       credentials: "include",
       next: { 
-        revalidate: 10, // ✅ 4시간 캐시
+        revalidate: 14400, // ✅ 4시간 캐시
         tags: [`country-${countryCode}`]
       }
     },

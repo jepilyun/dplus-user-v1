@@ -527,7 +527,7 @@ export const apiUrlCategory = (
         typeof optionalParams?.limit === "number" &&
         optionalParams?.langCode
       ) {
-        path = `/api/category/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}/${optionalParams?.langCode}`;
+        path = `/api/category/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
@@ -544,7 +544,7 @@ export const apiUrlCategory = (
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/category/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/category/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${encodeURIComponent(optionalParams?.categoryCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
