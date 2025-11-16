@@ -34,6 +34,10 @@ export const dplusI18nVI = {
     url: "URL",
     address: "Địa chỉ",
     phone: "Điện thoại",
+    product_purchase: "Mua sản phẩm",
+    detail_info_url: "Thông tin chi tiết",
+    watch_url: "Xem",
+    apply_url: "Đăng ký",
   },
   detail: {
     google_calendar: "Lịch Google",

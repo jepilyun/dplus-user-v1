@@ -31,6 +31,10 @@ export const dplusI18nTW = {
     url: "URL",
     address: "地址",
     phone: "電話",
+    product_purchase: "商品購買",
+    detail_info_url: "詳細資訊",
+    watch_url: "觀看",
+    apply_url: "申請",
   },
   detail: {
     google_calendar: "新增至 Google 日曆",

@@ -34,6 +34,10 @@ export const dplusI18nTH = {
     url: "URL",
     address: "ที่อยู่",
     phone: "เบอร์โทรศัพท์",
+    product_purchase: "ซื้อสินค้า",
+    detail_info_url: "ข้อมูลละเอียด",
+    watch_url: "ดู",
+    apply_url: "สมัคร",
   },
   detail: {
     google_calendar: "ปฏิทิน Google",

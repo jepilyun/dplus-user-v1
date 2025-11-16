@@ -31,6 +31,10 @@ export const dplusI18nZH = {
     url: "URL",
     address: "地址",
     phone: "电话",
+    product_purchase: "商品购买",
+    detail_info_url: "详细信息",
+    watch_url: "观看",
+    apply_url: "申请",
   },
   detail: {
     google_calendar: "添加到 Google 日历",

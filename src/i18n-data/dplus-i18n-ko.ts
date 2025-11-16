@@ -34,6 +34,10 @@ export const dplusI18nKO = {
     url: "URL",
     address: "주소",
     phone: "전화번호",
+    product_purchase: "상품 구매",
+    detail_info_url: "상세 정보",
+    watch_url: "시청하기",
+    apply_url: "지원하기",
   },
   detail: {
     google_calendar: "구글 캘린더에 저장하기",

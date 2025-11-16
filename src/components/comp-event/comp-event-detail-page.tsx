@@ -4,7 +4,6 @@ import { reqGetEventDetail } from "@/actions/action";
 import BtnWithIcon01 from "@/components/comp-button/btn-with-icon-01";
 import GoogleMap from "@/components/comp-google-map/google-map";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
-import { IconShare } from "@/icons/icon-share";
 import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
 import { detectDevice, DeviceType } from "@/utils/device-detector";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
@@ -19,11 +18,12 @@ import CompCommonDatetime from "../comp-common/comp-common-datetime";
 import { getEventImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
-import { IconCalendar } from "@/icons/icon-calendar";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
 import { CountdownTimer } from "@/components/comp-event/comp-event-countdown-timer";
 import ShareModal from "../comp-share/comp-share-modal";
+import Link from "next/link";
+import { MapPin, Map, CalendarDays, Share2 } from "lucide-react";
 
 
 /**
@@ -150,13 +150,8 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
     }
   };
 
-  const handleMapClick = () => {
-    if (eventDetail?.event.google_map_url) {
-      window.open(eventDetail?.event.google_map_url, '_blank');
-    }
-  };
-
-  const handleMarkerClick = () => {
+  // ✅ 구글 지도 열기 핸들러
+  const handleOpenGoogleMap = () => {
     if (eventDetail?.event.google_map_url) {
       window.open(eventDetail?.event.google_map_url, '_blank');
     }
@@ -293,7 +288,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           />
           <BtnWithIcon01
             title={deviceType === 'ios' ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
-            icon={deviceType === 'ios' ? <IconApple /> : <IconCalendar />}
+            icon={deviceType === 'ios' ? <IconApple /> : <CalendarDays />}
             onClick={() => handleCalendarSave(deviceType === 'ios' ? 'apple' : 'ics')}
             width={22}
             height={22}
@@ -302,7 +297,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           />
           <BtnWithIcon01 
             title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share} 
-            icon={<IconShare />} 
+            icon={<Share2 />} 
             onClick={handleShareClick} 
             width={22} 
             height={22} 
@@ -329,22 +324,41 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           </div>
         ))}
         <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
-        {eventDetail?.event.latitude && eventDetail?.event.longitude && (
-          <div className="m-auto w-full max-w-[1440px] h-48 bg-red-500 overflow-hidden">
-            <GoogleMap 
-              latitude={eventDetail?.event.latitude || 0}
-              longitude={eventDetail?.event.longitude || 0}
-              title={eventDetail?.event.title}
-              zoom={15}
-              className="w-full h-full"
-              style={{ minHeight: '192px' }}
-              onMapClick={handleMapClick}
-              onMarkerClick={handleMarkerClick}
-              // showClickHint={true}
-              clickHintText={eventDetail?.event.address_native ?? ''}
-            />
-          </div>
-        )}
+        <div className="flex flex-col gap-0 m-auto w-full max-w-[1280px] xl:rounded-2xl overflow-hidden">
+          {eventDetail?.event.latitude && eventDetail?.event.longitude && (
+            <div className="m-auto w-full overflow-hidden relative h-84">
+              <GoogleMap
+                latitude={eventDetail?.event.latitude || 0}
+                longitude={eventDetail?.event.longitude || 0}
+                title={eventDetail?.event.title}
+                zoom={15}
+                className="w-full h-full"
+                clickHintText={eventDetail?.event.address_native ?? ''}
+              />
+              
+              {/* ✅ 오른쪽 하단 버튼 */}
+              <button
+                onClick={handleOpenGoogleMap}
+                className="absolute top-4 left-4 bg-white hover:bg-gray-50 text-gray-800 font-medium px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:shadow-xl z-10"
+              >
+                <Map className="w-5 h-5" />
+                <span className="text-sm">Open in Google Maps</span>
+              </button>
+            </div>
+          )}
+          {eventDetail?.event.address_native && (
+            <Link href={eventDetail?.event.google_map_url ?? ''} target="_blank">
+              <div>
+                <div className="px-4 py-3 w-full text-md text-white bg-gray-800 hover:bg-gray-900 transition-colors cursor-pointer flex items-center gap-2">
+                  <div className="m-auto w-full max-w-[1024px] flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    {eventDetail?.event.address_native}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          )}
+        </div>
         {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
         <div className="my-6 sm:my-8 md:my-10 flex gap-4 justify-center flex-wrap">
           <CompLabelCount01 label="Views" count={eventDetail?.event.view_count ?? 0} />

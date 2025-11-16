@@ -8,9 +8,6 @@ interface GoogleMapProps {
   zoom?: number;
   className?: string;
   style?: React.CSSProperties;
-  onMapClick?: () => void;
-  onMarkerClick?: () => void;
-  showClickHint?: boolean;
   clickHintText?: string;
   markerConfig?: {
     scale?: number;
@@ -28,10 +25,7 @@ export default function GoogleMap({
   zoom = 15,
   className = "w-full h-full",
   style,
-  onMapClick,
-  onMarkerClick,
-  showClickHint = false,
-  clickHintText = "Click to open in Google Maps",
+  clickHintText = "",
   markerConfig = {
     scale: 1.0,
     background: "#ff1744",
@@ -80,6 +74,8 @@ export default function GoogleMap({
           streetViewControl: false,
           fullscreenControl: false,
           mapId: process.env.NEXT_PUBLIC_GOOGLE_MAP_ID!,
+          // ✅ 드래그, 줌 등 상호작용 유지
+          gestureHandling: 'auto',
         };
 
         const finalMapOptions = { ...defaultMapOptions, ...mapOptions };
@@ -93,22 +89,12 @@ export default function GoogleMap({
           glyphColor: markerConfig.glyphColor,
         });
 
-        const marker = new AdvancedMarkerElement({
+        new AdvancedMarkerElement({
           map: map,
           position: position,
           title: title,
           content: pinElement.element,
         });
-
-        // 지도 클릭 이벤트
-        if (onMapClick) {
-          map.addListener('click', onMapClick);
-        }
-        
-        // 마커 클릭 이벤트
-        if (onMarkerClick) {
-          marker.element.addEventListener('click', onMarkerClick);
-        }
 
         setMapLoading(false);
 
@@ -121,13 +107,14 @@ export default function GoogleMap({
 
     initMap();
 
-  }, [latitude, longitude, title, zoom, onMapClick, onMarkerClick, markerConfig]);
+  }, [latitude, longitude, title, zoom, markerConfig]);
 
   return (
     <div className={`relative ${className}`} style={style}>
+      {/* ✅ cursor-pointer 제거 */}
       <div 
         ref={mapRef} 
-        className="w-full h-full cursor-pointer"
+        className="w-full h-full"
       />
       
       {/* 지도 로딩 중 표시 */}
@@ -147,12 +134,12 @@ export default function GoogleMap({
         </div>
       )}
 
-      {/* 클릭 힌트 오버레이 */}
-      {!mapLoading && !mapError && showClickHint && clickHintText.length > 0 && (
+      {/* ✅ 클릭 힌트 제거 (이제 버튼이 대체) */}
+      {/* {!mapLoading && !mapError && clickHintText && (
         <div className="absolute bottom-4 left-4 right-4 bg-black bg-opacity-70 text-white text-xs p-2 rounded">
           {clickHintText}
         </div>
-      )}
+      )} */}
     </div>
   );
 }
