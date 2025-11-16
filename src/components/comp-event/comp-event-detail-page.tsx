@@ -44,7 +44,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(initialData ?? null);
   const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventImageUrls(initialData.event) : []);
 
-    // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
+  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
   const [viewCount, setViewCount] = useState(initialData?.event.view_count ?? 0);
   const [savedCount, setSavedCount] = useState(initialData?.event.saved_count ?? 0);
   const [sharedCount, setSharedCount] = useState(initialData?.event.shared_count ?? 0);

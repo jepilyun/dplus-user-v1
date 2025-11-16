@@ -10,25 +10,25 @@ const socialLinks = [
     name: "Instagram",
     url: "https://www.instagram.com/dplus_app",
     icon: <IconInstagram className="w-6 h-6" color="white" />,  // ✅ className 추가
-    bgColor: "bg-gradient-to-tr from-purple-600 via-pink-600 to-yellow-500",
+    bgColor: "bg-black/80 hover:bg-black/90",
   },
   {
     name: "Twitter/X",
     url: "https://x.com/dplusapp",
     icon: <IconTwitter className="w-6 h-6" color="white" />,  // ✅ className 추가
-    bgColor: "bg-black",
+    bgColor: "bg-black/80 hover:bg-black/90",
   },
   {
     name: "Threads",
     url: "https://www.threads.com/@dplus_app",
     icon: <IconThreads className="w-6 h-6" color="white" />,  // ✅ className 추가
-    bgColor: "bg-black",
+    bgColor: "bg-black/80 hover:bg-black/90",
   },
   {
     name: "Facebook",
     url: "https://www.facebook.com/profile.php?id=61575656837759",
     icon: <IconFacebook className="w-6 h-6" color="white" />,  // ✅ className 추가
-    bgColor: "bg-[#1877F2]",
+    bgColor: "bg-black/80 hover:bg-black/90",
   },
 ];
 
@@ -43,7 +43,7 @@ export default function CompFooter() {
             href={social.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`w-12 h-12 flex items-center justify-center rounded-full ${social.bgColor} hover:opacity-80 transition-opacity`}
+            className={`w-12 h-12 flex items-center justify-center rounded-full ${social.bgColor} transition-opacity`}
             aria-label={social.name}
           >
             {/* ✅ 추가 래퍼로 강제 중앙 정렬 */}
