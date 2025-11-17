@@ -125,7 +125,7 @@ export const reqGetFolderDetail = async (
       method: "GET",
       credentials: "include",
       next: { 
-        revalidate: 14400, // ✅ 4시간 캐시
+        revalidate: 7200, // ✅ 2시간 캐시
         tags: [`folder-${folderCode}`] // ✅ 특정 폴더만 revalidate 가능
       }
     },
@@ -151,6 +151,10 @@ export const reqGetFolderCodeList = async (
     {
       method: "GET",
       credentials: "include",
+      next: { 
+        revalidate: 3600, // ✅ 1시간 캐시
+        tags: [`folder-code-list-${countryCode}-${cityCode}`]
+      }
     },
   );
 
@@ -230,7 +234,7 @@ export const reqGetDateList = async (
       method: "GET",
       credentials: "include",
       next: { 
-        revalidate: 14400, // ✅ 4시간 캐시 (날짜별 데이터는 자주 변경)
+        revalidate: 7200, // ✅ 2시간 캐시 (날짜별 데이터는 자주 변경)
         tags: [`date-${dateString}-${countryCode}`]
       }
     },
@@ -301,6 +305,10 @@ export const reqGetCityCodes = async (
   const res = await fetch(apiUrlCity("getCityCodes"), {
     method: "GET",
     credentials: "include",
+    next: { 
+      revalidate: 3600, // ✅ 1시간 캐시
+      tags: [`city-code-list`]
+    }
   });
 
   return res.json();
@@ -345,7 +353,7 @@ export const reqGetStagDetail = async (
     method: "GET",
     credentials: "include",
     next: { 
-      revalidate: 14400, // ✅ 4시간 캐시
+      revalidate: 7200, // ✅ 2시간 캐시
       tags: [`stag-${stagCode}-${langCode}`]
     }
   });
@@ -362,6 +370,10 @@ export const reqGetStagCodes = async (
   const res = await fetch(apiUrlStag("getStagCodes", { limit }), {
     method: "GET",
     credentials: "include",
+    next: { 
+      revalidate: 3600, // ✅ 1시간 캐시
+      tags: [`stag-code-list`]
+    }
   });
   return res.json();
 };
@@ -432,7 +444,7 @@ export const reqGetGroupDetail = async (
       method: "GET",
       credentials: "include",
       next: { 
-        revalidate: 14400, // ✅ 4시간 캐시
+        revalidate: 7200, // ✅ 2시간 캐시
         tags: [`group-${groupCode}`]
       }
     },
@@ -478,6 +490,10 @@ export const reqGetGroupCodes = async (
   const res = await fetch(apiUrlGroup("getGroupCodes", { limit }), {
     method: "GET",
     credentials: "include",
+    next: { 
+      revalidate: 3600, // ✅ 1시간 캐시
+      tags: [`group-code-list`]
+    }
   });
 
   return res.json();
@@ -520,7 +536,7 @@ export const reqGetTagDetail = async (
     method: "GET",
     credentials: "include",
     next: { 
-      revalidate: 14400, // ✅ 4시간 캐시
+      revalidate: 7200, // ✅ 2시간 캐시
       tags: [`tag-${tagCode}`]
     }
   });
@@ -581,7 +597,7 @@ export const reqGetCategoryDetail = async (
       method: "GET",
       credentials: "include",
       next: { 
-        revalidate: 14400, // ✅ 4시간 캐시
+        revalidate: 7200, // ✅ 2시간 캐시
         tags: [`category-${countryCode}-${categoryCode}`]
       }
     },
@@ -630,6 +646,10 @@ export const reqGetCategoryCodes = async (
   const res = await fetch(apiUrlCategory("getCategoryCodes", { limit }), {
     method: "GET",
     credentials: "include",
+    next: { 
+      revalidate: 3600, // ✅ 1시간 캐시
+      tags: [`category-code-list`]
+    }
   });
 
   return res.json();
@@ -709,7 +729,7 @@ export const reqGetCountryDetail = async (
       method: "GET",
       credentials: "include",
       next: { 
-        revalidate: 14400, // ✅ 4시간 캐시
+        revalidate: 7200, // ✅ 2시간 캐시
         tags: [`country-${countryCode}`]
       }
     },
@@ -757,6 +777,10 @@ export const reqGetCountryCodes = async (): Promise<
   const res = await fetch(apiUrlCountry("getCountryCodes"), {
     method: "GET",
     credentials: "include",
+    next: { 
+      revalidate: 3600, // ✅ 1시간 캐시
+      tags: [`country-code-list`]
+    }
   });
 
   return res.json();

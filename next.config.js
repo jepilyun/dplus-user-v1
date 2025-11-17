@@ -19,7 +19,11 @@ const nextConfig = {
       "gzfnhzdqyqzfytxkzceu.supabase.co",
       "i.ytimg.com",
     ],
-  }
+  },
+  // ✅ Next.js의 자동 스크롤 복원 비활성화
+  experimental: {
+    scrollRestoration: false,
+  },
 };
 
 module.exports = nextConfig;

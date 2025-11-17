@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselGroup } from "../comp-image/hero-background-carousel-group";
-import { useGroupPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { useGroupPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementGroupSharedCount, incrementGroupViewCount } from "@/utils/increment-count";
 
 type GroupPageState = {
@@ -22,6 +22,16 @@ type GroupPageState = {
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
+
+/**
+ * ✅ 데이터 버전 생성 함수 (2시간 블록)
+ * - revalidate 2시간(7200초)과 동기화
+ */
+function getDataVersion(): string {
+  const now = Date.now();
+  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000));
+  return twoHourBlock.toString();
+}
 
 export default function CompGroupDetailPage({
   groupCode,
@@ -35,43 +45,51 @@ export default function CompGroupDetailPage({
   initialData: ResponseGroupDetailForUserFront | null;
 }) {
   const router = useRouter();
-
-  // ✅ 변경: 전용 hook 사용
   const { save, restore } = useGroupPageRestoration(groupCode);
 
-  // ✅ 조회수 증가 여부 추적
   const viewCountIncrementedRef = useRef(false);
+  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
+  const [loading, setLoading] = useState(!initialData);
 
   const [groupDetail, setGroupDetail] = useState<ResponseGroupDetailForUserFront | null>(
-    initialData ?? null // ✅ 초기 데이터로 시작
+    initialData ?? null
   );
+  
+  // ✅ 데이터 버전: 2시간 블록
+  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
+
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getGroupImageUrls(initialData.group) : [] // ✅ 초기 이미지도 설정
+    initialData ? getGroupImageUrls(initialData.group) : []
   );
 
   const [events, setEvents] = useState<TMapGroupEventWithEventInfo[]>(
-    initialData?.mapGroupEvent?.items ?? [] // ✅ 초기 이벤트도 설정
+    initialData?.mapGroupEvent?.items ?? []
   );
   const [eventsStart, setEventsStart] = useState(
-    initialData?.mapGroupEvent?.items?.length ?? 0 // ✅ 초기 시작점 설정
+    initialData?.mapGroupEvent?.items?.length ?? 0
   );
   const [eventsHasMore, setEventsHasMore] = useState(
-    Boolean(initialData?.mapGroupEvent?.hasMore) // ✅ 초기 hasMore 설정
+    Boolean(initialData?.mapGroupEvent?.hasMore)
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  const seenEventCodesRef = useRef<Set<string>>(new Set());
-  const hydratedFromRestoreRef = useRef(false);
+  const seenEventCodesRef = useRef<Set<string>>(
+    new Set(
+      initialData?.mapGroupEvent?.items
+        ?.map(item => item?.event_info?.event_code ?? item?.event_code)
+        .filter(Boolean) ?? []
+    )
+  );
 
-  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
   const [viewCount, setViewCount] = useState(initialData?.group.view_count ?? 0);
   const [sharedCount, setSharedCount] = useState(initialData?.group.shared_count ?? 0);
 
-  const fetchGroupDetail = async (restoredEvents?: TMapGroupEventWithEventInfo[]) => {
-    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+  /**
+   * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
+   */
+  const fetchAndMergeData = async (restoredEvents?: TMapGroupEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
@@ -94,25 +112,31 @@ export default function CompGroupDetailPage({
   
       setGroupDetail(res.dbResponse);
       setImageUrls(getGroupImageUrls(res.dbResponse.group));
-  
-      // ✅ view_count 업데이트
       setViewCount(res.dbResponse?.group?.view_count ?? 0);
       setSharedCount(res.dbResponse?.group?.shared_count ?? 0);
 
-      const initItems = res?.dbResponse?.mapGroupEvent?.items ?? [];
+      const serverEvents = res?.dbResponse?.mapGroupEvent?.items ?? [];
       
-      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      // ✅ 새 데이터 버전 업데이트
+      const newVersion = getDataVersion();
+      setDataVersion(newVersion);
+      
+      console.log('[Group Merge] 📊 Data versions:', {
+        new: newVersion,
+        old: dataVersion,
+        changed: newVersion !== dataVersion
+      });
+      
+      // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        console.log('[Group Fetch] Merging server data with restored pagination');
-        console.log('[Group Fetch] Server events:', initItems.length);
-        console.log('[Group Fetch] Restored total:', restoredEvents.length);
+        console.log('[Group Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[Group Merge] Server events:', serverEvents.length);
+        console.log('[Group Merge] Restored total:', restoredEvents.length);
         
-        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
-          initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
+          serverEvents.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
         const additionalEvents = restoredEvents
           .slice(LIST_LIMIT.default)
           .filter(item => {
@@ -120,7 +144,7 @@ export default function CompGroupDetailPage({
             return code && !serverCodes.has(code);
           });
         
-        console.log('[Group Fetch] Additional events from restore:', additionalEvents.length);
+        console.log('[Group Merge] Additional events from restore:', additionalEvents.length);
         
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
@@ -137,13 +161,12 @@ export default function CompGroupDetailPage({
           return true;
         });
         
-        console.log('[Group Fetch] Future events after filter:', futureEvents.length);
+        console.log('[Group Merge] Future events after filter:', futureEvents.length);
         
-        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
-        const finalEvents = [...initItems, ...futureEvents];
+        const finalEvents = [...serverEvents, ...futureEvents];
         
-        console.log('[Group Fetch] Final merged:', {
-          server: initItems.length,
+        console.log('[Group Merge] ✅ Final merged:', {
+          server: serverEvents.length,
           additional: futureEvents.length,
           total: finalEvents.length
         });
@@ -157,13 +180,12 @@ export default function CompGroupDetailPage({
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        // 더보기를 안 한 경우: 서버 데이터만 사용
-        console.log('[Group Fetch] Using server data only');
-        setEvents(initItems);
-        setEventsStart(initItems.length);
+        console.log('[Group Merge] ✅ Using server data only');
+        setEvents(serverEvents);
+        setEventsStart(serverEvents.length);
         
         seenEventCodesRef.current.clear();
-        initItems.forEach(item => {
+        serverEvents.forEach(item => {
           const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         });
@@ -191,7 +213,6 @@ export default function CompGroupDetailPage({
         await navigator.share(shareData);
         console.log('공유 성공');
         
-        // ✅ 공유 성공 시 카운트 증가
         const newCount = await incrementGroupSharedCount(groupCode);
         if (newCount !== null) {
           setSharedCount(newCount);
@@ -214,6 +235,7 @@ export default function CompGroupDetailPage({
     try {
       const res = await reqGetGroupEvents(groupCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
+      
       const newItems = fetchedItems.filter((it: TMapGroupEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodesRef.current.has(code)) return false;
@@ -221,15 +243,15 @@ export default function CompGroupDetailPage({
         return true;
       });
 
-      setEvents((prev) => prev.concat(newItems));
-      setEventsStart((prev) => prev + newItems.length);
+      setEvents(prev => [...prev, ...newItems]);
+      setEventsStart(prev => prev + newItems.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
   };
 
-  // 페이지 진입 시
+  // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
     if (!viewCountIncrementedRef.current && groupCode) {
       viewCountIncrementedRef.current = true;
@@ -237,11 +259,17 @@ export default function CompGroupDetailPage({
         if (newCount !== null) setViewCount(newCount);
       });
     }
-  }, [groupCode]);  
+  }, [groupCode]);
 
+  // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
-    console.log('[Group Mount] Component mounted, attempting restore...');
-    const saved = restore<GroupPageState>();
+    if (restorationAttemptedRef.current) return;
+    restorationAttemptedRef.current = true;
+
+    console.log('[Group Mount] 🚀 Component mounted, attempting restore...');
+    console.log('[Group Mount] Current data version:', dataVersion);
+    
+    const saved = restore<GroupPageState>(dataVersion);
     
     console.log('[Group Mount] Restored data:', {
       hasSaved: !!saved,
@@ -249,72 +277,108 @@ export default function CompGroupDetailPage({
     });
     
     if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Group Mount] Restoring state with', saved.events.length, 'events');
-      hydratedFromRestoreRef.current = true;
+      console.log('[Group Mount] ✅ Restoring state with', saved.events.length, 'events');
       
-      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
-      fetchGroupDetail(saved.events);
+      // ✅ 더보기를 했던 경우에만 백그라운드 병합
+      if (saved.events.length > LIST_LIMIT.default) {
+        console.log('[Group Mount] 📡 Fetching server data for merge...');
+        fetchAndMergeData(saved.events);
+      }
     } else {
-      console.log('[Group Mount] No valid saved data found');
-      // ✅ 초기 데이터가 있으면 fetch 생략
+      console.log('[Group Mount] ⚠️ No valid saved data found');
       if (!initialData) {
-        fetchGroupDetail();
+        fetchAndMergeData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupCode]);
 
-  // 라우팅 직전 저장
+  // ✅ 클릭 이벤트 감지하여 저장
   useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest("a") as HTMLAnchorElement | null;
-      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
-
-      console.log('[Group Save] Saving state:', {
+    const saveCurrentState = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY === 0) {
+        console.log('[Group Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
+        return;
+      }
+      
+      console.log('[Group Save] 💾 현재 상태 저장:', {
+        scrollY: currentScrollY,
         eventsCount: events.length,
-        eventsStart,
-        eventsHasMore,
+        dataVersion,
       });
 
-      save<GroupPageState>({
+      const state: GroupPageState = {
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
+      };
+
+      save<GroupPageState>(state, dataVersion);
     };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, save]);
 
-  // 새로고침/탭 숨김 시 저장
+    // ✅ 모든 네비게이션 요소 클릭 감지
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      
+      const eventCard = target.closest('[data-event-code]');
+      const link = target.closest('a');
+      const button = target.closest('button, [role="button"]');
+      
+      if (eventCard || link || button) {
+        if (link) {
+          const href = link.getAttribute('href') || '';
+          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
+            return;
+          }
+        }
+        
+        console.log('[Group Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
+        saveCurrentState();
+      }
+    };
+
+    document.addEventListener("click", handleClick, true);
+    
+    return () => {
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
+
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
-    const persist = () =>
+    const persist = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY === 0) return;
+      
       save<GroupPageState>({
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
+      }, dataVersion);
+    };
 
     window.addEventListener("beforeunload", persist);
+    
     const onVisibility = () => {
       if (document.visibilityState === "hidden") persist();
     };
     document.addEventListener("visibilitychange", onVisibility);
+    
     return () => {
       window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, save]);
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
   // ================= 렌더 =================
 
@@ -350,7 +414,7 @@ export default function CompGroupDetailPage({
           <h2 className="text-2xl font-bold mb-4">ERROR</h2>
           <p className="text-gray-600 mb-6">Failed to load group details. Please try again.</p>
           <button
-            onClick={() => fetchGroupDetail()}
+            onClick={() => fetchAndMergeData()}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Retry

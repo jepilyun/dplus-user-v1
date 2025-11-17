@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCategoryViewCount } from "@/utils/increment-count";
 
 type CategoryPageState = {
@@ -19,6 +19,16 @@ type CategoryPageState = {
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
+
+/**
+ * ✅ 데이터 버전 생성 함수 (2시간 블록)
+ * - revalidate 2시간(7200초)과 동기화
+ */
+function getDataVersion(): string {
+  const now = Date.now();
+  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000));
+  return twoHourBlock.toString();
+}
 
 export default function CompCategoryDetailPage({
   categoryCode,
@@ -34,39 +44,46 @@ export default function CompCategoryDetailPage({
   initialData: ResponseCategoryDetailForUserFront | null;
 }) {
   const router = useRouter();
+  const { save, restore } = useCategoryPageRestoration(categoryCode);
 
-  // ✅ 변경: 전용 hook 사용
-  const { save, restore } = useCategoryPageRestoration(categoryCode, countryCode);
-
-  // ✅ 조회수 증가 여부 추적
   const viewCountIncrementedRef = useRef(false);
+  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
+  const [loading, setLoading] = useState(!initialData);
 
   const [categoryDetail, setCategoryDetail] = useState<ResponseCategoryDetailForUserFront | null>(
-    initialData ?? null // ✅ 초기 데이터로 시작
+    initialData ?? null
   );
 
+  // ✅ 데이터 버전: 2시간 블록
+  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
+
   const [events, setEvents] = useState<TMapCategoryEventWithEventInfo[]>(
-    initialData?.mapCategoryEvent?.items ?? [] // ✅ 초기 이벤트도 설정
+    initialData?.mapCategoryEvent?.items ?? []
   );
   const [eventsStart, setEventsStart] = useState(
-    initialData?.mapCategoryEvent?.items?.length ?? 0 // ✅ 초기 시작점 설정
+    initialData?.mapCategoryEvent?.items?.length ?? 0
   );
   const [eventsHasMore, setEventsHasMore] = useState(
-    Boolean(initialData?.mapCategoryEvent?.hasMore) // ✅ 초기 hasMore 설정
+    Boolean(initialData?.mapCategoryEvent?.hasMore)
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  const seenEventCodesRef = useRef<Set<string>>(new Set());
-  const hydratedFromRestoreRef = useRef(false);
+  const seenEventCodesRef = useRef<Set<string>>(
+    new Set(
+      initialData?.mapCategoryEvent?.items
+        ?.map(item => item?.event_code)
+        .filter(Boolean) ?? []
+    )
+  );
 
-  // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
   const [viewCount, setViewCount] = useState(initialData?.category.view_count ?? 0);
 
-  const fetchCategoryDetail = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
-    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+  /**
+   * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
+   */
+  const fetchAndMergeData = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
@@ -82,24 +99,30 @@ export default function CompCategoryDetailPage({
       }
   
       setCategoryDetail(res.dbResponse);
-
-      // ✅ view_count 업데이트
       setViewCount(res.dbResponse?.category?.view_count ?? 0);
 
-      const initItems = res?.dbResponse?.mapCategoryEvent?.items ?? [];
+      const serverEvents = res?.dbResponse?.mapCategoryEvent?.items ?? [];
       
-      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      // ✅ 새 데이터 버전 업데이트
+      const newVersion = getDataVersion();
+      setDataVersion(newVersion);
+      
+      console.log('[Category Merge] 📊 Data versions:', {
+        new: newVersion,
+        old: dataVersion,
+        changed: newVersion !== dataVersion
+      });
+      
+      // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        console.log('[Category Fetch] Merging server data with restored pagination');
-        console.log('[Category Fetch] Server events:', initItems.length);
-        console.log('[Category Fetch] Restored total:', restoredEvents.length);
+        console.log('[Category Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[Category Merge] Server events:', serverEvents.length);
+        console.log('[Category Merge] Restored total:', restoredEvents.length);
         
-        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
-          initItems.map(item => item?.event_code).filter(Boolean)
+          serverEvents.map(item => item?.event_code).filter(Boolean)
         );
         
-        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
         const additionalEvents = restoredEvents
           .slice(LIST_LIMIT.default)
           .filter(item => {
@@ -107,7 +130,7 @@ export default function CompCategoryDetailPage({
             return code && !serverCodes.has(code);
           });
         
-        console.log('[Category Fetch] Additional events from restore:', additionalEvents.length);
+        console.log('[Category Merge] Additional events from restore:', additionalEvents.length);
         
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
@@ -115,9 +138,7 @@ export default function CompCategoryDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          // ✅ 수정: event_info 구조 고려
           const eventDate = item?.event_info?.date || item?.date;
-          
           if (eventDate) {
             const date = new Date(eventDate);
             return date.getTime() >= todayTimestamp;
@@ -125,13 +146,12 @@ export default function CompCategoryDetailPage({
           return true;
         });
         
-        console.log('[Category Fetch] Future events after filter:', futureEvents.length);
+        console.log('[Category Merge] Future events after filter:', futureEvents.length);
         
-        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
-        const finalEvents = [...initItems, ...futureEvents];
+        const finalEvents = [...serverEvents, ...futureEvents];
         
-        console.log('[Category Fetch] Final merged:', {
-          server: initItems.length,
+        console.log('[Category Merge] ✅ Final merged:', {
+          server: serverEvents.length,
           additional: futureEvents.length,
           total: finalEvents.length
         });
@@ -145,13 +165,12 @@ export default function CompCategoryDetailPage({
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        // 더보기를 안 한 경우: 서버 데이터만 사용
-        console.log('[Category Fetch] Using server data only');
-        setEvents(initItems);
-        setEventsStart(initItems.length);
+        console.log('[Category Merge] ✅ Using server data only');
+        setEvents(serverEvents);
+        setEventsStart(serverEvents.length);
         
         seenEventCodesRef.current.clear();
-        initItems.forEach(item => {
+        serverEvents.forEach(item => {
           const code = item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         });
@@ -174,6 +193,7 @@ export default function CompCategoryDetailPage({
     try {
       const res = await reqGetCategoryEvents(countryCode, categoryCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
+      
       const newItems = fetchedItems.filter((it: TMapCategoryEventWithEventInfo) => {
         const code = it?.event_code;
         if (!code || seenEventCodesRef.current.has(code)) return false;
@@ -181,15 +201,15 @@ export default function CompCategoryDetailPage({
         return true;
       });
 
-      setEvents((prev) => prev.concat(newItems));
-      setEventsStart((prev) => prev + newItems.length);
+      setEvents(prev => [...prev, ...newItems]);
+      setEventsStart(prev => prev + newItems.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
   };
 
-  // 페이지 진입 시
+  // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
     if (!viewCountIncrementedRef.current && categoryCode) {
       viewCountIncrementedRef.current = true;
@@ -199,9 +219,15 @@ export default function CompCategoryDetailPage({
     }
   }, [categoryCode]);
 
+  // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
-    console.log('[Category Mount] Component mounted, attempting restore...');
-    const saved = restore<CategoryPageState>();
+    if (restorationAttemptedRef.current) return;
+    restorationAttemptedRef.current = true;
+
+    console.log('[Category Mount] 🚀 Component mounted, attempting restore...');
+    console.log('[Category Mount] Current data version:', dataVersion);
+    
+    const saved = restore<CategoryPageState>(dataVersion);
     
     console.log('[Category Mount] Restored data:', {
       hasSaved: !!saved,
@@ -209,72 +235,108 @@ export default function CompCategoryDetailPage({
     });
     
     if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Category Mount] Restoring state with', saved.events.length, 'events');
-      hydratedFromRestoreRef.current = true;
+      console.log('[Category Mount] ✅ Restoring state with', saved.events.length, 'events');
       
-      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
-      fetchCategoryDetail(saved.events);
+      // ✅ 더보기를 했던 경우에만 백그라운드 병합
+      if (saved.events.length > LIST_LIMIT.default) {
+        console.log('[Category Mount] 📡 Fetching server data for merge...');
+        fetchAndMergeData(saved.events);
+      }
     } else {
-      console.log('[Category Mount] No valid saved data found');
-      // ✅ 초기 데이터가 있으면 fetch 생략
+      console.log('[Category Mount] ⚠️ No valid saved data found');
       if (!initialData) {
-        fetchCategoryDetail();
+        fetchAndMergeData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryCode, countryCode]);
 
-  // 라우팅 직전 저장
+  // ✅ 클릭 이벤트 감지하여 저장
   useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest("a") as HTMLAnchorElement | null;
-      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
-
-      console.log('[Category Save] Saving state:', {
+    const saveCurrentState = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY === 0) {
+        console.log('[Category Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
+        return;
+      }
+      
+      console.log('[Category Save] 💾 현재 상태 저장:', {
+        scrollY: currentScrollY,
         eventsCount: events.length,
-        eventsStart,
-        eventsHasMore,
+        dataVersion,
       });
 
-      save<CategoryPageState>({
+      const state: CategoryPageState = {
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
+      };
+
+      save<CategoryPageState>(state, dataVersion);
     };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, save]);
 
-  // 새로고침/탭 숨김 시 저장
+    // ✅ 모든 네비게이션 요소 클릭 감지
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      
+      const eventCard = target.closest('[data-event-code]');
+      const link = target.closest('a');
+      const button = target.closest('button, [role="button"]');
+      
+      if (eventCard || link || button) {
+        if (link) {
+          const href = link.getAttribute('href') || '';
+          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
+            return;
+          }
+        }
+        
+        console.log('[Category Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
+        saveCurrentState();
+      }
+    };
+
+    document.addEventListener("click", handleClick, true);
+    
+    return () => {
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
+
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
-    const persist = () =>
+    const persist = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY === 0) return;
+      
       save<CategoryPageState>({
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
+      }, dataVersion);
+    };
 
     window.addEventListener("beforeunload", persist);
+    
     const onVisibility = () => {
       if (document.visibilityState === "hidden") persist();
     };
     document.addEventListener("visibilitychange", onVisibility);
+    
     return () => {
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, save]);
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
   // ========================= 렌더 =========================
   if (loading) {
@@ -309,7 +371,7 @@ export default function CompCategoryDetailPage({
           <h2 className="text-2xl font-bold mb-4">ERROR</h2>
           <p className="text-gray-600 mb-6">Failed to load category details. Please try again.</p>
           <button
-            onClick={() => fetchCategoryDetail()}
+            onClick={() => fetchAndMergeData()}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Retry
@@ -334,7 +396,6 @@ export default function CompCategoryDetailPage({
         )}
       </div>
 
-      {/* 이벤트 목록 */}
       {events?.length ? (
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
           {events.map((item) => (

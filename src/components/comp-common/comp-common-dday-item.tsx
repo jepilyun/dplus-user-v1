@@ -10,6 +10,7 @@ import { TMapCategoryEventWithEventInfo, TMapCityEventWithEventInfo, TMapCountry
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
+import { useNavigationSave } from "@/contexts/navigation-save-context";
 
 
 export default function CompCommonDdayItem({
@@ -17,6 +18,7 @@ export default function CompCommonDdayItem({
   fullLocale,
 }: { event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo; fullLocale: string }) {
   const router = useRouter();
+  const saveBeforeNav = useNavigationSave(); // ✅ 저장 함수 가져오기
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -62,6 +64,10 @@ export default function CompCommonDdayItem({
     if (target.closest('a[data-tag-link]')) {
       return;
     }
+    
+    // ✅ 네비게이션 직전에 저장
+    saveBeforeNav?.();
+    
     router.push(`/event/${code}`);
   };
 

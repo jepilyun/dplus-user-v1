@@ -13,7 +13,7 @@ import {
   Tz,
   detectBrowserLanguage,
 } from "@/utils/date-ymd";
-import { useTodayPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
+import { useTodayPageRestoration } from "@/contexts/scroll-restoration-context";
 
 // 최소 유효성 검사
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
@@ -40,6 +40,16 @@ type TodayPageState = {
   tz: Tz;
   lang: "en" | "ko";
 };
+
+/**
+ * ✅ 데이터 버전 생성 함수 (2시간 블록)
+ * - revalidate 2시간(7200초)과 동기화
+ */
+function getDataVersion(): string {
+  const now = Date.now();
+  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000));
+  return twoHourBlock.toString();
+}
 
 export default function CompTodayDetailPage({
   countryCode,
@@ -68,7 +78,10 @@ export default function CompTodayDetailPage({
   }, [defaultTz]);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
+  const [loading, setLoading] = useState(!initialData);
+
+  // ✅ 데이터 버전: 2시간 블록
+  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
 
   // ✅ 복원/중복 제어
   const seenEventCodesRef = useRef<Set<string>>(
@@ -78,7 +91,7 @@ export default function CompTodayDetailPage({
   );
   const requestIdRef = useRef(0);
   const nowYmdRef = useRef<string>("");
-  const hydratedFromRestoreRef = useRef(false);
+  const restorationAttemptedRef = useRef(false);
 
   // ✅ 렌더용(섹션 포함) 상태
   const [eventsWithSections, setEventsWithSections] = useState<EventWithSection[]>(
@@ -88,10 +101,10 @@ export default function CompTodayDetailPage({
     })) ?? []
   );
   const [eventsStart, setEventsStart] = useState(
-    initialData?.items?.length ?? 0 // ✅ 초기 시작점 설정
+    initialData?.items?.length ?? 0
   );
   const [eventsHasMore, setEventsHasMore] = useState(
-    Boolean(initialData?.hasMore) // ✅ 초기 hasMore 설정
+    Boolean(initialData?.hasMore)
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
@@ -107,8 +120,10 @@ export default function CompTodayDetailPage({
     }));
   };
 
-  const fetchTodayList = async (restoredRawEvents?: TEventCardForDateDetail[]) => {
-    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+  /**
+   * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
+   */
+  const fetchAndMergeData = async (restoredRawEvents?: TEventCardForDateDetail[]) => {
     if (initialData && !restoredRawEvents) {
       setLoading(false);
       return;
@@ -126,22 +141,31 @@ export default function CompTodayDetailPage({
       }
   
       const raw: unknown[] = res?.dbResponse?.items ?? [];
-      const initItems = raw.filter(isValidEvent);
+      const serverEvents = raw.filter(isValidEvent);
+      
+      // ✅ 새 데이터 버전 업데이트
+      const newVersion = getDataVersion();
+      setDataVersion(newVersion);
+      
+      console.log('[Today Merge] 📊 Data versions:', {
+        new: newVersion,
+        old: dataVersion,
+        changed: newVersion !== dataVersion
+      });
   
-      // ✅ 핵심 수정: 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredRawEvents && restoredRawEvents.length > LIST_LIMIT.default) {
-        console.log('[Today Fetch] Merging server data with restored pagination');
-        console.log('[Today Fetch] Server events:', initItems.length);
-        console.log('[Today Fetch] Restored total:', restoredRawEvents.length);
+        console.log('[Today Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[Today Merge] Server events:', serverEvents.length);
+        console.log('[Today Merge] Restored total:', restoredRawEvents.length);
         
-        const serverCodes = new Set(initItems.map(item => item.event_code));
+        const serverCodes = new Set(serverEvents.map(item => item.event_code));
         
-        // ✅ 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
         const additionalEvents = restoredRawEvents
           .slice(LIST_LIMIT.default)
           .filter(item => !serverCodes.has(item.event_code));
         
-        console.log('[Today Fetch] Additional events from restore:', additionalEvents.length);
+        console.log('[Today Merge] Additional events from restore:', additionalEvents.length);
         
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
@@ -153,21 +177,19 @@ export default function CompTodayDetailPage({
           return eventDate.getTime() >= todayTimestamp;
         });
         
-        console.log('[Today Fetch] Future events after filter:', futureEvents.length);
+        console.log('[Today Merge] Future events after filter:', futureEvents.length);
         
         // 중복 제거 후 병합
         seenEventCodesRef.current.clear();
         const merged: TEventCardForDateDetail[] = [];
         
-        // 서버 데이터 먼저 (최신 36개)
-        for (const it of initItems) {
+        for (const it of serverEvents) {
           if (!seenEventCodesRef.current.has(it.event_code)) {
             seenEventCodesRef.current.add(it.event_code);
             merged.push(it);
           }
         }
         
-        // 추가 로드한 미래 이벤트
         for (const it of futureEvents) {
           if (!seenEventCodesRef.current.has(it.event_code)) {
             seenEventCodesRef.current.add(it.event_code);
@@ -175,8 +197,8 @@ export default function CompTodayDetailPage({
           }
         }
         
-        console.log('[Today Fetch] Final merged:', {
-          server: initItems.length,
+        console.log('[Today Merge] ✅ Final merged:', {
+          server: serverEvents.length,
           additional: futureEvents.length,
           total: merged.length
         });
@@ -185,11 +207,11 @@ export default function CompTodayDetailPage({
         setEventsWithSections(finalWithSections);
         setEventsStart(finalWithSections.length);
       } else {
-        // 더보기를 안 한 경우: 서버 데이터만 사용
-        console.log('[Today Fetch] Using server data only');
+        console.log('[Today Merge] ✅ Using server data only');
         seenEventCodesRef.current.clear();
         const deduped: TEventCardForDateDetail[] = [];
-        for (const it of initItems) {
+        
+        for (const it of serverEvents) {
           if (!seenEventCodesRef.current.has(it.event_code)) {
             seenEventCodesRef.current.add(it.event_code);
             deduped.push(it);
@@ -243,9 +265,15 @@ export default function CompTodayDetailPage({
     }
   };
 
+  // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
-    console.log('[Today Mount] Component mounted, attempting restore...');
-    const saved = restore<TodayPageState>();
+    if (restorationAttemptedRef.current) return;
+    restorationAttemptedRef.current = true;
+
+    console.log('[Today Mount] 🚀 Component mounted, attempting restore...');
+    console.log('[Today Mount] Current data version:', dataVersion);
+    
+    const saved = restore<TodayPageState>(dataVersion);
     
     console.log('[Today Mount] Restored data:', {
       hasSaved: !!saved,
@@ -253,43 +281,46 @@ export default function CompTodayDetailPage({
     });
     
     if (saved && saved.rawEvents && saved.rawEvents.length > 0) {
-      console.log('[Today Mount] Restoring state with', saved.rawEvents.length, 'events');
-      hydratedFromRestoreRef.current = true;
+      console.log('[Today Mount] ✅ Restoring state with', saved.rawEvents.length, 'events');
+      
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       
-      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
       setEventsWithSections(attachSections(saved.rawEvents));
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
   
-      // 복원된 TZ/Lang이 있으면 우선 적용
       if (saved.tz) setTz(saved.tz);
       if (saved.lang) setLang(saved.lang);
       setLoading(false);
       
-      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
-      fetchTodayList(saved.rawEvents);
+      // ✅ 더보기를 했던 경우에만 백그라운드 병합
+      if (saved.rawEvents.length > LIST_LIMIT.default) {
+        console.log('[Today Mount] 📡 Fetching server data for merge...');
+        fetchAndMergeData(saved.rawEvents);
+      }
     } else {
-      console.log('[Today Mount] No valid saved data found');
-      // ✅ 초기 데이터가 있으면 fetch 생략
+      console.log('[Today Mount] ⚠️ No valid saved data found');
       if (!initialData) {
-        fetchTodayList();
+        fetchAndMergeData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);
 
-  // 라우팅 직전 저장
+  // ✅ 클릭 이벤트 감지하여 저장
   useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest("a") as HTMLAnchorElement | null;
-      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
-
-      console.log('[Today Save] Saving state:', {
+    const saveCurrentState = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY === 0) {
+        console.log('[Today Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
+        return;
+      }
+      
+      console.log('[Today Save] 💾 현재 상태 저장:', {
+        scrollY: currentScrollY,
         eventsCount: eventsWithSections.length,
-        eventsStart,
-        eventsHasMore,
+        dataVersion,
       });
 
       // 저장은 raw 기준으로(섹션은 복원 시 재계산)
@@ -298,26 +329,57 @@ export default function CompTodayDetailPage({
         return rest;
       });
 
-      save<TodayPageState>({
+      const state: TodayPageState = {
         rawEvents,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
         tz,
         lang,
-      });
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, save]);
+      };
 
-  // 새로고침/탭 숨김 시 저장
+      save<TodayPageState>(state, dataVersion);
+    };
+
+    // ✅ 모든 네비게이션 요소 클릭 감지
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      
+      const eventCard = target.closest('[data-event-code]');
+      const link = target.closest('a');
+      const button = target.closest('button, [role="button"]');
+      
+      if (eventCard || link || button) {
+        if (link) {
+          const href = link.getAttribute('href') || '';
+          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
+            return;
+          }
+        }
+        
+        console.log('[Today Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
+        saveCurrentState();
+      }
+    };
+
+    document.addEventListener("click", handleClick, true);
+    
+    return () => {
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, dataVersion, save]);
+
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY === 0) return;
+      
       const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
         const { section, ...rest } = it;
         return rest;
       });
+      
       save<TodayPageState>({
         rawEvents,
         eventsStart,
@@ -325,19 +387,21 @@ export default function CompTodayDetailPage({
         seenEventCodes: Array.from(seenEventCodesRef.current),
         tz,
         lang,
-      });
+      }, dataVersion);
     };
 
     window.addEventListener("beforeunload", persist);
+    
     const onVisibility = () => {
       if (document.visibilityState === "hidden") persist();
     };
     document.addEventListener("visibilitychange", onVisibility);
+    
     return () => {
       window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, save]);
+  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, dataVersion, save]);
 
   // ✅ TZ/Lang이 변하면 섹션만 재계산하여 화면 업데이트
   useEffect(() => {
@@ -390,7 +454,7 @@ export default function CompTodayDetailPage({
               : "Failed to load today's events. Please try again."}
           </p>
           <button
-            onClick={() => fetchTodayList()}
+            onClick={() => fetchAndMergeData()}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             {lang === "ko" ? "재시도" : "Retry"}

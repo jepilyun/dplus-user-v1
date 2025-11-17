@@ -7,6 +7,7 @@ import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useRouter } from "next/navigation";
+import { useNavigationSave } from "@/contexts/navigation-save-context";
 
 
 export default function CompCommonDdayItemForDate({
@@ -14,6 +15,7 @@ export default function CompCommonDdayItemForDate({
   fullLocale,
 }: { event: TEventCardForDateDetail; fullLocale: string }) {
   const router = useRouter();
+  const saveBeforeNav = useNavigationSave(); // ✅ 저장 함수 가져오기
 
   const code = event?.event_code ?? "default";
   const { bg, fg } = computeBadgeColors(
@@ -55,6 +57,10 @@ export default function CompCommonDdayItemForDate({
     if (target.closest('a[data-tag-link]')) {
       return;
     }
+
+    // ✅ 네비게이션 직전에 저장
+    saveBeforeNav?.();
+
     router.push(`/event/${code}`);
   };
 

@@ -4,20 +4,19 @@ import { reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
 import {
   LIST_LIMIT,
   ResponseCountryDetailForUserFront,
-  SUPPORT_LANG_CODES,
   TCountryDetail,
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getCountryImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-// import { HeroImageBackgroundCarouselCountry } from "../comp-image/hero-background-carousel-country";
 import Link from "next/link";
 import { getCityBgUrl } from "@/utils/get-city-bg-image";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCountryViewCount } from "@/utils/increment-count";
+import { NavigationSaveContext } from "@/contexts/navigation-save-context";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -26,14 +25,17 @@ type CountryPageState = {
   seenEventCodes: string[];
 };
 
-
 /**
- * Country 상세 페이지
- * @param countryCode - 국가 코드
- * @param fullLocale - 전체 로케일
- * @param langCode - 언어 코드
- * @returns 
+ * ✅ 데이터 버전 생성 함수 (2시간 블록)
+ * - revalidate 2시간(7200초)과 동기화
+ * - 2시간마다 자동으로 버전 변경
  */
+function getDataVersion(): string {
+  const now = Date.now();
+  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000)); // 2시간 단위
+  return twoHourBlock.toString();
+}
+
 export default function CompCountryDetailPage({
   countryCode,
   fullLocale,
@@ -48,15 +50,19 @@ export default function CompCountryDetailPage({
   const router = useRouter();
   const { save, restore } = useCountryPageRestoration(countryCode);
 
-  // ✅ 조회수 증가 여부 추적
   const viewCountIncrementedRef = useRef(false);
+  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
-  const [loading, setLoading] = useState(!initialData); // ✅ 초기 데이터 있으면 false
+  const [loading, setLoading] = useState(!initialData);
 
   const [countryDetail, setCountryDetail] = useState<ResponseCountryDetailForUserFront | null>(
-    initialData ?? null // ✅ 초기 데이터로 시작
+    initialData ?? null
   );
+  
+  // ✅ 데이터 버전: 2시간 블록 (예: "123456" → 2시간마다 변경)
+  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
+
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialData ? getCountryImageUrls(initialData.country as TCountryDetail) : []
   );
@@ -86,16 +92,14 @@ export default function CompCountryDetailPage({
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
-  const hydratedFromRestoreRef = useRef(false);
-
-  // ✅ 안전하게 초기값 설정
   const [viewCount, setViewCount] = useState(
     initialData?.country?.view_count ?? 0
   );
 
-  // 복원된 이벤트를 매개변수로 받음
-  const fetchCountryDetail = async (restoredEvents?: TMapCountryEventWithEventInfo[]) => {
-    // ✅ 초기 데이터가 있고 복원 데이터도 없으면 fetch 생략
+  /**
+   * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
+   */
+  const fetchAndMergeData = async (restoredEvents?: TMapCountryEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
@@ -122,33 +126,38 @@ export default function CompCountryDetailPage({
       setImageUrls(getCountryImageUrls(res.dbResponse?.country as TCountryDetail));
       setHasCategories((res.dbResponse?.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse?.cities?.items?.length ?? 0) > 0);
-
-      // ✅ view_count 업데이트
       setViewCount(res.dbResponse?.country?.view_count ?? 0);
-  
-      const initItems = res.dbResponse?.mapCountryEvent?.items ?? [];
+
+      const serverEvents = res.dbResponse?.mapCountryEvent?.items ?? [];
       
-      // 복원 여부와 관계없이 항상 서버 최신 36개를 기준으로
+      // ✅ 새 데이터 버전 업데이트
+      const newVersion = getDataVersion();
+      setDataVersion(newVersion);
+      
+      console.log('[Merge] 📊 Data versions:', {
+        new: newVersion,
+        old: dataVersion,
+        changed: newVersion !== dataVersion
+      });
+      
+      // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        console.log('[Fetch] Merging server data with restored pagination');
-        console.log('[Fetch] Server events:', initItems.length);
-        console.log('[Fetch] Restored total:', restoredEvents.length);
+        console.log('[Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[Merge] Server events:', serverEvents.length);
+        console.log('[Merge] Restored total:', restoredEvents.length);
         
-        // 서버의 최신 36개 이벤트 코드
         const serverCodes = new Set(
-          initItems.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
+          serverEvents.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
-        // 복원된 이벤트 중 37번째 이후만 추출 (더보기로 로드한 것들)
         const additionalEvents = restoredEvents
           .slice(LIST_LIMIT.default)
           .filter(item => {
             const code = item?.event_info?.event_code ?? item?.event_code;
-            // 서버에 없는 이벤트만 (중복 제거)
             return code && !serverCodes.has(code);
           });
         
-        console.log('[Fetch] Additional events from restore:', additionalEvents.length);
+        console.log('[Merge] Additional events from restore:', additionalEvents.length);
         
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
@@ -163,18 +172,16 @@ export default function CompCountryDetailPage({
           return true;
         });
         
-        console.log('[Fetch] Future events after filter:', futureEvents.length);
+        console.log('[Merge] Future events after filter:', futureEvents.length);
         
-        // ✅ 서버 최신 36개 + 더보기로 로드한 이벤트들
-        const finalEvents = [...initItems, ...futureEvents];
+        const finalEvents = [...serverEvents, ...futureEvents];
         
-        console.log('[Fetch] Final merged:', {
-          server: initItems.length,
+        console.log('[Merge] ✅ Final merged:', {
+          server: serverEvents.length,
           additional: futureEvents.length,
           total: finalEvents.length
         });
         
-        // ✅ 상태 업데이트 (화면에 이미 복원된 데이터가 표시된 상태에서 업데이트)
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
         
@@ -184,13 +191,12 @@ export default function CompCountryDetailPage({
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        // 더보기를 안 한 경우: 서버 데이터만 사용
-        console.log('[Fetch] Using server data only');
-        setEvents(initItems);
-        setEventsStart(initItems.length);
+        console.log('[Merge] ✅ Using server data only');
+        setEvents(serverEvents);
+        setEventsStart(serverEvents.length);
         
         seenEventCodesRef.current.clear();
-        initItems.forEach(item => {
+        serverEvents.forEach(item => {
           const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         });
@@ -229,24 +235,46 @@ export default function CompCountryDetailPage({
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
+    
     try {
       const res = await reqGetCountryEvents(countryCode, eventsStart, LIST_LIMIT.default, langCode);
-
       const fetchedItems = res?.dbResponse?.items ?? [];
+      
       const newItems = fetchedItems.filter((it: TMapCountryEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodesRef.current.has(code)) return false;
         seenEventCodesRef.current.add(code);
         return true;
       });
-      setEvents((prev) => prev.concat(newItems));
-      setEventsStart((prev) => prev + newItems.length);
+      
+      setEvents(prev => [...prev, ...newItems]);
+      setEventsStart(prev => prev + newItems.length);
       setEventsHasMore(Boolean(res?.dbResponse?.hasMore));
     } finally {
       setEventsLoading(false);
     }
   };
 
+  // ✅ 저장 함수 생성
+  const saveStateBeforeNavigation = useCallback(() => {
+    const currentScrollY = window.scrollY;
+    
+    console.log('[BeforeNav] 💾 네비게이션 전 저장:', {
+      scrollY: currentScrollY,
+      eventsCount: events.length,
+    });
+
+    const state: CountryPageState = {
+      events,
+      eventsStart,
+      eventsHasMore,
+      seenEventCodes: Array.from(seenEventCodesRef.current),
+    };
+
+    save<CountryPageState>(state, dataVersion);
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
+
+  // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
     if (!viewCountIncrementedRef.current && countryCode) {
       viewCountIncrementedRef.current = true;
@@ -256,10 +284,16 @@ export default function CompCountryDetailPage({
     }
   }, [countryCode]);
 
-  // ✅ 수정: 복원된 데이터를 fetchCountryDetail에 전달
+  // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
-    console.log('[Mount] Component mounted, attempting restore...');
-    const saved = restore<CountryPageState>();
+    if (restorationAttemptedRef.current) return;
+    restorationAttemptedRef.current = true;
+
+    console.log('[Mount] 🚀 Component mounted, attempting restore...');
+    console.log('[Mount] Current data version:', dataVersion);
+    
+    // ✅ 현재 버전과 함께 복원 시도
+    const saved = restore<CountryPageState>(dataVersion);
 
     console.log('[Mount] Restored data:', {
       hasSaved: !!saved,
@@ -267,74 +301,85 @@ export default function CompCountryDetailPage({
     });
     
     if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Mount] Restoring state with', saved.events.length, 'events');
-      hydratedFromRestoreRef.current = true;
+      console.log('[Mount] ✅ Restoring state with', saved.events.length, 'events');
       
-      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
+      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 보존)
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
       setEventsHasMore(Boolean(saved.eventsHasMore));
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
-      fetchCountryDetail(saved.events);
+      // ✅ 더보기를 했던 경우에만 백그라운드 병합
+      if (saved.events.length > LIST_LIMIT.default) {
+        console.log('[Mount] 📡 Fetching server data for merge...');
+        fetchAndMergeData(saved.events);
+      }
     } else {
-      console.log('[Mount] No valid saved data found');
-      // ✅ 초기 데이터가 있으면 fetch 생략
+      console.log('[Mount] ⚠️ No valid saved data found (version mismatch or expired)');
       if (!initialData) {
-        fetchCountryDetail();
+        fetchAndMergeData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countryCode]);
 
-  // 라우팅 직전 상태 저장
+  // ✅ 링크 클릭 시 저장 (버전 포함)
   useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
+    const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const link = target.closest("a") as HTMLAnchorElement | null;
-      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
+      
+      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) {
+        return;
+      }
 
-      console.log('[Save] Saving state:', {
+      console.log('[Click] 💾 Saving state:', {
+        scrollY: window.scrollY,
         eventsCount: events.length,
-        eventsStart,
-        eventsHasMore,
+        dataVersion,
       });
 
-      save<CountryPageState>({
+      const state: CountryPageState = {
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
+      };
+
+      // ✅ 버전과 함께 저장
+      save<CountryPageState>(state, dataVersion);
     };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, save]);
 
-  // 새로고침/탭 숨김 시 저장
+    document.addEventListener("click", handleLinkClick, true);
+    return () => document.removeEventListener("click", handleLinkClick, true);
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
+
+  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
-    const persist = () =>
+    const persist = () => {
       save<CountryPageState>({
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
+      }, dataVersion);
+    };
 
     window.addEventListener("beforeunload", persist);
+    
     const onVisibility = () => {
       if (document.visibilityState === "hidden") persist();
     };
     document.addEventListener("visibilitychange", onVisibility);
+    
     return () => {
       window.removeEventListener("beforeunload", persist);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [events, eventsStart, eventsHasMore, save]);
+  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
-  // 로딩 중
+  // 나머지 렌더링 로직은 동일...
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -343,15 +388,12 @@ export default function CompCountryDetailPage({
     );
   }
 
-  // 국가를 찾을 수 없는 경우 - 인라인 에러 표시
   if (error === 'not-found') {
     return (
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Country Not Found</h2>
-          <p className="text-gray-600 mb-6">
-            해당 국가는 존재하지 않습니다.
-          </p>
+          <p className="text-gray-600 mb-6">해당 국가는 존재하지 않습니다.</p>
           <button
             onClick={() => router.push(`/${langCode}`)}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -363,17 +405,14 @@ export default function CompCountryDetailPage({
     );
   }
 
-  // 네트워크 에러 - 재시도 옵션 제공
   if (error === 'network') {
     return (
       <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">ERROR</h2>
-          <p className="text-gray-600 mb-6">
-            Failed to load country details. Please try again.
-          </p>
+          <p className="text-gray-600 mb-6">Failed to load country details. Please try again.</p>
           <button
-            onClick={() => fetchCountryDetail()}
+            onClick={() => fetchAndMergeData()}
             className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             Retry
@@ -384,186 +423,105 @@ export default function CompCountryDetailPage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* 추후 국가가 다양해지면 국가 헤더 부분 추가하기 */}
-      {/* <HeroImageBackgroundCarouselCountry
-        bucket="countries"
-        imageUrls={imageUrls}
-        interval={5000}
-        countryDetail={countryDetail?.country || null}
-        langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
-      /> */}
-
-      {hasCategories && (
-        <div className="mx-auto w-full max-w-[1440px] px-4">
-          <div className="flex justify-center gap-2 flex-wrap">
-            {countryDetail?.categories?.items.map((item) => (
-              <Link
-                key={item.category_code}
-                href={`/category/${item.category_code}`}
-                className="block"
-              >
-                <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-gray-200 px-6 py-3 transition hover:bg-gray-50 hover:font-bold">
-                  <div className="text-md text-center">
-                    {item.name_i18n ?? item.name}
-                  </div>
-                  {/* <div className="text-xs text-muted-foreground text-center">{item.name}</div> */}
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-      {hasCities && (
-        <div className="mx-auto w-full max-w-[1440px] px-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
-            {countryDetail?.cities?.items.map((item) => {
-              const bg = getCityBgUrl(item);
-              return (
+    <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
+      <div className="flex flex-col gap-8">
+        {hasCategories && (
+          <div className="mx-auto w-full max-w-[1440px] px-4">
+            <div className="flex justify-center gap-2 flex-wrap">
+              {countryDetail?.categories?.items.map((item) => (
                 <Link
-                  key={item.city_code}
-                  href={`/city/${item.city_code}`}
-                  className={[
-                    "relative flex flex-col items-center justify-center gap-1",
-                    "h-full min-h-[120px] w-full rounded-2xl border border-gray-200 p-4",
-                    "transition-all duration-200 overflow-hidden",
-                    "group", // ← 중요: group으로 설정
-                    bg 
-                      ? "bg-gray-900" 
-                      : "bg-gray-50 hover:bg-gray-100",
-                  ].join(" ")}
+                  key={item.category_code}
+                  href={`/category/${item.category_code}`}
+                  className="block"
                 >
-                  {/* 배경 이미지 레이어 */}
-                  {bg && (
-                    <>
-                      <div
-                        className="absolute inset-0 bg-center bg-cover transition-transform duration-300 group-hover:scale-105"
-                        style={{ backgroundImage: `url(${bg})` }}
-                        aria-hidden="true"
-                      />
-                      
-                      {/* 검은 반투명 오버레이 - hover 시 더 투명하게 */}
-                      <div 
-                        className="absolute inset-0 bg-black/60 transition-opacity duration-200 group-hover:bg-black/40" 
-                        aria-hidden="true"
-                      />
-                    </>
-                  )}
-
-                  {/* 내용 */}
-                  <div className="relative z-10 w-full">
-                    <div
-                      className={[
-                        "text-xl font-bold text-center transition-transform duration-200",
-                        bg 
-                          ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] group-hover:scale-105" 
-                          : "text-gray-900",
-                      ].join(" ")}
-                    >
-                      {item.name_native ?? item.name}
-                    </div>
-                    <div
-                      className={[
-                        "text-sm text-center transition-transform duration-200",
-                        bg
-                          ? "text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:scale-105"
-                          : "text-muted-foreground",
-                      ].join(" ")}
-                    >
-                      {item.name}
+                  <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-gray-200 px-6 py-3 transition hover:bg-gray-50 hover:font-bold">
+                    <div className="text-md text-center">
+                      {item.name_i18n ?? item.name}
                     </div>
                   </div>
                 </Link>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
-      {/* {countryDetail?.stags?.items.map(item => (
-        <div key={item.stag_code}>
-          <div>{item.stag}</div>
-        </div>
-      ))} */}
-      {events?.length ? (
-        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
-          {events.map(item => (
-            <CompCommonDdayItem key={item.event_info?.event_code} event={item} fullLocale={fullLocale} />
-          ))}
+        )}
 
-          {/* 더보기 버튼 */}
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} />}
-        </div>
-      ) : null}
+        {hasCities && (
+          <div className="mx-auto w-full max-w-[1440px] px-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
+              {countryDetail?.cities?.items.map((item) => {
+                const bg = getCityBgUrl(item);
+                return (
+                  <Link
+                    key={item.city_code}
+                    href={`/city/${item.city_code}`}
+                    className={[
+                      "relative flex flex-col items-center justify-center gap-1",
+                      "h-full min-h-[120px] w-full rounded-2xl border border-gray-200 p-4",
+                      "transition-all duration-200 overflow-hidden group",
+                      bg ? "bg-gray-900" : "bg-gray-50 hover:bg-gray-100",
+                    ].join(" ")}
+                  >
+                    {bg && (
+                      <>
+                        <div
+                          className="absolute inset-0 bg-center bg-cover transition-transform duration-300 group-hover:scale-105"
+                          style={{ backgroundImage: `url(${bg})` }}
+                          aria-hidden="true"
+                        />
+                        <div 
+                          className="absolute inset-0 bg-black/60 transition-opacity duration-200 group-hover:bg-black/40" 
+                          aria-hidden="true"
+                        />
+                      </>
+                    )}
+                    <div className="relative z-10 w-full">
+                      <div
+                        className={[
+                          "text-xl font-bold text-center transition-transform duration-200",
+                          bg 
+                            ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] group-hover:scale-105" 
+                            : "text-gray-900",
+                        ].join(" ")}
+                      >
+                        {item.name_native ?? item.name}
+                      </div>
+                      <div
+                        className={[
+                          "text-sm text-center transition-transform duration-200",
+                          bg
+                            ? "text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:scale-105"
+                            : "text-muted-foreground",
+                        ].join(" ")}
+                      >
+                        {item.name}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-      {/* 
-      {folderDetail?.mapStagFolder?.map(item => (
-        <div key={item.stag_info?.stag_code}>
-          <div>{item.stag_native}</div>
-          <div>{item.stag_name_i18n}</div>
-        </div>
-      ))}
-      {folderDetail?.mapTagFolder?.map(item => (
-        <div key={item.tag_code}>
-          <div>{item.tag_code}</div>
-        </div>
-      ))}
-      <div className="m-auto w-full max-w-[1280px]">
-        <div className="rounded-xl bg-white/70 p-8 sm:p-12">
-          <ul
-            className="
-              grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3
-              gap-x-6 gap-y-6
-            "
-            aria-label="event contact & links"
-          >
-          {folderDetail?.content.phone && (
-            <InfoItem
-              icon={<IconPhoneRound className="h-12 w-12 text-gray-700" />}
-              text={`+${folderDetail.content.phone_country_code} ${folderDetail.content.phone}`}
-              href={toTelUrl(folderDetail.content.phone)}
-            />
-          )}
-          {folderDetail?.content.homepage && (
-            <InfoItem
-              icon={<IconHomepageRound className="h-12 w-12 text-gray-700" />}
-              text={folderDetail.content.homepage.replace(/^https?:\/\//i, "")}
-              href={toAbsoluteUrl(folderDetail.content.homepage)}
-            />
-          )}
-          {folderDetail?.content.email && (
-            <InfoItem
-              icon={<IconEmailRound className="h-12 w-12 text-gray-700" />}
-              text={folderDetail.content.email}
-              href={toMailUrl(folderDetail.content.email)}
-            />
-          )}
-          {folderDetail?.content.youtube_ch_id && (
-            <InfoItem
-              icon={<IconYoutubeRound className="h-12 w-12 text-gray-700" />}
-              text="Youtube"
-              href={toYoutubeChannelUrl(folderDetail.content.youtube_ch_id)}
-            />
-          )}
-          {folderDetail?.content.instagram_id && (
-            <InfoItem
-              icon={<IconInstagramRound className="h-12 w-12 text-gray-700" />}
-              text="Instagram"
-              href={toInstagramUrl(folderDetail.content.instagram_id)}
-            />
-          )}
-          {/* 기존 LinkForDetail도 리스트 아이템로 포함 */}
-          {/* {folderDetail?.content.url && (
-            <InfoItem
-              icon={<IconWebsiteRound className="h-12 w-12 text-gray-700" />}
-              text="URL"
-              href={folderDetail.content.url}
-            />
-          )}
-          </ul> */}
-        {/* </div> */}
-      {/* </div> */}
-      {/* <div>Profile Image:{folderDetail?.content.profile}</div> */}
-      {/* <CompDatesInDetail createdAt={folderDetail?.content.created_at} updatedAt={folderDetail?.content.updated_at} fullLocale={fullLocale} /> */}
-    </div>
+        {events?.length ? (
+          <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
+            {events.map(item => (
+              <CompCommonDdayItem 
+                key={item.event_info?.event_code} 
+                event={item} 
+                fullLocale={fullLocale} 
+              />
+            ))}
+
+            {eventsHasMore && (
+              <CompLoadMore 
+                onLoadMore={loadMoreEvents} 
+                loading={eventsLoading} 
+              />
+            )}
+          </div>
+        ) : null}
+      </div>
+    </NavigationSaveContext.Provider>
   );
 }
