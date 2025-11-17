@@ -1,10 +1,7 @@
-// components/comp-share/share-modal.tsx
 "use client";
 
-import { useState } from "react";
 import { Dialog, IconButton } from "@mui/material";
 import { openSocialShare, type SocialPlatform } from "@/utils/social-share";
-import { IconClose } from "@/icons/icon-close";
 import { IconTwitter } from "@/icons/icon-twitter";
 import { IconFacebook } from "@/icons/icon-facebook";
 import { IconThreads } from "@/icons/icon-threads";

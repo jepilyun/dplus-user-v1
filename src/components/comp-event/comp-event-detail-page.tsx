@@ -335,8 +335,6 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
                 className="w-full h-full"
                 clickHintText={eventDetail?.event.address_native ?? ''}
               />
-              
-              {/* ✅ 오른쪽 하단 버튼 */}
               <button
                 onClick={handleOpenGoogleMap}
                 className="absolute top-4 left-4 bg-white hover:bg-gray-50 text-gray-800 font-medium px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:shadow-xl z-10"
