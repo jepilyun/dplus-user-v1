@@ -17,6 +17,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
+import { getSessionDataVersion } from "@/utils/get-session-data-version";
 
 type FolderPageState = {
   events: TMapFolderEventWithEventInfo[];
@@ -24,16 +25,6 @@ type FolderPageState = {
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
-
-/**
- * ✅ 데이터 버전 생성 함수 (2시간 블록)
- * - revalidate 2시간(7200초)과 동기화
- */
-function getDataVersion(): string {
-  const now = Date.now();
-  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000));
-  return twoHourBlock.toString();
-}
 
 export default function CompFolderDetailPage({
   folderCode,
@@ -60,7 +51,7 @@ export default function CompFolderDetailPage({
   );
   
   // ✅ 데이터 버전: 2시간 블록
-  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
+  const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialData ? getFolderImageUrls(initialData.folder) : []
@@ -117,7 +108,7 @@ export default function CompFolderDetailPage({
       const serverEvents = db?.folderEvent?.items ?? [];
       
       // ✅ 새 데이터 버전 업데이트
-      const newVersion = getDataVersion();
+      const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
       console.log('[Folder Merge] 📊 Data versions:', {

@@ -15,6 +15,7 @@ import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-carousel-stag";
 import { useStagPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementStagViewCount } from "@/utils/increment-count";
+import { getSessionDataVersion } from "@/utils/get-session-data-version";
 
 type StagPageState = {
   events: TMapStagEventWithEventInfo[];
@@ -22,16 +23,6 @@ type StagPageState = {
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
-
-/**
- * ✅ 데이터 버전 생성 함수 (2시간 블록)
- * - revalidate 2시간(7200초)과 동기화
- */
-function getDataVersion(): string {
-  const now = Date.now();
-  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000));
-  return twoHourBlock.toString();
-}
 
 export default function CompStagDetailPage({
   stagCode,
@@ -58,7 +49,7 @@ export default function CompStagDetailPage({
   );
   
   // ✅ 데이터 버전: 2시간 블록
-  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
+  const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialData ? getStagImageUrls(initialData.stag) : []
@@ -116,7 +107,7 @@ export default function CompStagDetailPage({
       const serverEvents = res?.dbResponse?.mapStagEvent?.items ?? [];
       
       // ✅ 새 데이터 버전 업데이트
-      const newVersion = getDataVersion();
+      const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
       console.log('[Stag Merge] 📊 Data versions:', {

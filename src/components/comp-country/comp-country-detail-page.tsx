@@ -17,6 +17,7 @@ import { getCityBgUrl } from "@/utils/get-city-bg-image";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCountryViewCount } from "@/utils/increment-count";
 import { NavigationSaveContext } from "@/contexts/navigation-save-context";
+import { getSessionDataVersion } from "@/utils/get-session-data-version";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -24,17 +25,6 @@ type CountryPageState = {
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
-
-/**
- * ✅ 데이터 버전 생성 함수 (2시간 블록)
- * - revalidate 2시간(7200초)과 동기화
- * - 2시간마다 자동으로 버전 변경
- */
-function getDataVersion(): string {
-  const now = Date.now();
-  const twoHourBlock = Math.floor(now / (2 * 60 * 60 * 1000)); // 2시간 단위
-  return twoHourBlock.toString();
-}
 
 export default function CompCountryDetailPage({
   countryCode,
@@ -61,7 +51,7 @@ export default function CompCountryDetailPage({
   );
   
   // ✅ 데이터 버전: 2시간 블록 (예: "123456" → 2시간마다 변경)
-  const [dataVersion, setDataVersion] = useState<string>(getDataVersion);
+  const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialData ? getCountryImageUrls(initialData.country as TCountryDetail) : []
@@ -131,7 +121,7 @@ export default function CompCountryDetailPage({
       const serverEvents = res.dbResponse?.mapCountryEvent?.items ?? [];
       
       // ✅ 새 데이터 버전 업데이트
-      const newVersion = getDataVersion();
+      const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
       console.log('[Merge] 📊 Data versions:', {
