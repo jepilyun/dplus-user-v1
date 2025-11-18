@@ -507,6 +507,7 @@ export default function CompCountryDetailPage({
               <CompLoadMore 
                 onLoadMore={loadMoreEvents} 
                 loading={eventsLoading} 
+                locale={langCode}
               />
             )}
           </div>

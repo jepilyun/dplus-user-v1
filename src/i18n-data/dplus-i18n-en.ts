@@ -1,6 +1,7 @@
 // English
 export const dplusI18nEN = {
   repeat_annually: "Repeats annually",
+  load_more: "Load More",
   metadata: {
     title:
       "dplus | Concerts·Festivals·Exhibitions·Shows·Pop-ups, Add in One Click",

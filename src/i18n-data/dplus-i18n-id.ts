@@ -1,6 +1,7 @@
 // Indonesian
 export const dplusI18nID = {
   repeat_annually: "Berulang setiap tahun",
+  load_more: "Muat Lebih Banyak",
   metadata: {
     title:
       "dplus | Jadwal konser·festival·pameran·pertunjukan·pop-up, tambah sekali klik",

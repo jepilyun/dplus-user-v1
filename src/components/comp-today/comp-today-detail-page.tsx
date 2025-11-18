@@ -495,7 +495,7 @@ export default function CompTodayDetailPage({
           })()}
 
           {eventsHasMore && (
-            <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} />
+            <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />
           )}
         </div>
       ) : (

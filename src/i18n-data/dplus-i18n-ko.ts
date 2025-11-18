@@ -1,5 +1,6 @@
 export const dplusI18nKO = {
   repeat_annually: "매년 반복",
+  load_more: "더보기",
   metadata: {
     // SEO Title (≤ 60자 권장)
     title: "dplus | 콘서트·축제·전시·공연·팝업 일정이 궁금할 때",

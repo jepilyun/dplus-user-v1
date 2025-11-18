@@ -1,6 +1,7 @@
 // Japanese
 export const dplusI18nJA = {
   repeat_annually: "毎年繰り返す",
+  load_more: "もっと見る",
   metadata: {
     title:
       "dplus｜コンサート・フェス・展示・公演・ポップアップの予定をワンクリック追加",

@@ -1,6 +1,7 @@
 // Thai
 export const dplusI18nTH = {
   repeat_annually: "ทำซ้ำทุกปี",
+  load_more: "ดูเพิ่มเติม",
   metadata: {
     title:
       "dplus | คอนเสิร์ต·เทศกาล·นิทรรศการ·การแสดง·ป๊อปอัพ เพิ่มลงปฏิทินในคลิกเดียว",

@@ -1,6 +1,7 @@
 // Chinese (Traditional, Taiwan)
 export const dplusI18nTW = {
   repeat_annually: "每年重複",
+  load_more: "載入更多",
   metadata: {
     title: "dplus｜音樂會・慶典・展覽・演出・快閃行程，一鍵加入",
     description:

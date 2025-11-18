@@ -345,7 +345,7 @@ export default function CompTagDetailPage({
             />
           ))}
 
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} />}
+          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
         </div>
       ) : null}
     </div>

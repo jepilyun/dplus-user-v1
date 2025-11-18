@@ -1,6 +1,7 @@
 // Chinese (Simplified)
 export const dplusI18nZH = {
   repeat_annually: "每年重复",
+  load_more: "加载更多",
   metadata: {
     title: "dplus | 音乐会·庆典·展览·演出·快闪日程，一键添加",
     description:

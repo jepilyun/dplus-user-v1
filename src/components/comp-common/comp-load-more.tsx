@@ -1,11 +1,15 @@
+import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { Button, CircularProgress } from "@mui/material";
 
 interface CompLoadMoreProps {
   onLoadMore: () => void;
   loading: boolean;
+  locale: string;
 }
 
-export const CompLoadMore = ({ onLoadMore, loading }: CompLoadMoreProps) => {
+export const CompLoadMore = ({ onLoadMore, loading, locale }: CompLoadMoreProps) => {
+  const { load_more } = getDplusI18n(locale);
+
   return (
     <div className="flex justify-center py-8">
       <Button
@@ -37,7 +41,7 @@ export const CompLoadMore = ({ onLoadMore, loading }: CompLoadMoreProps) => {
           },
         }}
       >
-        {loading ? "Loading..." : "Load More"}
+        {loading ? "Loading..." : load_more}
       </Button>
     </div>
   );

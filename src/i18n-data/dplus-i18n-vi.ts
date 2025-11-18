@@ -1,6 +1,7 @@
 // Vietnamese
 export const dplusI18nVI = {
   repeat_annually: "Lặp lại hằng năm",
+  load_more: "Xem thêm",
   metadata: {
     title:
       "dplus | Lịch concert·lễ hội·triển lãm·biểu diễn·pop-up – thêm chỉ với một cú nhấp",

@@ -393,7 +393,7 @@ export default function CompCategoryDetailPage({
             <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} />
           ))}
 
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} />}
+          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
         </div>
       ) : (
         <div className="mx-auto w-full max-w-[1024px] px-2 sm:px-4 lg:px-6 text-center py-12 text-gray-500">
