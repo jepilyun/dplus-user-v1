@@ -45,9 +45,9 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventImageUrls(initialData.event) : []);
 
   // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
-  const [viewCount, setViewCount] = useState(initialData?.event.view_count ?? 0);
-  const [savedCount, setSavedCount] = useState(initialData?.event.saved_count ?? 0);
-  const [sharedCount, setSharedCount] = useState(initialData?.event.shared_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.event?.view_count ?? 0);
+  const [savedCount, setSavedCount] = useState(initialData?.event?.saved_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.event?.shared_count ?? 0);
   
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -359,9 +359,9 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         </div>
         {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
         <div className="my-6 sm:my-8 md:my-10 flex gap-4 justify-center flex-wrap">
-          <CompLabelCount01 label="Views" count={eventDetail?.event.view_count ?? 0} />
-          <CompLabelCount01 label="Saved" count={eventDetail?.event.saved_count ?? 0} />
-          <CompLabelCount01 label="Shared" count={eventDetail?.event.shared_count ?? 0} />
+          <CompLabelCount01 label="Views" count={viewCount} />
+          <CompLabelCount01 label="Saved" count={savedCount} />
+          <CompLabelCount01 label="Shared" count={sharedCount} />
         </div>
       </div>
       {/* ✅ 공유 모달 */}
