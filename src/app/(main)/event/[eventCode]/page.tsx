@@ -8,6 +8,7 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { reqGetEventCodeList, reqGetEventDetail, reqGetEventMetadata } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { notFound } from "next/navigation";
 
 
 /**
@@ -113,15 +114,31 @@ export default async function EventDetailPage({
 }) {
   const { fullLocale, langCode } = getRequestLocale();
 
-  const response = await reqGetEventDetail(params.eventCode, langCode);
-  const eventDetail = response?.dbResponse ?? null;
+  try {
+    const response = await reqGetEventDetail(params.eventCode, langCode);
+    const eventDetail = response?.dbResponse ?? null;
 
-  return (
-    <CompEventDetailPage
-      eventCode={params.eventCode}
-      fullLocale={fullLocale}
-      langCode={langCode}
-      initialData={eventDetail}
-    />
-  );
+    // ✅ 데이터 검증
+    const isEmptyObj =
+      !eventDetail || 
+      (typeof eventDetail === "object" && !Array.isArray(eventDetail) && Object.keys(eventDetail).length === 0);
+
+    // ✅ 데이터가 없거나 event 객체가 없으면 404
+    if (!response?.success || isEmptyObj || !eventDetail?.event) {
+      notFound();
+    }
+
+    return (
+      <CompEventDetailPage
+        eventCode={params.eventCode}
+        fullLocale={fullLocale}
+        langCode={langCode}
+        initialData={eventDetail}
+      />
+    );
+  } catch (error) {
+    // ✅ 네트워크 에러나 예상치 못한 에러도 404로 처리
+    console.error('Failed to fetch event detail:', error);
+    notFound();
+  }
 }

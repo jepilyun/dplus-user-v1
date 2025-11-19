@@ -9,6 +9,7 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { LIST_LIMIT } from "dplus_common_v1";
+import { notFound } from "next/navigation";
 
 
 /**
@@ -109,30 +110,46 @@ export default async function CategoryDetailPage({
   params,
   searchParams,
 }: {
-  params: { categoryCode: string, countryCode: string };
+  params: { categoryCode: string, countryCode: string[] };
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
   const countryCode = params.countryCode?.[0] ?? "AA";
 
-  // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-  const response = await reqGetCategoryDetail(
-    countryCode,
-    params.categoryCode,
-    langCode,
-    0,
-    LIST_LIMIT.default
-  ).catch(() => null);
+  try {
+    // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
+    const response = await reqGetCategoryDetail(
+      countryCode,
+      params.categoryCode,
+      langCode,
+      0,
+      LIST_LIMIT.default
+    );
 
-  const initialData = response?.dbResponse ?? null;
+    const initialData = response?.dbResponse ?? null;
 
-  return (
-    <CompCategoryDetailPage
-      categoryCode={params.categoryCode}
-      countryCode={params.countryCode}
-      fullLocale={fullLocale}
-      langCode={langCode}
-      initialData={initialData}
-    />
-  );
+    // ✅ 데이터 검증
+    const isEmptyObj =
+      !initialData || 
+      (typeof initialData === "object" && !Array.isArray(initialData) && Object.keys(initialData).length === 0);
+
+    // ✅ 응답이 없거나 실패한 경우 404
+    if (!response?.success || isEmptyObj || !initialData?.category) {
+      notFound();
+    }
+
+    return (
+      <CompCategoryDetailPage
+        categoryCode={params.categoryCode}
+        countryCode={countryCode}
+        fullLocale={fullLocale}
+        langCode={langCode}
+        initialData={initialData}
+      />
+    );
+  } catch (error) {
+    // ✅ 네트워크 에러나 예상치 못한 에러도 404로 처리
+    console.error('Failed to fetch category detail:', error);
+    notFound();
+  }
 }

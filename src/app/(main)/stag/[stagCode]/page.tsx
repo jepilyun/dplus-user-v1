@@ -9,6 +9,7 @@ import { reqGetStagDetail } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { LIST_LIMIT } from "dplus_common_v1";
+import { notFound } from "next/navigation";
 
 
 
@@ -85,57 +86,6 @@ export async function generateMetadata(
 
 
 /**
- * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
- */
-// export async function generateMetadata(
-//   { params }: { params: { stagCode: string } }
-// ): Promise<Metadata> {
-//   const { langCode } = getRequestLocale();
-//   const dict = getDplusI18n(langCode);
-
-//   // API 호출 (에러 대비 안전가드)
-//   const api = await reqGetStagMetadata(params.stagCode, langCode).catch(() => null);
-//   const m = api?.dbResponse ?? null;
-
-//   const title = pick(m?.metadata_i18n_title, m?.metadata_title, dict.metadata.title);
-//   const description = pick(
-//     m?.metadata_i18n_description,
-//     m?.metadata_description,
-//     dict.metadata.description
-//   );
-//   const ogTitle = pick(m?.metadata_i18n_og_title, m?.metadata_og_title, dict.metadata.og_title);
-//   const ogDesc = pick(
-//     m?.metadata_i18n_og_description,
-//     m?.metadata_og_description,
-//     dict.metadata.og_description
-//   );
-//   const ogImage = pick(m?.metadata_i18n_og_image, m?.metadata_og_image, dict.metadata.og_image);
-
-//   const keywords = buildKeywords(
-//     m?.metadata_i18n_tag_set as string[] | null | undefined,
-//     m?.metadata_keywords ?? null,
-//     dict.metadata.keywords
-//   );
-
-//   return {
-//     title,
-//     description,
-//     keywords,
-//     openGraph: {
-//       title: ogTitle,
-//       description: ogDesc,
-//       images: ogImage, // string | string[] | OGImage[]
-//     },
-//     alternates: {
-//       canonical: `https://www.dplus.app/stag/${params?.stagCode}`,
-//     },
-//   };
-// }
-
-
-/**
  * Stag 상세 페이지
  * @param params - Stag Code
  * @param searchParams - 검색 파라미터
@@ -149,17 +99,39 @@ export default async function StagDetailPage({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const { fullLocale, langCode } = getRequestLocale();
-  const stagCode = params.stagCode;
 
-  const response = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default).catch(() => null);
-  const initialData = response?.dbResponse ?? null;
+  try {
+    // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
+    const response = await reqGetStagDetail(
+      params.stagCode,
+      langCode,
+      0,
+      LIST_LIMIT.default
+    );
 
-  return (
-    <CompStagDetailPage
-      stagCode={params.stagCode}
-      fullLocale={fullLocale}
-      langCode={langCode}
-      initialData={initialData}
-    />
-  );
+    const initialData = response?.dbResponse ?? null;
+
+    // ✅ 데이터 검증
+    const isEmptyObj =
+      !initialData || 
+      (typeof initialData === "object" && !Array.isArray(initialData) && Object.keys(initialData).length === 0);
+
+    // ✅ 응답이 없거나 실패한 경우 404
+    if (!response?.success || isEmptyObj || !initialData?.stag) {
+      notFound();
+    }
+
+    return (
+      <CompStagDetailPage
+        stagCode={params.stagCode}
+        fullLocale={fullLocale}
+        langCode={langCode}
+        initialData={initialData}
+      />
+    );
+  } catch (error) {
+    // ✅ 네트워크 에러나 예상치 못한 에러도 404로 처리
+    console.error('Failed to fetch stag detail:', error);
+    notFound();
+  }
 }
