@@ -11,6 +11,7 @@ import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 
+
 /**
  * Generate metadata for the page
  * @param params - The parameters of the page

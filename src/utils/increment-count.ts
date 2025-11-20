@@ -1,4 +1,4 @@
-import { supabaseClient } from '@/utils/supabase-client';
+import supabaseClient from '@/lib/supabase-client';
 
 // ============================================
 // EVENT
@@ -9,6 +9,11 @@ import { supabaseClient } from '@/utils/supabase-client';
  */
 export async function incrementEventViewCount(eventCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_event_view_count_returning', {
       p_event_code: eventCode,
       p_increment: 1
@@ -31,6 +36,11 @@ export async function incrementEventViewCount(eventCode: string): Promise<number
  */
 export async function incrementEventSharedCount(eventCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_event_shared_count_returning', {
       p_event_code: eventCode,
       p_increment: 1
@@ -53,6 +63,11 @@ export async function incrementEventSharedCount(eventCode: string): Promise<numb
  */
 export async function incrementEventSavedCount(eventCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_event_saved_count_returning', {
       p_event_code: eventCode,
       p_increment: 1
@@ -79,6 +94,11 @@ export async function incrementEventSavedCount(eventCode: string): Promise<numbe
  */
 export async function incrementFolderViewCount(folderCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_folder_view_count_returning', {
       p_folder_code: folderCode,
       p_increment: 1
@@ -101,6 +121,11 @@ export async function incrementFolderViewCount(folderCode: string): Promise<numb
  */
 export async function incrementFolderSharedCount(folderCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_folder_shared_count_returning', {
       p_folder_code: folderCode,
       p_increment: 1
@@ -127,6 +152,11 @@ export async function incrementFolderSharedCount(folderCode: string): Promise<nu
  */
 export async function incrementGroupViewCount(groupCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_group_view_count_returning', {
       p_group_code: groupCode,
       p_increment: 1
@@ -149,6 +179,11 @@ export async function incrementGroupViewCount(groupCode: string): Promise<number
  */
 export async function incrementGroupSharedCount(groupCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_group_shared_count_returning', {
       p_group_code: groupCode,
       p_increment: 1
@@ -175,6 +210,11 @@ export async function incrementGroupSharedCount(groupCode: string): Promise<numb
  */
 export async function incrementCountryViewCount(countryCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_country_view_count_returning', {
       p_country_code: countryCode,
       p_increment: 1
@@ -201,6 +241,11 @@ export async function incrementCountryViewCount(countryCode: string): Promise<nu
  */
 export async function incrementCityViewCount(cityCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_city_view_count_returning', {
       p_city_code: cityCode,
       p_increment: 1
@@ -227,6 +272,11 @@ export async function incrementCityViewCount(cityCode: string): Promise<number |
  */
 export async function incrementCategoryViewCount(categoryCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_category_view_count_returning', {
       p_category_code: categoryCode,
       p_increment: 1
@@ -253,6 +303,11 @@ export async function incrementCategoryViewCount(categoryCode: string): Promise<
  */
 export async function incrementStagViewCount(stagCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_stag_view_count_returning', {
       p_stag_code: stagCode,
       p_increment: 1
@@ -279,6 +334,11 @@ export async function incrementStagViewCount(stagCode: string): Promise<number |
  */
 export async function incrementTagViewCount(tagCode: string): Promise<number | null> {
   try {
+    if (!supabaseClient) {
+      console.error('Supabase client is not initialized');
+      return null;
+    }
+
     const { data, error } = await supabaseClient.rpc('increment_tag_view_count_returning', {
       p_tag_code: tagCode,
       p_increment: 1

@@ -1,5 +1,8 @@
+// utils/generate-image-url.ts
+import { SUPABASE_URL } from '@/lib/supabase-config';
+
 /**
- * Event 이미지 URL 생성
+ * Storage 이미지 URL 생성
  * @param bucket 버킷 이름
  * @param path 이미지 경로
  * @returns 이미지 URL
@@ -7,7 +10,8 @@
 export const generateStorageImageUrl = (
   bucket: string,
   path: string | null,
-) => {
+): string | null => {
   if (!path) return null;
-  return `https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/${bucket}/${path}`;
+  
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 };
