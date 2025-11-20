@@ -46,7 +46,7 @@ export const reqGetEventDetail = async (
     method: "GET",
     credentials: "include",
     next: { 
-      revalidate: 86400, // ✅ 24시간 캐시
+      revalidate: 14400, // ✅ 4시간 캐시
       tags: [`event-${eventCode}`] // ✅ 필요시 특정 이벤트만 revalidate
     }
   });

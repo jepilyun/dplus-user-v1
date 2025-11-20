@@ -1,5 +1,5 @@
 // 이 라우트 기본 재생성 주기: 24시간
-export const revalidate = 86400; // 24시간 × 60분 × 60초 = 86400초
+export const revalidate = 14400; // 24시간 × 60분 × 60초 = 86400초
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트

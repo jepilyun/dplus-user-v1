@@ -60,7 +60,7 @@ export default function CompFooter() {
           Copyright 2025 dplus. All rights reserved.
         </div>
         <div className="text-center text-sm md:text-right">
-          support@dplus.app
+          admin@dplus.app
         </div>
       </div>
     </footer>
