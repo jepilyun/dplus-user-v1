@@ -308,7 +308,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         <HeroImageSlider
           bucket="events"
           imageUrls={imageUrls}
-          className="m-auto w-full flex max-w-[1440px]"
+          className="m-auto w-full"
         />
         {eventDetail?.event.description && (
           <div className="m-auto p-4 px-8 text-center w-full text-lg max-w-[1024px] whitespace-pre-line">{eventDetail?.event.description}</div>

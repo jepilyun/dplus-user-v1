@@ -429,7 +429,7 @@ export default function CompFolderDetailPage({
         {folderDetail?.folder.title}
       </div>
 
-      <HeroImageSlider bucket="folders" imageUrls={imageUrls} className="m-auto w-full flex max-w-[1440px]" />
+      <HeroImageSlider bucket="folders" imageUrls={imageUrls} className="m-auto w-full" />
 
       {folderDetail?.folder.description && (
         <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">

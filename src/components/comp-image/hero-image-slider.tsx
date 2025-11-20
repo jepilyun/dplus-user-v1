@@ -25,13 +25,11 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
   const trackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // 반응형 perView: 모바일1 / 태블릿2 / 데스크톱4  → 이미지 개수로 캡핑
     const updatePerView = () => {
       let cols = 3;
       if (window.matchMedia("(max-width: 640px)").matches) cols = 1;
       else if (window.matchMedia("(max-width: 1024px)").matches) cols = 2;
 
-      // 이미지 개수보다 열 수가 많지 않도록 캡핑
       const capped = Math.max(1, Math.min(cols, urls.length || 1));
       setPerView(capped);
     };
@@ -42,7 +40,6 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
   }, [urls.length]);
 
   useEffect(() => {
-    // 현재 페이지가 범위를 벗어나지 않도록 보정
     const maxStart = Math.max(0, urls.length - perView);
     if (current > maxStart) setCurrent(maxStart);
   }, [perView, urls.length, current]);
@@ -79,48 +76,68 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
     setSelectedIndex((i) => (i === null ? i : (i + 1) % urls.length));
   };
 
+  // ✅ 현재 보이는 첫 번째 이미지
+  const currentImageUrl = generateStorageImageUrl(bucket, urls[current]) ?? "";
+
   return (
     <>
-      {/* 슬라이더 */}
-      <div className={`relative ${className || ""}`}>
-        <div
-          className="overflow-hidden w-full max-h-128"
-          aria-roledescription="carousel"
-          aria-label="Event images"
-        >
+      {/* 슬라이더 - 외부 컨테이너 */}
+      <div className={`relative w-full bg-gray-900 ${className || ""}`}>
+        {/* ✅ 블러 배경 레이어 */}
+        <div className="absolute inset-0 overflow-hidden">
+          <Image
+            src={currentImageUrl}
+            alt="Background blur"
+            fill
+            className="object-cover blur-3xl opacity-30 transition-all duration-500"
+            style={{ transform: "scale(1.2)" }}
+            priority
+          />
+          {/* ✅ 어두운 오버레이 */}
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+
+        {/* ✅ 실제 슬라이더 - 중앙 정렬 + 최대 너비 제한 */}
+        <div className="relative mx-auto max-w-[1440px]">
           <div
-            ref={trackRef}
-            className="flex transition-transform duration-300 ease-out"
-            style={{
-              transform: `translateX(-${(100 / perView) * current}%)`,
-            }}
+            className="overflow-hidden w-full max-h-128"
+            aria-roledescription="carousel"
+            aria-label="Event images"
           >
-            {urls.map((src, idx) => (
-              <div
-                key={`${src}-${idx}`}
-                className="relative flex-shrink-0 overflow-hidden cursor-pointer"
-                style={{
-                  width: `${100 / perView}%`,
-                  // Safari 호환성을 위한 명시적 높이 설정
-                  paddingBottom: `${100 / perView}%`, // 1:1 비율 유지
-                }}
-                onClick={() => openModalAt(idx)}
-              >
-                <div className="absolute inset-0">
-                  <Image
-                    className="w-full h-full object-cover"
-                    src={generateStorageImageUrl(bucket, src) ?? ""}
-                    alt={`Hero Image ${idx + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
+            <div
+              ref={trackRef}
+              className="flex transition-transform duration-300 ease-out"
+              style={{
+                transform: `translateX(-${(100 / perView) * current}%)`,
+              }}
+            >
+              {urls.map((src, idx) => (
+                <div
+                  key={`${src}-${idx}`}
+                  className="relative flex-shrink-0 overflow-hidden cursor-pointer"
+                  style={{
+                    width: `${100 / perView}%`,
+                    paddingBottom: `${100 / perView}%`,
+                  }}
+                  onClick={() => openModalAt(idx)}
+                >
+                  <div className="absolute inset-0">
+                    <Image
+                      className="w-full h-full max-h-128 object-cover"
+                      src={generateStorageImageUrl(bucket, src) ?? ""}
+                      alt={`Hero Image ${idx + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      style={{ objectPosition: "center" }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* 좌우 버튼 (3장 초과일 때만) */}
+        {/* 좌우 버튼 */}
         {showArrows && (
           <>
             <IconButton
@@ -182,7 +199,6 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
           role="dialog"
           aria-modal="true"
         >
-          {/* 닫기 */}
           <button
             className="absolute top-5 right-5 text-white text-4xl z-50"
             onClick={(e) => {
@@ -194,7 +210,6 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
             &times;
           </button>
 
-          {/* 모달 좌우 버튼 */}
           {urls.length > 1 && (
             <>
               <IconButton
@@ -213,7 +228,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
                   zIndex: 50,
                   "&:hover": { bgcolor: "rgba(255,255,255,0.3)" },
                   "&:focus-visible": {
-                    outline: "2px solid rgba(255,255,255,0.6)",
+                    outline: "2px solid rgba(255,255,255,0.6",
                     outlineOffset: 2,
                   },
                 }}
