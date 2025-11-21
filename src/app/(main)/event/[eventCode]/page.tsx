@@ -66,15 +66,23 @@ export async function generateMetadata(
   );
 
   const ddayLabel = data?.date ? getDdayLabel(calculateDaysFromToday(data?.date)) : "";
+  const pageTitle = `${ddayLabel ? `[${ddayLabel}] ` : ''}${title} | dplus.app`;
 
   return {
-    title: `${ddayLabel ? `[${ddayLabel}] ` : ''}${title} | dplus.app`,
+    title: pageTitle,
     description,
     keywords,
     openGraph: {
-      title: `${ddayLabel ? `[${ddayLabel}] ` : ''}${title} | dplus.app`,
+      title: pageTitle,
       description: ogDesc,
       images: ogImage,
+    },
+    // ✅ 트위터 카드 메타데이터 추가
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: ogDesc,
+      images: [ogImage ?? ""],
     },
     alternates: {
       canonical: `https://www.dplus.app/event/${params?.eventCode}`,

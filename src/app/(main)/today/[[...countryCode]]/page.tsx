@@ -34,9 +34,16 @@ export async function generateMetadata(
     description,
     keywords,
     openGraph: {
-      title: ogTitle,
+      title: `${title} | dplus.app`,
       description: ogDesc,
       images: ogImage,
+    },
+    // ✅ 트위터 카드 메타데이터 추가
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | dplus.app`,
+      description: ogDesc,
+      images: [ogImage ?? ""],
     },
     alternates: {
       canonical: `https://www.dplus.app/today/${params?.countryCode}`,

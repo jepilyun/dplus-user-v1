@@ -60,14 +60,24 @@ export async function generateMetadata(
     dict.metadata.keywords
   );
 
+  const pageTitle = `${title} | dplus.app`;
+  const ogPageTitle = `${ogTitle} | dplus.app`;
+
   return {
-    title: `${title} | dplus.app`,
+    title: pageTitle,
     description,
     keywords,
     openGraph: {
-      title: `${ogTitle} | dplus.app`,
+      title: ogPageTitle,
       description: ogDesc,
       images: ogImage,
+    },
+    // ✅ 트위터 카드 메타데이터 추가
+    twitter: {
+      card: "summary_large_image",
+      title: ogPageTitle,
+      description: ogDesc,
+      images: [ogImage ?? ""],
     },
     alternates: {
       canonical: `https://www.dplus.app/stag/${params?.stagCode}`,

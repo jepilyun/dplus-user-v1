@@ -28,6 +28,15 @@ export const metadata: Metadata = {
       },
     ],
   },
+  // ✅ 트위터 카드 메타데이터 추가
+  twitter: {
+    card: "summary_large_image",
+    title: dplusI18nKO.metadata.og_title,
+    description: dplusI18nKO.metadata.og_description,
+    images: [dplusI18nKO.metadata.og_image],
+    creator: "@dplusapp", // 선택사항: 트위터 계정이 있다면
+    // site: "@dplusapp", // 선택사항: 트위터 계정이 있다면
+  },
   icons: {
     icon: [
       { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },

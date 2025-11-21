@@ -22,6 +22,14 @@ export async function generateMetadata({ params }: { params: Promise<{ langCode:
       description: dict.metadata.og_description,
       images: dict.metadata.og_image, 
     },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.metadata.og_title,
+      description: dict.metadata.og_description,
+      images: [dict.metadata.og_image],
+      creator: "@dplusapp", // 선택사항: 트위터 계정이 있다면
+      // site: "@dplusapp", // 선택사항: 트위터 계정이 있다면
+    },
     alternates: {
       canonical: `https://www.dplus.app/KR`,
     },
