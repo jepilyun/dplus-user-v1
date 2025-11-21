@@ -65,8 +65,7 @@ export async function generateMetadata(
     dict.metadata.keywords
   );
 
-  const ddayLabel = data?.date ? getDdayLabel(calculateDaysFromToday(data?.date)) : "";
-  const pageTitle = `${ddayLabel ? `[${ddayLabel}] ` : ''}${title} | dplus.app`;
+  const pageTitle = `${title} | dplus.app`;
 
   return {
     title: pageTitle,
