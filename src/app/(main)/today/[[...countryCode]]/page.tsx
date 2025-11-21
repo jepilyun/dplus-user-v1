@@ -7,7 +7,6 @@ import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { reqGetTodayList } from "@/actions/action";
 import { LIST_LIMIT } from "dplus_common_v1";
 
-
 /**
  * Generate metadata for the page
  * @param params - The parameters of the page
@@ -20,22 +19,15 @@ export async function generateMetadata(
   const dict = getDplusI18n(langCode);
 
   const title = pick("Today - " + dict.metadata.title, dict.metadata.title);
-  const description = pick(
-    dict.metadata.description
-  );
+  const description = pick(dict.metadata.description);
   const ogTitle = pick("Today - " + params.countryCode, dict.metadata.og_title);
-  const ogDesc = pick(
-    dict.metadata.og_description
-  );
-  const ogImage = pick(
-    generateStorageImageUrl("service", "og_dplus_1200x630.jpg"),
-    dict.metadata.og_image
-  );
+  const ogDesc = pick(dict.metadata.og_description);
+  
+  // ✅ 디폴트 OG 이미지 (절대 URL)
+  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
+  const ogImage = pick(defaultOgImage, dict.metadata.og_image);
 
-  const keywords = buildKeywords(
-    null,
-    dict.metadata.keywords
-  );
+  const keywords = buildKeywords(null, dict.metadata.keywords);
 
   return {
     title,
@@ -44,14 +36,13 @@ export async function generateMetadata(
     openGraph: {
       title: ogTitle,
       description: ogDesc,
-      images: ogImage, // string | string[] | OGImage[]
+      images: ogImage,
     },
     alternates: {
       canonical: `https://www.dplus.app/today/${params?.countryCode}`,
     },
   };
 }
-
 
 /**
  * Today 상세 페이지

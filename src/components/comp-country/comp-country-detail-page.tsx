@@ -8,7 +8,7 @@ import {
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCountryImageUrls } from "@/utils/set-image-urls";
+import { getCountryHeroImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -54,7 +54,7 @@ export default function CompCountryDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getCountryImageUrls(initialData.country as TCountryDetail) : []
+    initialData ? getCountryHeroImageUrls(initialData.country as TCountryDetail) : []
   );
   const [hasCategories, setHasCategories] = useState(
     (initialData?.categories?.items?.length ?? 0) > 0
@@ -113,7 +113,7 @@ export default function CompCountryDetailPage({
       }
   
       setCountryDetail(res.dbResponse ?? null);
-      setImageUrls(getCountryImageUrls(res.dbResponse?.country as TCountryDetail));
+      setImageUrls(getCountryHeroImageUrls(res.dbResponse?.country as TCountryDetail));
       setHasCategories((res.dbResponse?.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse?.cities?.items?.length ?? 0) > 0);
       setViewCount(res.dbResponse?.country?.view_count ?? 0);

@@ -11,7 +11,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
-import { getFolderImageUrls } from "@/utils/set-image-urls";
+import { getFolderDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -54,7 +54,7 @@ export default function CompFolderDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getFolderImageUrls(initialData.folder) : []
+    initialData ? getFolderDetailImageUrls(initialData.folder) : []
   );
 
   const [events, setEvents] = useState<TMapFolderEventWithEventInfo[]>(
@@ -101,7 +101,7 @@ export default function CompFolderDetailPage({
       }
 
       setFolderDetail(db);
-      setImageUrls(getFolderImageUrls(db.folder));
+      setImageUrls(getFolderDetailImageUrls(db.folder));
       setViewCount(db?.folder?.view_count ?? 0);
       setSharedCount(db?.folder?.shared_count ?? 0);
 

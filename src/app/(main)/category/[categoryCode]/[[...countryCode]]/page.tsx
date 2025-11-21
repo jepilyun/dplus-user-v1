@@ -7,10 +7,10 @@ import CompCategoryDetailPage from "@/components/comp-category/comp-category-det
 import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/actions/action";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
+import { getCategoryOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
-
 
 /**
  * Generate metadata for the page
@@ -41,26 +41,18 @@ export async function generateMetadata(
     data?.metadata_og_description,
     dict.metadata.og_description
   );
+
+  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
+  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "categories");
+  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "categories");
+  const ogImageFromCategory = getCategoryOgImageUrl(data); // 이미 절대 URL
+  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
+
   const ogImage = pick(
-    metadataI18n?.og_image, 
-    data?.metadata_og_image, 
-    data?.hero_image_01, 
-    data?.hero_image_02,
-    data?.hero_image_03,
-    data?.hero_image_04,
-    data?.hero_image_05,
-    data?.thumbnail_main_01,
-    data?.thumbnail_main_02,
-    data?.thumbnail_main_03,
-    data?.thumbnail_main_04,
-    data?.thumbnail_main_05,
-    data?.thumbnail_vertical_01,
-    data?.thumbnail_vertical_02,
-    data?.thumbnail_vertical_03,
-    data?.thumbnail_vertical_04,
-    data?.thumbnail_vertical_05,
-    generateStorageImageUrl("service", "og_dplus_1200x630.jpg"),
-    dict.metadata.og_image
+    ogImageFromI18n,
+    ogImageFromMetadata,
+    ogImageFromCategory,
+    defaultOgImage
   );
 
   const keywords = buildKeywords(
@@ -70,20 +62,19 @@ export async function generateMetadata(
   );
 
   return {
-    title,
+    title: `${title} | dplus.app`,
     description,
     keywords,
     openGraph: {
-      title: ogTitle,
+      title: `${ogTitle} | dplus.app`,
       description: ogDesc,
-      images: ogImage, // string | string[] | OGImage[]
+      images: ogImage,
     },
     alternates: {
-      canonical: `https://www.dplus.app/category/${params?.categoryCode}/${params?.countryCode}`,
+      canonical: `https://www.dplus.app/category/${params?.categoryCode}/${params?.countryCode ?? 'AA'}`,
     },
   };
 }
-
 
 // ✅ 항상 배열을 반환하도록 방어 코딩
 export async function generateStaticParams() {
@@ -92,8 +83,8 @@ export async function generateStaticParams() {
     const list = res?.dbResponse ?? []; // 없으면 빈 배열
 
     return list.map((cat: { category_code: string }) => ({
-      categoryCode: cat.category_code, // [[...countryCode]]는 생략 가능
-      countryCode: ["KR", "AA"], // 필요하면 이렇게 배열로 넣기
+      categoryCode: cat.category_code,
+      countryCode: ["KR", "AA"],
     }));
   } catch {
     return []; // 실패해도 배열 반환

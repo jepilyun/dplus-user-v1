@@ -15,7 +15,7 @@ import { IconGoogleColor } from "@/icons/icon-google-color";
 import { IconApple } from "@/icons/icon-apple";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import CompCommonDatetime from "../comp-common/comp-common-datetime";
-import { getEventImageUrls } from "@/utils/set-image-urls";
+import { getEventDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
@@ -42,7 +42,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const [loading, setLoading] = useState(true);
 
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(initialData ?? null);
-  const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventImageUrls(initialData.event) : []);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventDetailImageUrls(initialData.event) : []);
 
   // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
   const [viewCount, setViewCount] = useState(initialData?.event?.view_count ?? 0);
@@ -79,7 +79,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       setSavedCount(db?.event?.saved_count ?? 0);
       setSharedCount(db?.event?.shared_count ?? 0);
 
-      setImageUrls(getEventImageUrls(db.event));
+      setImageUrls(getEventDetailImageUrls(db.event));
       setError(null);
     } catch (e) {
       // 네트워크 에러나 서버 에러

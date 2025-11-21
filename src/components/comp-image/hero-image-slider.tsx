@@ -9,11 +9,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 type HeroImageSliderProps = {
   bucket: string;
-  imageUrls?: string[] | null;
+  imageUrls?: string[] | null; // ✅ 이미 절대 URL 배열
   className?: string;
 };
 
 export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSliderProps) {
+  // ✅ imageUrls는 이미 getEventDetailImageUrls()로 변환된 절대 URL들
   const urls = useMemo(
     () => (imageUrls ?? []).filter(Boolean) as string[],
     [imageUrls]
@@ -23,6 +24,9 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
   const [current, setCurrent] = useState(0);
   const [perView, setPerView] = useState(3);
   const trackRef = useRef<HTMLDivElement | null>(null);
+
+  // ✅ 현재 이미지 URL (블러 배경용)
+  const currentImageUrl = urls[current] || urls[0] || '';
 
   useEffect(() => {
     const updatePerView = () => {
@@ -76,9 +80,6 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
     setSelectedIndex((i) => (i === null ? i : (i + 1) % urls.length));
   };
 
-  // ✅ 현재 보이는 첫 번째 이미지
-  const currentImageUrl = generateStorageImageUrl(bucket, urls[current]) ?? "";
-
   return (
     <>
       {/* 슬라이더 - 외부 컨테이너 */}
@@ -124,7 +125,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
                   <div className="absolute inset-0">
                     <Image
                       className="w-full h-full max-h-128 object-cover"
-                      src={generateStorageImageUrl(bucket, src) ?? ""}
+                      src={src} // ✅ 이미 절대 URL
                       alt={`Hero Image ${idx + 1}`}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -264,7 +265,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
 
           <div className="relative w-[92%] md:w-[88%] max-w-6xl h-[80vh]">
             <Image
-              src={generateStorageImageUrl(bucket, urls[selectedIndex]) ?? ""}
+              src={urls[selectedIndex]} // ✅ 이미 절대 URL
               alt={`Enlarged hero image ${selectedIndex + 1}`}
               fill
               style={{ objectFit: "contain" }}

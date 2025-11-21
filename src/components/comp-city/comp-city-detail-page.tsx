@@ -8,7 +8,7 @@ import {
   TMapCityEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { getCityImageUrls } from "@/utils/set-image-urls";
+import { getCityDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -52,7 +52,7 @@ export default function CompCityDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getCityImageUrls(initialData.city) : []
+    initialData ? getCityDetailImageUrls(initialData.city) : []
   );
 
   const [events, setEvents] = useState<TMapCityEventWithEventInfo[]>(
@@ -101,7 +101,7 @@ export default function CompCityDetailPage({
       }
   
       setCityDetail(res.dbResponse);
-      setImageUrls(getCityImageUrls(res.dbResponse.city));
+      setImageUrls(getCityDetailImageUrls(res.dbResponse.city));
       setViewCount(res.dbResponse?.city?.view_count ?? 0);
 
       const serverEvents = res?.dbResponse?.mapCityEvent?.items ?? [];

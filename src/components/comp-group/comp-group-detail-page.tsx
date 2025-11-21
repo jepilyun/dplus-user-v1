@@ -8,7 +8,7 @@ import {
   TMapGroupEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { getGroupImageUrls } from "@/utils/set-image-urls";
+import { getGroupDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -52,7 +52,7 @@ export default function CompGroupDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getGroupImageUrls(initialData.group) : []
+    initialData ? getGroupDetailImageUrls(initialData.group) : []
   );
 
   const [events, setEvents] = useState<TMapGroupEventWithEventInfo[]>(
@@ -102,7 +102,7 @@ export default function CompGroupDetailPage({
       }
   
       setGroupDetail(res.dbResponse);
-      setImageUrls(getGroupImageUrls(res.dbResponse.group));
+      setImageUrls(getGroupDetailImageUrls(res.dbResponse.group));
       setViewCount(res.dbResponse?.group?.view_count ?? 0);
       setSharedCount(res.dbResponse?.group?.shared_count ?? 0);
 

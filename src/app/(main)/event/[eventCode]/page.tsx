@@ -5,10 +5,13 @@ import { getRequestLocale } from "@/utils/get-request-locale";
 import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트
 import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import { reqGetEventCodeList, reqGetEventDetail, reqGetEventMetadata } from "@/actions/action";
+import { reqGetEventCodeList, reqGetEventDetail } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
 import { notFound } from "next/navigation";
+import { getEventOgImageUrl } from "@/utils/set-image-urls";
+import { calculateDaysFromToday } from "@/utils/calc-dates";
+import { getDdayLabel } from "@/utils/dday-label";
 
 
 /**
@@ -22,11 +25,10 @@ export async function generateMetadata(
   const { langCode } = getRequestLocale();
   const dict = getDplusI18n(langCode);
 
-  // API 호출 (에러 대비 안전가드)
   const response = await reqGetEventDetail(params.eventCode, langCode).catch(() => null);
   const data = response?.dbResponse?.event ?? null;
   const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
-
+  
   const title = pick(metadataI18n?.title, data?.metadata_title, data?.title, dict.metadata.title);
   const description = pick(
     metadataI18n?.description,
@@ -35,32 +37,26 @@ export async function generateMetadata(
     dict.metadata.description
   );
   const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.title, dict.metadata.og_title);
+
   const ogDesc = pick(
     metadataI18n?.og_description,
     data?.metadata_og_description,
     data?.description,
     dict.metadata.og_description
   );
+
+  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
+  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "categories");
+  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "categories");
+  const ogImageFromCategory = getEventOgImageUrl(data); // 이미 절대 URL
+  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
+
+  // ✅ 우선순위: 커스텀 OG 이미지 > 첫 번째 이벤트 이미지 > 디폴트
   const ogImage = pick(
-    metadataI18n?.og_image, 
-    data?.metadata_og_image, 
-    data?.hero_image_01, 
-    data?.hero_image_02,
-    data?.hero_image_03,
-    data?.hero_image_04,
-    data?.hero_image_05,
-    data?.thumbnail_main_01,
-    data?.thumbnail_main_02,
-    data?.thumbnail_main_03,
-    data?.thumbnail_main_04,
-    data?.thumbnail_main_05,
-    data?.thumbnail_vertical_01,
-    data?.thumbnail_vertical_02,
-    data?.thumbnail_vertical_03,
-    data?.thumbnail_vertical_04,
-    data?.thumbnail_vertical_05,
-    generateStorageImageUrl("service", "og_dplus_1200x630.jpg"),
-    dict.metadata.og_image
+    ogImageFromI18n,
+    ogImageFromMetadata,
+    ogImageFromCategory,
+    defaultOgImage
   );
 
   const keywords = buildKeywords(
@@ -69,21 +65,22 @@ export async function generateMetadata(
     dict.metadata.keywords
   );
 
+  const ddayLabel = data?.date ? getDdayLabel(calculateDaysFromToday(data?.date)) : "";
+
   return {
-    title,
+    title: `${ddayLabel ? `[${ddayLabel}] ` : ''}${title} | dplus.app`,
     description,
     keywords,
     openGraph: {
-      title: ogTitle,
+      title: `${ddayLabel ? `[${ddayLabel}] ` : ''}${title} | dplus.app`,
       description: ogDesc,
-      images: ogImage, // string | string[] | OGImage[]
+      images: ogImage,
     },
     alternates: {
       canonical: `https://www.dplus.app/event/${params?.eventCode}`,
     },
   };
 }
-
 
 // ✅ 항상 배열을 반환하도록 방어 코딩
 export async function generateStaticParams() {

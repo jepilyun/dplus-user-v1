@@ -8,7 +8,7 @@ import {
   TMapStagEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { getStagImageUrls } from "@/utils/set-image-urls";
+import { getStagDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
@@ -52,7 +52,7 @@ export default function CompStagDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getStagImageUrls(initialData.stag) : []
+    initialData ? getStagDetailImageUrls(initialData.stag) : []
   );
 
   const [events, setEvents] = useState<TMapStagEventWithEventInfo[]>(
@@ -101,7 +101,7 @@ export default function CompStagDetailPage({
       }
   
       setStagDetail(res.dbResponse);
-      setImageUrls(getStagImageUrls(res.dbResponse.stag));
+      setImageUrls(getStagDetailImageUrls(res.dbResponse.stag));
       setViewCount(res.dbResponse?.stag?.view_count ?? 0);
   
       const serverEvents = res?.dbResponse?.mapStagEvent?.items ?? [];

@@ -7,10 +7,10 @@ import { reqGetGroupCodes, reqGetGroupDetail } from "@/actions/action";
 import { Metadata } from "next";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
+import { getGroupOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
-
 
 /**
  * Generate metadata for the page
@@ -40,26 +40,18 @@ export async function generateMetadata(
     data?.metadata_og_description,
     dict.metadata.og_description
   );
+
+  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
+  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "groups");
+  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "groups");
+  const ogImageFromGroup = getGroupOgImageUrl(data); // 이미 절대 URL
+  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
+
   const ogImage = pick(
-    metadataI18n?.og_image, 
-    data?.metadata_og_image, 
-    data?.hero_image_01, 
-    data?.hero_image_02,
-    data?.hero_image_03,
-    data?.hero_image_04,
-    data?.hero_image_05,
-    data?.thumbnail_main_01,
-    data?.thumbnail_main_02,
-    data?.thumbnail_main_03,
-    data?.thumbnail_main_04,
-    data?.thumbnail_main_05,
-    data?.thumbnail_vertical_01,
-    data?.thumbnail_vertical_02,
-    data?.thumbnail_vertical_03,
-    data?.thumbnail_vertical_04,
-    data?.thumbnail_vertical_05,
-    generateStorageImageUrl("service", "og_dplus_1200x630.jpg"),
-    dict.metadata.og_image
+    ogImageFromI18n,
+    ogImageFromMetadata,
+    ogImageFromGroup,
+    defaultOgImage
   );
 
   const keywords = buildKeywords(
@@ -69,20 +61,19 @@ export async function generateMetadata(
   );
 
   return {
-    title,
+    title: `${title} | dplus.app`,
     description,
     keywords,
     openGraph: {
-      title: ogTitle,
+      title: `${ogTitle} | dplus.app`,
       description: ogDesc,
-      images: ogImage, // string | string[] | OGImage[]
+      images: ogImage,
     },
     alternates: {
       canonical: `https://www.dplus.app/group/${params?.groupCode}`,
     },
   };
 }
-
 
 // ✅ 항상 배열을 반환하도록 방어 코딩
 export async function generateStaticParams() {
