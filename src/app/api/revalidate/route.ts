@@ -17,79 +17,113 @@ type RevalidateType =
 
 interface RevalidateBody {
   type: RevalidateType;
-  code?: string;
+  eventCode?: string;     // ✅ 추가
+  cityCode?: string;      // ✅ 추가
   countryCode?: string;
   categoryCode?: string;
+  stagCode?: string;      // ✅ 추가
+  groupCode?: string;     // ✅ 추가
+  folderCode?: string;    // ✅ 추가
+  tagCode?: string;       // ✅ 추가
   date?: string;
   tagId?: number;
 }
 
+// ✅ CORS 헤더 설정
+function getCorsHeaders() {
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+}
+
+// ✅ OPTIONS 메서드 처리 (Preflight)
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 200,
+    headers: getCorsHeaders(),
+  });
+}
+
 export async function POST(request: NextRequest) {
+  const corsHeaders = getCorsHeaders();
   const secret = request.nextUrl.searchParams.get('secret');
   
-  // ✅ 보안: secret key 확인
   if (secret !== process.env.REVALIDATE_SECRET) {
-    return NextResponse.json({ message: 'Invalid secret' }, { status: 401 });
+    return NextResponse.json(
+      { message: 'Invalid secret' }, 
+      { status: 401, headers: corsHeaders }
+    );
   }
 
   try {
     const body: RevalidateBody = await request.json();
-    const { type, code, countryCode, categoryCode, date, tagId } = body;
+    const { type, eventCode, cityCode, countryCode, categoryCode, stagCode, groupCode, folderCode, tagCode, date, tagId } = body;
 
-    console.log('🔄 Revalidate request:', { type, code, countryCode, categoryCode, date, tagId });
+    console.log('🔄 Revalidate request:', body);
 
     // ✅ Event 재검증
     if (type === 'event') {
-      if (!code) {
-        return NextResponse.json({ message: 'eventCode required' }, { status: 400 });
+      if (!eventCode) {
+        return NextResponse.json(
+          { message: 'eventCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
-      revalidatePath(`/event/${code}`);
-      revalidateTag(`event-${code}`);
+      revalidatePath(`/event/${eventCode}`);
+      revalidateTag(`event-${eventCode}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'event',
-        path: `/event/${code}`,
+        path: `/event/${eventCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ City 재검증
     if (type === 'city') {
-      if (!code) {
-        return NextResponse.json({ message: 'cityCode required' }, { status: 400 });
+      if (!cityCode) {
+        return NextResponse.json(
+          { message: 'cityCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
-      revalidatePath(`/city/${code}`);
-      revalidateTag(`city-${code}`);
-      revalidateTag(`city-events-${code}`);
+      revalidatePath(`/city/${cityCode}`);
+      revalidateTag(`city-${cityCode}`);
+      revalidateTag(`city-events-${cityCode}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'city',
-        path: `/city/${code}`,
+        path: `/city/${cityCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Country 재검증
     if (type === 'country') {
-      if (!code) {
-        return NextResponse.json({ message: 'countryCode required' }, { status: 400 });
+      if (!countryCode) {
+        return NextResponse.json(
+          { message: 'countryCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
-      revalidatePath(`/country/${code}`);
-      revalidatePath(`/${code}`); // 홈페이지 국가별
-      revalidateTag(`country-${code}`);
-      revalidateTag(`country-events-${code}`);
+      revalidatePath(`/country/${countryCode}`);
+      revalidatePath(`/${countryCode}`);
+      revalidateTag(`country-${countryCode}`);
+      revalidateTag(`country-events-${countryCode}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'country',
-        paths: [`/country/${code}`, `/${code}`],
+        paths: [`/country/${countryCode}`, `/${countryCode}`],
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Category 재검증
@@ -97,7 +131,7 @@ export async function POST(request: NextRequest) {
       if (!countryCode || !categoryCode) {
         return NextResponse.json({ 
           message: 'countryCode and categoryCode required' 
-        }, { status: 400 });
+        }, { status: 400, headers: corsHeaders });
       }
       
       revalidatePath(`/category/${categoryCode}/${countryCode}`);
@@ -109,81 +143,90 @@ export async function POST(request: NextRequest) {
         type: 'category',
         path: `/category/${categoryCode}/${countryCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Stag 재검증
     if (type === 'stag') {
-      if (!code) {
-        return NextResponse.json({ message: 'stagCode required' }, { status: 400 });
+      if (!stagCode) {
+        return NextResponse.json(
+          { message: 'stagCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
-      revalidatePath(`/stag/${code}`);
-      revalidateTag(`stag-${code}`);
-      revalidateTag(`stag-events-${code}`);
+      revalidatePath(`/stag/${stagCode}`);
+      revalidateTag(`stag-${stagCode}`);
+      revalidateTag(`stag-events-${stagCode}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'stag',
-        path: `/stag/${code}`,
+        path: `/stag/${stagCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Group 재검증
     if (type === 'group') {
-      if (!code) {
-        return NextResponse.json({ message: 'groupCode required' }, { status: 400 });
+      if (!groupCode) {
+        return NextResponse.json(
+          { message: 'groupCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
-      revalidatePath(`/group/${code}`);
-      revalidateTag(`group-${code}`);
-      revalidateTag(`group-events-${code}`);
+      revalidatePath(`/group/${groupCode}`);
+      revalidateTag(`group-${groupCode}`);
+      revalidateTag(`group-events-${groupCode}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'group',
-        path: `/group/${code}`,
+        path: `/group/${groupCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Folder 재검증
     if (type === 'folder') {
-      if (!code) {
-        return NextResponse.json({ message: 'folderCode required' }, { status: 400 });
+      if (!folderCode) {
+        return NextResponse.json(
+          { message: 'folderCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
-      revalidatePath(`/folder/${code}`);
-      revalidateTag(`folder-${code}`);
-      revalidateTag(`folder-events-${code}`);
+      revalidatePath(`/folder/${folderCode}`);
+      revalidateTag(`folder-${folderCode}`);
+      revalidateTag(`folder-events-${folderCode}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'folder',
-        path: `/folder/${code}`,
+        path: `/folder/${folderCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Tag 재검증
     if (type === 'tag') {
-      if (!code || !tagId) {
+      if (!tagCode || !tagId) {
         return NextResponse.json({ 
           message: 'tagCode and tagId required' 
-        }, { status: 400 });
+        }, { status: 400, headers: corsHeaders });
       }
       
-      revalidatePath(`/tag/${code}`);
-      revalidateTag(`tag-${code}`);
+      revalidatePath(`/tag/${tagCode}`);
+      revalidateTag(`tag-${tagCode}`);
       revalidateTag(`tag-events-${tagId}`);
       
       return NextResponse.json({ 
         revalidated: true, 
         type: 'tag',
-        path: `/tag/${code}`,
+        path: `/tag/${tagCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Date 재검증
@@ -191,7 +234,7 @@ export async function POST(request: NextRequest) {
       if (!date || !countryCode) {
         return NextResponse.json({ 
           message: 'date and countryCode required' 
-        }, { status: 400 });
+        }, { status: 400, headers: corsHeaders });
       }
       
       revalidatePath(`/date/${date}/${countryCode}`);
@@ -202,13 +245,16 @@ export async function POST(request: NextRequest) {
         type: 'date',
         path: `/date/${date}/${countryCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     // ✅ Today 재검증
     if (type === 'today') {
       if (!countryCode) {
-        return NextResponse.json({ message: 'countryCode required' }, { status: 400 });
+        return NextResponse.json(
+          { message: 'countryCode required' }, 
+          { status: 400, headers: corsHeaders }
+        );
       }
       
       revalidatePath(`/today/${countryCode}`);
@@ -219,10 +265,10 @@ export async function POST(request: NextRequest) {
         type: 'today',
         path: `/today/${countryCode}`,
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
-    // ✅ 전체 재검증 (주의해서 사용)
+    // ✅ 전체 재검증
     if (type === 'all') {
       revalidatePath('/', 'layout');
       
@@ -231,13 +277,13 @@ export async function POST(request: NextRequest) {
         type: 'all',
         message: 'All pages revalidated',
         now: Date.now() 
-      });
+      }, { headers: corsHeaders });
     }
 
     return NextResponse.json({ 
       message: 'Invalid type or missing parameters',
       validTypes: ['event', 'city', 'country', 'category', 'stag', 'group', 'folder', 'tag', 'date', 'today', 'all']
-    }, { status: 400 });
+    }, { status: 400, headers: corsHeaders });
 
   } catch (error) {
     console.error('❌ Revalidation error:', error);
@@ -245,6 +291,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       message: 'Error revalidating',
       error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 });
+    }, { status: 500, headers: getCorsHeaders() });
   }
 }
