@@ -33,9 +33,10 @@ export function HeroImageBackgroundCarouselCity({ bucket, imageUrls = [], interv
         : "h-[120px] md:h-[180px] bg-white"
     )}>
       {hasImages && imageUrls.map((url, idx) => (
+        console.log('url', url),
         <Image
           key={url}
-          src={generateStorageImageUrl(bucket, url) ?? ""}
+          src={url}
           alt={`City background ${idx}`}
           fill
           className={clsx(
