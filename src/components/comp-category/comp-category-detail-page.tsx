@@ -34,6 +34,7 @@ export default function CompCategoryDetailPage({
   fullLocale: string;
   initialData: ResponseCategoryDetailForUserFront | null;
 }) {
+  console.log('initialData', initialData);
   const router = useRouter();
   const { save, restore } = useCategoryPageRestoration(categoryCode);
 

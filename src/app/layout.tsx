@@ -1,39 +1,40 @@
 import type { Metadata } from "next";
 import { Monoton, Noto_Sans, Noto_Sans_KR, Poppins, Rubik, Gamja_Flower } from "next/font/google";
 import Script from "next/script";
-import { dplusI18nKO } from "@/i18n-data/dplus-i18n-ko";
 import { ScrollRestorationProvider } from "@/contexts/scroll-restoration-context";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
+import { DEFAULT_METADATA_I18N } from "@/consts/const-metadata";
 
-// 기본 메타데이터
+// 기본 메타데이터 (현재는 한국어로)
+// TODO: 다국어 처리
 export const metadata: Metadata = {
-  title: dplusI18nKO.metadata.title,
-  description: dplusI18nKO.metadata.description,
-  keywords: dplusI18nKO.metadata.keywords,
+  title: DEFAULT_METADATA_I18N.KO.title,
+  description: DEFAULT_METADATA_I18N.KO.description,
+  keywords: DEFAULT_METADATA_I18N.KO.keywords,
   openGraph: {
-    title: dplusI18nKO.metadata.og_title,
-    description: dplusI18nKO.metadata.og_description,
-    url: dplusI18nKO.metadata.og_url,
+    title: DEFAULT_METADATA_I18N.KO.og_title,
+    description: DEFAULT_METADATA_I18N.KO.og_description,
+    url: DEFAULT_METADATA_I18N.KO.og_url,
     type: "website",
-    locale: dplusI18nKO.metadata.og_locale,
-    siteName: dplusI18nKO.metadata.og_site_name,
+    locale: DEFAULT_METADATA_I18N.KO.og_locale,
+    siteName: DEFAULT_METADATA_I18N.KO.og_site_name,
     images: [
       {
-        url: dplusI18nKO.metadata.og_image,
-        width: dplusI18nKO.metadata.og_image_width,
-        height: dplusI18nKO.metadata.og_image_height,
-        alt: dplusI18nKO.metadata.og_image_alt,
+        url: DEFAULT_METADATA_I18N.KO.og_image,
+        width: DEFAULT_METADATA_I18N.KO.og_image_width,
+        height: DEFAULT_METADATA_I18N.KO.og_image_height,
+        alt: DEFAULT_METADATA_I18N.KO.og_image_alt,
       },
     ],
   },
   // ✅ 트위터 카드 메타데이터 추가
   twitter: {
     card: "summary_large_image",
-    title: dplusI18nKO.metadata.og_title,
-    description: dplusI18nKO.metadata.og_description,
-    images: [dplusI18nKO.metadata.og_image],
+    title: DEFAULT_METADATA_I18N.KO.og_title,
+    description: DEFAULT_METADATA_I18N.KO.og_description,
+    images: [DEFAULT_METADATA_I18N.KO.og_image],
     creator: "@dplusapp", // 선택사항: 트위터 계정이 있다면
     // site: "@dplusapp", // 선택사항: 트위터 계정이 있다면
   },

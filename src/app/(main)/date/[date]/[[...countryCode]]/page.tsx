@@ -6,6 +6,7 @@ import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { reqGetDateList } from "@/actions/action";
 import { LIST_LIMIT } from "dplus_common_v1";
+import { getMetadataByLang } from "@/consts/const-metadata";
 
 /**
  * Generate metadata for the page
@@ -16,18 +17,18 @@ export async function generateMetadata(
   { params }: { params: { date: string, countryCode: string } }
 ): Promise<Metadata> {
   const { langCode } = getRequestLocale();
-  const dict = getDplusI18n(langCode);
+  const defaultMetadata = getMetadataByLang(langCode);
 
-  const title = pick(params.date + " - " + dict.metadata.title, dict.metadata.title);
-  const description = pick(dict.metadata.description);
-  const ogTitle = pick(params.date + " - " + params.countryCode, dict.metadata.og_title);
-  const ogDesc = pick(dict.metadata.og_description);
+  const title = pick(params.date + " - " + defaultMetadata.title, defaultMetadata.title);
+  const description = pick(defaultMetadata.description);
+  const ogTitle = pick(params.date + " - " + params.countryCode, defaultMetadata.og_title);
+  const ogDesc = pick(defaultMetadata.og_description);
   
   // ✅ 디폴트 OG 이미지 (절대 URL)
   const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-  const ogImage = pick(defaultOgImage, dict.metadata.og_image);
+  const ogImage = pick(defaultOgImage, defaultMetadata.og_image);
 
-  const keywords = buildKeywords(null, dict.metadata.keywords);
+  const keywords = buildKeywords(null, defaultMetadata.keywords);
 
   return {
     title: `${params.date} - ${title} | dplus.app`,

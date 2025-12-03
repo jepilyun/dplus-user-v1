@@ -12,6 +12,7 @@ import { notFound } from "next/navigation";
 import { getEventOgImageUrl } from "@/utils/set-image-urls";
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
+import { getMetadataByLang } from "@/consts/const-metadata";
 
 
 /**
@@ -23,26 +24,26 @@ export async function generateMetadata(
   { params }: { params: { eventCode: string } }
 ): Promise<Metadata> {
   const { langCode } = getRequestLocale();
-  const dict = getDplusI18n(langCode);
+  const defaultMetadata = getMetadataByLang(langCode);
 
   const response = await reqGetEventDetail(params.eventCode, langCode).catch(() => null);
   const data = response?.dbResponse?.event ?? null;
   const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, data?.metadata_title, data?.title, dict.metadata.title);
+  const title = pick(metadataI18n?.title, data?.metadata_title, data?.title, defaultMetadata.title);
   const description = pick(
     metadataI18n?.description,
     data?.metadata_description,
     data?.description,
-    dict.metadata.description
+    defaultMetadata.description
   );
-  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.title, dict.metadata.og_title);
+  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.title, defaultMetadata.og_title);
 
   const ogDesc = pick(
     metadataI18n?.og_description,
     data?.metadata_og_description,
     data?.description,
-    dict.metadata.og_description
+    defaultMetadata.og_description
   );
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
@@ -62,7 +63,7 @@ export async function generateMetadata(
   const keywords = buildKeywords(
     metadataI18n?.tag_set as string[] | null | undefined,
     data?.metadata_keywords ?? null,
-    dict.metadata.keywords
+    defaultMetadata.keywords
   );
 
   const pageTitle = `${title} | dplus.app`;

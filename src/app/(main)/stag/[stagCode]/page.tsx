@@ -11,6 +11,7 @@ import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-ima
 import { getStagOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
+import { getMetadataByLang } from "@/consts/const-metadata";
 
 /**
  * Generate metadata for the page
@@ -21,24 +22,24 @@ export async function generateMetadata(
   { params }: { params: { stagCode: string } }
 ): Promise<Metadata> {
   const { langCode } = getRequestLocale();
-  const dict = getDplusI18n(langCode);
+  const defaultMetadata = getMetadataByLang(langCode);
 
   // API 호출 (에러 대비 안전가드)
   const response = await reqGetStagDetail(params.stagCode, langCode, 0, 36).catch(() => null);
   const data = response?.dbResponse?.stag ?? null;
   const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, data?.metadata_title, data?.stag_native + " - " + data?.stag, dict.metadata.title);
+  const title = pick(metadataI18n?.title, data?.metadata_title, data?.stag_native + " - " + data?.stag, defaultMetadata.title);
   const description = pick(
     metadataI18n?.description,
     data?.metadata_description,
-    dict.metadata.description
+    defaultMetadata.description
   );
-  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.stag_native + " - " + data?.stag, dict.metadata.og_title);
+  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.stag_native + " - " + data?.stag, defaultMetadata.og_title);
   const ogDesc = pick(
     metadataI18n?.og_description,
     data?.metadata_og_description,
-    dict.metadata.og_description
+    defaultMetadata.og_description
   );
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
@@ -57,7 +58,7 @@ export async function generateMetadata(
   const keywords = buildKeywords(
     metadataI18n?.tag_set as string[] | null | undefined,
     data?.metadata_keywords ?? null,
-    dict.metadata.keywords
+    defaultMetadata.keywords
   );
 
   const pageTitle = `${title} | dplus.app`;

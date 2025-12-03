@@ -3,6 +3,7 @@ import "@/app/globals.css";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import TopNavMain from "@/components/comp-top-nav/top-nav-main";
 import CompFooter from "@/components/comp-common/comp-footer";
+import { getMetadataByLang } from "@/consts/const-metadata";
 
 /**
  * Generate metadata for the page
@@ -11,16 +12,16 @@ import CompFooter from "@/components/comp-common/comp-footer";
  */
 export async function generateMetadata({ params }: { params: Promise<{ langCode: string }> }): Promise<Metadata> {
   const { langCode } = await params;
-  const dict = getDplusI18n(langCode);
+  const metadata = getMetadataByLang(langCode);
 
   return {
-    title: dict.metadata.title,
-    description: dict.metadata.description,
-    keywords: dict.metadata.keywords,
+    title: metadata.title,
+    description: metadata.description,
+    keywords: metadata.keywords,
     openGraph: {
-      title: dict.metadata.og_title,
-      description: dict.metadata.og_description,
-      images: dict.metadata.og_image, 
+      title: metadata.og_title,
+      description: metadata.og_description,
+      images: metadata.og_image, 
     },
     alternates: {
       canonical: `https://www.dplus.app/KR`,
