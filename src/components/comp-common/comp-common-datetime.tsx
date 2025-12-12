@@ -37,16 +37,16 @@ export default function CompCommonDatetime({
   }
 
   return (
-    <div className="h-[48px] flex justify-center items-center gap-2">
+    <div className="h-[48px] flex justify-center items-center gap-2 text-white">
       {isRepeatAnnually && (
-        <div className="text-center font-extrabold text-md sm:text-[1.3rem] text-white bg-gray-900 px-2 py-1 rounded-md h-full leading-[48px]">
+        <div className="text-center font-extrabold text-base sm:text-[1.3rem] bg-gray-900 px-2 py-1 rounded-md h-full leading-[48px]">
           {getDplusI18n(fullLocale).repeat_annually}
         </div>
       )}
       
       {/* 날짜와 시간을 한 줄로 */}
       <Link href={`/date/${datetime}`}>
-        <div className="flex flex-wrap items-center justify-center gap-4 font-medium text-md sm:text-[1.3rem] rounded-full px-4 sm:px-6 md:px-8 h-full leading-[32px] sm:leading-[48px] text-gray-700 sm:bg-gray-100 hover:text-white hover:bg-gray-900">
+        <div className="flex flex-wrap items-center justify-center gap-2 font-medium text-base xs:text-base sm:text-[1.3rem] rounded-full px-6 sm:px-6 md:px-8 h-full leading-[40px] sm:leading-[48px] hover:text-white hover:bg-gray-900">
           <div className="text-center">
             {formatDateTime(
               new Date(datetime),

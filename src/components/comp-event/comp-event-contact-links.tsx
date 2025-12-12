@@ -157,11 +157,11 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
   if (!inlineItems.length && !boxItems.length) return null;
 
   return (
-    <section className="m-auto w-full max-w-[1280px]" aria-label="event contact & links section">
-      <div className="rounded-xl bg-white/70 p-8 sm:p-12">
+    <div className="m-auto w-full max-w-[1440px]" aria-label="event contact & links section">
+      <div className="rounded-xl bg-white/70">
         {/* Inline items (전화, 이메일) */}
         {inlineItems.length > 0 && (
-          <ul className="mb-8 space-y-4" aria-label="contact info">
+          <ul className="space-y-4" aria-label="contact info">
             {inlineItems.map((it) => (
               <InfoItem
                 key={it.key}
@@ -193,6 +193,6 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
           </ul>
         )}
       </div>
-    </section>
+    </div>
   );
 }

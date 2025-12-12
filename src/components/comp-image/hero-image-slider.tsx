@@ -83,7 +83,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
   return (
     <>
       {/* 슬라이더 - 외부 컨테이너 */}
-      <div className={`relative w-full bg-gray-900 ${className || ""}`}>
+      <div className={`mb-4 relative w-full bg-gray-900 rounded-xl overflow-hidden ${className || ""}`}>
         {/* ✅ 블러 배경 레이어 */}
         <div className="absolute inset-0 overflow-hidden">
           <Image
@@ -195,7 +195,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
       {/* 모달 */}
       {selectedIndex !== null && (
         <div
-          className="fixed inset-0 bg-black/70 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-black/80 flex justify-center items-center z-50"
           onClick={closeModal}
           role="dialog"
           aria-modal="true"
@@ -263,7 +263,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
             </>
           )}
 
-          <div className="relative w-[92%] md:w-[88%] max-w-6xl h-[80vh]">
+          <div className="relative w-[92%] md:w-[88%] max-w-6xl h-[80vh] rounded-xl overflow-hidden">
             <Image
               src={urls[selectedIndex]} // ✅ 이미 절대 URL
               alt={`Enlarged hero image ${selectedIndex + 1}`}

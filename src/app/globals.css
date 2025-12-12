@@ -7,7 +7,7 @@
   --black: #000000;
   --key-color: #2DB0E0;
   --key-color-light: #6FD8FE;
-  --dplus-red: #FF007E;
+  --dplus-red: #EF007D;
 }
 
 @theme inline {
@@ -101,6 +101,10 @@ body {
 
 .color-dplus-red {
   color: var(--dplus-red);
+}
+
+.border-dplus-red {
+  border-color: var(--dplus-red);
 }
 
 .bg-tag-country {

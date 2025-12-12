@@ -22,21 +22,21 @@ export const HeadlineTagsDetail = ({
   const i18n = getDplusI18n(langCode);
 
   return (
-    <div className="mb-6 flex gap-2 sm:gap-4 flex-wrap justify-center font-bold text-md sm:text-xl">
+    <div className="flex gap-2 sm:gap-4 flex-wrap justify-center font-bold text-lg text-gray-400 sm:text-xl">
       {showCountry && targetCountryName && (
         <Link href={`/country/${targetCountryCode}`}>
-          <div className="text-gray-700 font-medium hover:text-[var(--dplus-red)]">#{targetCountryName}</div>
+          <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all">#{targetCountryName}</div>
         </Link>
       )}
       {targetCityName && (
         <Link href={`/city/${targetCityCode}`}>
-          <div className="text-gray-700 font-medium hover:text-[var(--dplus-red)]">#{targetCityName}</div>
+          <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all">#{targetCityName}</div>
         </Link>
       )}
       {categories && categories.length > 0 && (
         categories.map((category) => (
           <Link href={`/category/${category.category_info?.category_code}`} key={category.category_info?.category_code}>
-            <div className="text-gray-700 font-medium hover:text-[var(--dplus-red)]">#{category.category_info?.name_i18n}</div>
+            <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all">#{category.category_info?.name_i18n}</div>
           </Link>
         ))
       )}

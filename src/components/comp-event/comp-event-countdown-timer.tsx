@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock10Icon, TimerIcon } from "lucide-react";
+import { Clock10Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface CompEventCountdownTimerProps {
@@ -69,23 +69,25 @@ export function CompEventCountdownTimer({ startAtUtc }: CompEventCountdownTimerP
     };
   }, [startAtUtc]);
 
+  // ✅ 조건부 렌더링: 조건에 맞지 않으면 null 반환
   if (!countdown) return null;
-
+  
   const totalHours = countdown.days * 24 + countdown.hours;
+  
+  // ✅ 만료되었거나 100시간 이상이면 null 반환
+  if (countdown.isExpired || totalHours >= 100) {
+    return null;
+  }
 
+  // ✅ 조건을 만족할 때만 렌더링
   return (
-    <div className="text-center my-4 flex items-center justify-center gap-2 sm:gap-4">
-      {/* ✅ 만료되지 않았고 100시간 미만일 때만 타이머 표시 */}
-      {!countdown.isExpired && totalHours < 100 && (
-        <>
-          <Clock10Icon className="w-8 h-8 sm:w-10 sm:h-10" />
-          <div className="font-rubik font-semibold text-2xl sm:text-3xl md:text-4xl tabular-nums">
-            {String(totalHours).padStart(2, '0')}:
-            {String(countdown.minutes).padStart(2, '0')}:
-            {String(countdown.seconds).padStart(2, '0')}
-          </div>
-        </>
-      )}
+    <div className="text-center flex items-center justify-center gap-2 sm:gap-4 text-white">
+      <Clock10Icon className="w-8 h-8 sm:w-10 sm:h-10" />
+      <div className="font-rubik font-semibold text-2xl sm:text-3xl md:text-4xl tabular-nums">
+        {String(totalHours).padStart(2, '0')}:
+        {String(countdown.minutes).padStart(2, '0')}:
+        {String(countdown.seconds).padStart(2, '0')}
+      </div>
     </div>
   );
 }
