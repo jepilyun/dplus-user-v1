@@ -370,17 +370,17 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
                 </div>
               </Link>
             )}
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-row flex-wrap items-center justify-center sm:justify-end gap-2">
               <button 
                 onClick={handleOpenGoogleMap}
-                className="mx-2 flex items-center justify-center gap-2 px-4 py-4 cursor-pointer hover:text-cyan-300 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-4 cursor-pointer hover:text-cyan-300 transition-colors"
               >
                 <Map className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm font-medium">{getDplusI18n(langCode).detail.open_in_maps}</span>
               </button>
               <button 
                 onClick={handleOpenDirections}
-                className="mx-2 flex items-center justify-center gap-2 px-4 py-4 cursor-pointer hover:text-cyan-300 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-4 cursor-pointer hover:text-cyan-300 transition-colors"
               >
                 <Navigation className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm font-medium">{getDplusI18n(langCode).detail.directions}</span>
