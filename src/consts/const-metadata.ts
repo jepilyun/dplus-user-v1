@@ -2,15 +2,15 @@
 export const DEFAULT_METADATA_I18N = {
   EN: {
     title:
-      "dplus | What’s Hot Now: Concerts, Fests & Pop-ups — Add Instantly",
+      "Don’t Miss the Latest Trending Events: Concerts, Festivals, Exhibitions & Pop-Ups | dplus",
     description:
-      "Discover trending events and pop-ups all in one place — then add them to your calendar in just one click.",
+      "Don’t miss out! Browse the hottest concerts, festivals, exhibitions, and pop-up events all in one place, and save them to your Google or Apple Calendar with one click.",
     keywords:
       "dplus, schedule, events, concerts, shows, festivals, exhibitions, pop-up stores, meetups, deals, calendar",
     og_title:
-      "dplus | What’s Hot Now: Concerts, Fests & Pop-ups — Add Instantly",
+      "Don’t Miss the Latest Trending Events: Concerts, Festivals, Exhibitions & Pop-Ups | dplus",
     og_description:
-      "Discover trending events and pop-ups all in one place — then add them to your calendar in just one click.",
+      "Don’t miss out! Browse the hottest concerts, festivals, exhibitions, and pop-up events all in one place, and save them to your Google or Apple Calendar with one click.",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -22,14 +22,14 @@ export const DEFAULT_METADATA_I18N = {
       "dplus | What’s Hot Now: Concerts, Fests & Pop-ups — Add Instantly",
   },
   KO: {
-    title: "dplus | 지금 핫한 콘서트·축제·팝업, 한눈에 보고 바로 저장!",
+    title: "놓치기 쉬운 ✨최신 인기 이벤트✨ 일정: 콘서트·축제·전시·팝업 한눈에 | dplus",
     description:
-      "요즘 뭐 하지? 지금 떠오르는 콘서트부터 전시·팝업까지 한 번에 보고, 구글/애플 캘린더에 바로 저장하세요!",
+      "놓치지 마세요! 인기 콘서트·축제·전시·팝업 일정을 한눈에 모아보고, Google/Apple 캘린더에 클릭 한 번으로 저장하세요!",
     keywords:
       "dplus, 일정, 이벤트, 콘서트, 공연, 축제, 전시, 팝업스토어, 모임, 할인, 캘린더",
-    og_title: "dplus | 지금 핫한 콘서트·축제·팝업, 한눈에 보고 바로 저장!",
+    og_title: "놓치기 쉬운 ✨최신 인기 이벤트✨ 일정: 콘서트·축제·전시·팝업 한눈에 | dplus",
     og_description:
-      "요즘 뭐 하지? 지금 떠오르는 콘서트부터 전시·팝업까지 한 번에 보고, 구글/애플 캘린더에 바로 저장하세요!",
+      "놓치지 마세요! 인기 콘서트·축제·전시·팝업 일정을 한눈에 모아보고, Google/Apple 캘린더에 클릭 한 번으로 저장하세요!",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -41,15 +41,15 @@ export const DEFAULT_METADATA_I18N = {
   },
   JA: {
     title:
-      "dplus｜話題のライブ・フェス・展示・ポップアップを今すぐチェック",
+      "見逃し厳禁の最新人気イベント：コンサート·フェス·展示会·ポップアップをまとめてチェック | dplus",
     description:
-      "いま注目のイベント・コンサート・ポップアップ情報をまとめて確認。Google/Appleカレンダーにワンクリックで追加できます。",
+      "お見逃しなく！人気のコンサート、フェス、展示会、ポップアップをまとめて確認し、Google/Apple カレンダーにワンクリックで保存できます。",
     keywords:
       "dplus, 予定, イベント, コンサート, 公演, フェス, 展示, ポップアップストア, ミートアップ, セール, カレンダー",
     og_title:
-      "dplus｜話題のライブ・フェス・展示・ポップアップを今すぐチェック",
+      "見逃し厳禁の最新人気イベント：コンサート·フェス·展示会·ポップアップをまとめてチェック | dplus",
     og_description:
-      "いま注目のイベント・コンサート・ポップアップ情報をまとめて確認。Google/Appleカレンダーにワンクリックで追加できます。",
+      "お見逃しなく！人気のコンサート、フェス、展示会、ポップアップをまとめて確認し、Google/Apple カレンダーにワンクリックで保存できます。",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -61,14 +61,14 @@ export const DEFAULT_METADATA_I18N = {
       "dplus｜話題のライブ・フェス・展示・ポップアップを今すぐチェック",
   },
   ZH: {
-    title: "dplus | 熱門音樂會·慶典·展覽·快閃，一站掌握一鍵收藏",
+    title: "不容错过的人气活动：演唱会·庆典·展览·快闪店 一览 | dplus",
     description:
-      "想知道最近有什麼好玩？快來掌握音樂會、慶典、展覽與快閃活動，一鍵加入你的 Google/Apple 日曆！",
+      "别错过！热门演唱会、庆典、展览和快闪活动一站式查看，一键保存到 Google/Apple 日历。",
     keywords:
       "dplus, 日程, 活動, 音樂會, 演出, 慶典, 節日, 展覽, 快閃店, 聚會, 優惠, 日曆",
-    og_title: "dplus | 熱門音樂會·慶典·展覽·快閃，一站掌握一鍵收藏",
+    og_title: "不容错过的人气活动：演唱会·庆典·展览·快闪店 一览 | dplus",
     og_description:
-      "想知道最近有什麼好玩？快來掌握音樂會、慶典、展覽與快閃活動，一鍵加入你的 Google/Apple 日曆！",
+      "别错过！热门演唱会、庆典、展览和快闪活动一站式查看，一键保存到 Google/Apple 日历。",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -79,14 +79,14 @@ export const DEFAULT_METADATA_I18N = {
     og_image_alt: "dplus | 熱門音樂會·慶典·展覽·快閃，一站掌握一鍵收藏",
   },
   TW: {
-    title: "dplus｜熱門音樂會・慶典・展覽・快閃行程，立即加入行事曆",
+    title: "不能錯過的最新人氣活動：演唱會·慶典·展覽·快閃店 一次掌握 | dplus",
     description:
-      "想掌握當下熱門活動？瀏覽人氣音樂會、展覽與快閃，一鍵加入 Google/Apple 行事曆。",
+      "別錯過！最熱門的演唱會、慶典、展覽與快閃活動一次查看，還能一鍵加入 Google/Apple 行事曆。",
     keywords:
       "dplus, 行程, 活動, 音樂會, 演出, 慶典, 節慶, 展覽, 快閃店, 聚會, 優惠, 行事曆",
-    og_title: "dplus｜熱門音樂會・慶典・展覽・快閃行程，立即加入行事曆",
+    og_title: "不能錯過的最新人氣活動：演唱會·慶典·展覽·快閃店 一次掌握 | dplus",
     og_description:
-      "想掌握當下熱門活動？瀏覽人氣音樂會、展覽與快閃，一鍵加入 Google/Apple 行事曆。",
+      "別錯過！最熱門的演唱會、慶典、展覽與快閃活動一次查看，還能一鍵加入 Google/Apple 行事曆。",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -98,15 +98,15 @@ export const DEFAULT_METADATA_I18N = {
   },
   ID: {
     title:
-      "dplus | Event & Konser Terpopuler? Lihat Sekarang dan Tambahkan ke Kalender!",
+      "Jangan Lewatkan Event Populer Terbaru: Konser·Festival·Pameran·Pop-Up dalam Satu Tempat | dplus",
     description:
-      "Cari tahu acara dan konser yang lagi happening, lalu tambahkan ke Google/Apple Calendar hanya dengan satu klik!",
+      "Jangan sampai ketinggalan! Lihat konser, festival, pameran, dan pop-up paling populer dalam satu halaman dan simpan ke Kalender Google/Apple hanya dengan satu klik.",
     keywords:
       "dplus, jadwal, acara, konser, pertunjukan, festival, pameran, pop-up, komunitas, promo, kalender",
     og_title:
-      "dplus | Event & Konser Terpopuler? Lihat Sekarang dan Tambahkan ke Kalender!",
+      "Jangan Lewatkan Event Populer Terbaru: Konser·Festival·Pameran·Pop-Up dalam Satu Tempat | dplus",
     og_description:
-      "Cari tahu acara dan konser yang lagi happening, lalu tambahkan ke Google/Apple Calendar hanya dengan satu klik!",
+      "Jangan sampai ketinggalan! Lihat konser, festival, pameran, dan pop-up paling populer dalam satu halaman dan simpan ke Kalender Google/Apple hanya dengan satu klik.",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -119,15 +119,15 @@ export const DEFAULT_METADATA_I18N = {
   },
   VI: {
     title:
-      "dplus | Sự kiện hot nhất tuần này — Thêm ngay vào lịch chỉ 1 cú nhấp",
+      "Đừng bỏ lỡ sự kiện hot mới nhất: Concert·Lễ hội·Triển lãm·Pop-up — Xem nhanh trong một trang | dplus",
     description:
-      "Khám phá concert, triển lãm & pop-up đang được quan tâm nhất. Thêm ngay vào Google/Apple Calendar của bạn!",
+      "Đừng bỏ lỡ! Xem tất cả concert, lễ hội, triển lãm và pop-up nổi bật ở một nơi và lưu vào Lịch Google/Apple chỉ với một lần nhấn.",
     keywords:
       "dplus, lịch, sự kiện, concert, biểu diễn, lễ hội, triển lãm, pop-up, meetup, ưu đãi, lịch biểu, calendar",
     og_title:
-      "dplus | Sự kiện hot nhất tuần này — Thêm ngay vào lịch chỉ 1 cú nhấp",
+      "Đừng bỏ lỡ sự kiện hot mới nhất: Concert·Lễ hội·Triển lãm·Pop-up — Xem nhanh trong một trang | dplus",
     og_description:
-      "Khám phá concert, triển lãm & pop-up đang được quan tâm nhất. Thêm ngay vào Google/Apple Calendar của bạn!",
+      "Đừng bỏ lỡ! Xem tất cả concert, lễ hội, triển lãm và pop-up nổi bật ở một nơi và lưu vào Lịch Google/Apple chỉ với một lần nhấn.",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",
@@ -140,15 +140,15 @@ export const DEFAULT_METADATA_I18N = {
   },
   TH: {
     title:
-      "dplus | เช็กคอนเสิร์ต・นิทรรศการ・ป๊อปอัพมาแรง คลิกเดียวเพิ่มลงปฏิทิน",
+      "ห้ามพลาด! อีเวนต์ยอดฮิตล่าสุด: คอนเสิร์ต·เทศกาล·นิทรรศการ·ป๊อปอัป รวมไว้ที่เดียว | dplus",
     description:
-      "รวมทุกกิจกรรมเด็ดที่คุณไม่อยากพลาด เพิ่มลง Google/Apple Calendar ง่าย ๆ ในคลิกเดียว!",
+      "อย่าพลาด! ตรวจสอบคอนเสิร์ต เทศกาล นิทรรศการ และป๊อปอัปยอดนิยมได้ในที่เดียว แล้วบันทึกลง Google/Apple Calendar ได้ง่าย ๆ เพียงคลิกเดียว",
     keywords:
       "dplus, ตาราง, กิจกรรม, คอนเสิร์ต, การแสดง, เทศกาล, นิทรรศการ, ป๊อปอัพ, มีตติ้ง, โปรโมชัน, ปฏิทิน",
     og_title:
-      "dplus | เช็กคอนเสิร์ต・นิทรรศการ・ป๊อปอัพมาแรง คลิกเดียวเพิ่มลงปฏิทิน",
+      "ห้ามพลาด! อีเวนต์ยอดฮิตล่าสุด: คอนเสิร์ต·เทศกาล·นิทรรศการ·ป๊อปอัป รวมไว้ที่เดียว | dplus",
     og_description:
-      "รวมทุกกิจกรรมเด็ดที่คุณไม่อยากพลาด เพิ่มลง Google/Apple Calendar ง่าย ๆ ในคลิกเดียว!",
+      "อย่าพลาด! ตรวจสอบคอนเสิร์ต เทศกาล นิทรรศการ และป๊อปอัปยอดนิยมได้ในที่เดียว แล้วบันทึกลง Google/Apple Calendar ได้ง่าย ๆ เพียงคลิกเดียว",
     og_image: "https://gzfnhzdqyqzfytxkzceu.supabase.co/storage/v1/object/public/service/og_dplus_1200x630.jpg",
     og_url: "https://dplus.app",
     og_type: "website",

@@ -26,5 +26,7 @@ export const dplusI18nJA = {
     share: "共有",
     copy_link: "リンクをコピー",
     link_copied: "リンクがコピーされました。",
+    open_in_maps: "地図で開く",
+    directions: "ルート",
   }
 };

@@ -20,11 +20,13 @@ export const dplusI18nEN = {
     apply_url: "Apply",
   },
   detail: {
-    google_calendar: "Google Calendar",
-    apple_calendar: "Apple Calendar",
-    ics_download: "Download ICS",
+    google_calendar: "Calendar",
+    apple_calendar: "Calendar",
+    ics_download: "Download",
     share: "Share",
     copy_link: "Copy Link",
     link_copied: "Link Copied",
+    open_in_maps: "Open in Maps",
+    directions: "Directions",
   }
 };

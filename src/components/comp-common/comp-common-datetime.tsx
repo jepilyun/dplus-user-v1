@@ -37,16 +37,16 @@ export default function CompCommonDatetime({
   }
 
   return (
-    <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
+    <div className="h-[48px] flex justify-center items-center gap-2">
       {isRepeatAnnually && (
-        <div className="text-center font-extrabold text-sm text-white bg-gray-900 px-2 py-1 rounded-md">
+        <div className="text-center font-extrabold text-md sm:text-[1.3rem] text-white bg-gray-900 px-2 py-1 rounded-md h-full leading-[48px]">
           {getDplusI18n(fullLocale).repeat_annually}
         </div>
       )}
       
       {/* 날짜와 시간을 한 줄로 */}
       <Link href={`/date/${datetime}`}>
-        <div className="flex flex-wrap items-center justify-center gap-4 font-medium text-md sm:text-xl md:text-2xl lg:text-3xl rounded-full p-2 px-4 sm:p-3 sm:px-6 md:p-4 md:px-8 hover:text-black hover:bg-gray-100">
+        <div className="flex flex-wrap items-center justify-center gap-4 font-medium text-md sm:text-[1.3rem] rounded-full px-4 sm:px-6 md:px-8 h-full leading-[32px] sm:leading-[48px] text-gray-700 sm:bg-gray-100 hover:text-white hover:bg-gray-900">
           <div className="text-center">
             {formatDateTime(
               new Date(datetime),
@@ -73,3 +73,11 @@ export default function CompCommonDatetime({
     </div>
   );
 }
+
+// <div className="h-[48px] flex items-center justify-center">
+// <div className="flex items-center justify-center rounded-full bg-dplus-red h-full">
+//   <div className="px-6 h-full text-white font-rubik font-bold text-2xl sm:text-3xl leading-[48px]">
+//     {ddayLabel}
+//   </div>
+// </div>
+// </div>

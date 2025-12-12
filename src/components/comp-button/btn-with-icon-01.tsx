@@ -4,56 +4,68 @@ export default function BtnWithIcon01({
   title,
   icon,
   onClick,
+  loading = false,
   minWidth = null,
   minHeight = null,
   maxWidth = null,
   width = 24,
   height = 24,
+  borderColor = "#333333",
+  textColor = "#333333",
 }: {
   title: string;
   icon?: React.ReactNode | null;
   onClick?: () => void;
+  loading?: boolean;
   minWidth?: number | null;
   minHeight?: number | null;
   maxWidth?: number | null;
   width?: number;
   height?: number;
+  borderColor?: string;
+  textColor?: string;
 }) {
+  const borderColorValue = borderColor ? `1px solid ${borderColor}` : "1px solid #333333";
+  const textColorValue = textColor ? textColor : "#333333";
+
   return (
     <Button
       variant="contained"
       disableElevation
+      disabled={loading}
       sx={{
-        backgroundColor: "#f5f5f5",
-        color: "#444",
+        position: "relative",
+        backgroundColor: "#ffffff",
+        color: textColorValue,
+        border: borderColorValue,
         borderRadius: "9999px",
-        boxShadow: "none",
+        // boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.1)",
         minWidth: minWidth ?? null,
         minHeight: minHeight ?? null,
         maxWidth: maxWidth ?? null,
-        px: 4,                // ⬅️ 좌우 패딩 늘림
-        py: 2,                // 세로 패딩은 그대로
-        "&:hover": { backgroundColor: "#efefef", boxShadow: "none" },
+        px: 4,
+        py: 2,
+        transition: "all 0.2s ease-in-out", // ✅ 부드러운 전환 효과
+        "&:hover": { 
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)", // ✅ 더 길고 연한 그림자
+        },
         "& .MuiButton-startIcon svg": { width: width, height: height },
         
-        // 768px 이하에서 텍스트 숨기고 패딩 조정
-        // "@media (max-width: 768px)": {
-        //   minWidth: "64px",
-        //   minHeight: "64px",
-        //   px: 2, // 패딩 줄임
-        //   "& .button-text": {
-        //     display: "none", // 텍스트 숨김
-        //   },
-        //   "& .MuiButton-startIcon": {
-        //     marginRight: 0, // 아이콘 오른쪽 마진 제거
-        //     marginLeft: 0, // 아이콘 왼쪽 마진 제거
-        //   },
-        // },
+        "&.Mui-disabled": {
+          backgroundColor: "#ff007e",
+          color: "#999",
+        },
       }}
-      startIcon={icon ?? null}
+      startIcon={loading ? null : icon ?? null}
       onClick={onClick}
     >
-      <span className="button-text">{title}</span>
+      {loading ? (
+        <div className="flex items-center justify-center">
+          <div className="text-gray-500">Loading...</div>
+        </div>
+      ) : (
+        <span className="button-text font-bold">{title}</span>
+      )}
     </Button>
   );
 }

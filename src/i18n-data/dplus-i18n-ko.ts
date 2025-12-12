@@ -19,11 +19,13 @@ export const dplusI18nKO = {
     apply_url: "지원하기",
   },
   detail: {
-    google_calendar: "구글 캘린더에 저장하기",
-    apple_calendar: "애플 캘린더에 저장하기",
-    ics_download: "일정 파일 다운로드",
+    google_calendar: "캘린더 저장",
+    apple_calendar: "캘린더 저장",
+    ics_download: "일정 다운로드",
     share: "공유하기",
     copy_link: "링크 복사",
     link_copied: "링크가 복사되었습니다.",
+    open_in_maps: "구글 지도에서 열기",
+    directions: "길찾기",
   }
 };

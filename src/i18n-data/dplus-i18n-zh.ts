@@ -26,5 +26,7 @@ export const dplusI18nZH = {
     share: "分享",
     copy_link: "复制链接",
     link_copied: "链接已复制",
+    open_in_maps: "在 Google 地图中打开",
+    directions: "路线",
   }
 };

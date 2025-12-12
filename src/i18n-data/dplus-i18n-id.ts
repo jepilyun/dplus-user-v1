@@ -20,11 +20,13 @@ export const dplusI18nID = {
     apply_url: "Pendaftaran",
   },
   detail: {
-    google_calendar: "Kalender Google",
-    apple_calendar: "Apple Calendar",
-    ics_download: "Unduh ICS",
+    google_calendar: "Kalender",
+    apple_calendar: "Kalender",
+    ics_download: "Unduh",
     share: "Bagikan",
     copy_link: "Salin tautan",
     link_copied: "Tautan telah disalin.",
+    open_in_maps: "Buka di Peta",
+    directions: "Rute",
   }
 };

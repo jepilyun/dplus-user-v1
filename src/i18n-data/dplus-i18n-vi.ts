@@ -20,11 +20,13 @@ export const dplusI18nVI = {
     apply_url: "Đăng ký",
   },
   detail: {
-    google_calendar: "Lịch Google",
-    apple_calendar: "Lịch Apple",
-    ics_download: "Tải xuống ICS",
+    google_calendar: "Lịch",
+    apple_calendar: "Lịch",
+    ics_download: "Tải xuống",
     share: "Chia sẻ",
     copy_link: "Sao chép liên kết",
     link_copied: "Liên kết đã được sao chép.",
+    open_in_maps: "Mở trong Google Maps",
+    directions: "Hướng dẫn",
   }
 };

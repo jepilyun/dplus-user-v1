@@ -20,11 +20,13 @@ export const dplusI18nTH = {
     apply_url: "สมัคร",
   },
   detail: {
-    google_calendar: "ปฏิทิน Google",
-    apple_calendar: "ปฏิทิน Apple",
-    ics_download: "ดาวน์โหลดไฟล์ ICS",
+    google_calendar: "ปฏิทิน",
+    apple_calendar: "ปฏิทิน",
+    ics_download: "ดาวน์โหลด",
     share: "แบ่งปัน",
     copy_link: "คัดลอกลิงค์",
     link_copied: "ลิงค์ถูกคัดลอกแล้ว",
+    open_in_maps: "เปิดในแผนที่",
+    directions: "การนำทาง",
   }
 };

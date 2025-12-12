@@ -20,10 +20,11 @@ import { useRouter } from "next/navigation";
 import CompEventContactLinks from "@/components/comp-event/comp-event-contact-links";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
-import { CountdownTimer } from "@/components/comp-event/comp-event-countdown-timer";
+import { CompEventCountdown } from "@/components/comp-event/comp-event-countdown";
 import ShareModal from "../comp-share/comp-share-modal";
 import Link from "next/link";
-import { MapPin, Map, CalendarDays, Share2 } from "lucide-react";
+import { MapPin, Map, CalendarDays, Share2, Navigation } from "lucide-react";
+import { CompEventCountdownTimer } from "./comp-event-countdown-timer";
 
 
 /**
@@ -157,6 +158,24 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
     }
   };
 
+  // ✅ 길찾기 URL 가져오기
+  const getDirectionsUrl = () => {
+    if (eventDetail?.event.latitude && eventDetail?.event.longitude) {
+      // 구글 맵 길찾기 URL (현재 위치에서 목적지까지)
+      return `https://www.google.com/maps/dir/?api=1&destination=${eventDetail?.event.latitude},${eventDetail?.event.longitude}`;
+    }
+    
+    return null;
+  };
+
+  // ✅ 길찾기 열기 핸들러
+  const handleOpenDirections = () => {
+    const url = getDirectionsUrl();
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   // ✅ 페이지 진입 시 view_count 증가 (한 번만)
   useEffect(() => {
     const incrementViewCount = async () => {
@@ -242,41 +261,42 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
 
   return (
     <>
-      <div className="flex flex-col gap-8"
+      <div className="flex flex-col gap-4"
         data-event-code={eventDetail?.event.event_code}
         date-created-at={eventDetail?.event.created_at}
         date-updated-at={eventDetail?.event.updated_at}
       >
-        {/* ✅ 타이머 컴포넌트 분리 */}
-        <CountdownTimer 
+        <CompEventCountdownTimer
           startAtUtc={eventDetail?.event.start_at_utc || ''}
-          ddayLabel={eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
         />
-        <CompCommonDatetime 
-          datetime={eventDetail?.event.date ?? null}
-          fullLocale={fullLocale}
-          time={eventDetail?.event.time ?? null}
-          isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
-        />
-        <div className="flex flex-col gap-3 sm:gap-4 md:gap-6 justify-center items-center">
-          <HeadlineTagsDetail
-            targetCountryCode={eventDetail?.event.target_country_code || null}
-            targetCountryName={eventDetail?.event.target_country_native || null}
-            targetCityCode={eventDetail?.event.target_city_code || null}
-            targetCityName={eventDetail?.event.target_city_native || null}
-            categories={eventDetail?.mapCategoryEvent?.items ?? null}
-            langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-2">
+          <CompEventCountdown 
+            ddayLabel={eventDetail?.event.date ? getDdayLabel(calculateDaysFromToday(eventDetail?.event.date)) : ''}
           />
-          <div
-            id="event-title"
-            className="py-3 text-center px-4 sm:px-6 sm:py-4 md:px-8 md:py-5 lg:px-10 lg:py-6 font-black
-                      text-xl sm:text-2xl md:text-3xl leading-[1.8]"
-            data-event-code={eventDetail?.event.event_code}
-          >
-            {eventDetail?.event.title}
-          </div>
+          <CompCommonDatetime 
+            datetime={eventDetail?.event.date ?? null}
+            fullLocale={fullLocale}
+            time={eventDetail?.event.time ?? null}
+            isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+          />
         </div>
-        <div className="px-6 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 justify-center items-center">
+        <div
+          id="event-title"
+          className="px-6 text-center md:px-8 md:py-4 lg:px-10 font-black text-4xl xl:text-5xl leading-[1.6]"
+          data-event-code={eventDetail?.event.event_code}
+        >
+          {eventDetail?.event.title}
+        </div>
+        <HeadlineTagsDetail
+          targetCountryCode={eventDetail?.event.target_country_code || null}
+          targetCountryName={eventDetail?.event.target_country_native || null}
+          targetCityCode={eventDetail?.event.target_city_code || null}
+          targetCityName={eventDetail?.event.target_city_native || null}
+          categories={eventDetail?.mapCategoryEvent?.items ?? null}
+          langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
+          showCountry={false}
+        /> 
+        <div className="my-6 px-6 flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 justify-center items-center">
           <BtnWithIcon01 
             title={getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar} 
             icon={<IconGoogleColor />} 
@@ -324,9 +344,9 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
           </div>
         ))}
         <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
-        <div className="flex flex-col gap-0 m-auto w-full max-w-[1280px] xl:rounded-2xl overflow-hidden">
+        <div className="flex flex-col gap-0 m-auto w-full max-w-[1280px] xl:rounded-lg overflow-hidden">
           {eventDetail?.event.latitude && eventDetail?.event.longitude && (
-            <div className="m-auto w-full overflow-hidden relative h-84">
+            <div className="m-auto w-full overflow-hidden relative h-72">
               <GoogleMap
                 latitude={eventDetail?.event.latitude || 0}
                 longitude={eventDetail?.event.longitude || 0}
@@ -335,27 +355,38 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
                 className="w-full h-full"
                 clickHintText={eventDetail?.event.address_native ?? ''}
               />
-              <button
-                onClick={handleOpenGoogleMap}
-                className="absolute top-4 left-4 bg-white hover:bg-gray-50 text-gray-800 font-medium px-4 py-2 rounded-full shadow-lg flex items-center gap-2 transition-all hover:shadow-xl z-10"
-              >
-                <Map className="w-5 h-5" />
-                <span className="text-sm">Open in Google Maps</span>
-              </button>
             </div>
           )}
-          {eventDetail?.event.address_native && (
-            <Link href={eventDetail?.event.google_map_url ?? ''} target="_blank">
-              <div>
-                <div className="px-4 py-3 w-full text-md text-white bg-gray-800 hover:bg-gray-900 transition-colors cursor-pointer flex items-center gap-2">
-                  <div className="m-auto w-full max-w-[1024px] flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    {eventDetail?.event.address_native}
+          <div className="py-4 sm:py-0 flex flex-col sm:flex-row gap-2 items-center justify-between text-white bg-black/90">
+            {eventDetail?.event.address_native && (
+              <Link href={eventDetail?.event.google_map_url ?? ''} target="_blank">
+                <div>
+                  <div className="px-4 py-3 w-full text-md hover:text-cyan-300 transition-colors cursor-pointer flex items-center gap-2">
+                    <div className="m-auto w-full flex items-center gap-2">
+                      <MapPin className="w-5 h-5" />
+                      {eventDetail?.event.address_native}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          )}
+              </Link>
+            )}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <button 
+                onClick={handleOpenGoogleMap}
+                className="mx-2 flex items-center justify-center gap-2 px-4 py-4 cursor-pointer hover:text-cyan-300 transition-colors"
+              >
+                <Map className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-medium">{getDplusI18n(langCode).detail.open_in_maps}</span>
+              </button>
+              <button 
+                onClick={handleOpenDirections}
+                className="mx-2 flex items-center justify-center gap-2 px-4 py-4 cursor-pointer hover:text-cyan-300 transition-colors"
+              >
+                <Navigation className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-medium">{getDplusI18n(langCode).detail.directions}</span>
+              </button>
+            </div>
+          </div>
         </div>
         {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
         <div className="my-6 sm:my-8 md:my-10 flex gap-4 justify-center flex-wrap">
