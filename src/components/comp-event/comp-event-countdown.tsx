@@ -3,15 +3,14 @@
 interface CompEventCountdownProps {
   ddayLabel?: string;
   fgColor?: string;
+  bgColor?: string;
 }
 
-export function CompEventCountdown({ ddayLabel, fgColor }: CompEventCountdownProps) {
+export function CompEventCountdown({ ddayLabel, fgColor = '#EAEAEA', bgColor = '#EAEAEA' }: CompEventCountdownProps) {
   return (
-    <div className="h-[48px] flex items-center justify-center">
-      <div className="flex items-center justify-center rounded-full bg-white h-full" style={{ color: fgColor }}>
-        <div className="px-6 h-full font-rubik font-bold text-2xl leading-[48px]">
-          {ddayLabel}
-        </div>
+    <div className="h-[44px] flex items-center justify-center rounded-full" style={{ color: fgColor, backgroundColor: bgColor }}>
+      <div className="px-6 font-rubik font-bold text-xl">
+        {ddayLabel}
       </div>
     </div>
   );

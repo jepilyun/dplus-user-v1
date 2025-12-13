@@ -1,13 +1,12 @@
 "use client";
 
-import { Clock10Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface CompEventCountdownTimerProps {
+interface CompEventTimerProps {
   startAtUtc: string;
 }
 
-export function CompEventCountdownTimer({ startAtUtc }: CompEventCountdownTimerProps) {
+export function CompEventTimer({ startAtUtc }: CompEventTimerProps) {
   const [countdown, setCountdown] = useState<{
     days: number;
     hours: number;
@@ -81,9 +80,8 @@ export function CompEventCountdownTimer({ startAtUtc }: CompEventCountdownTimerP
 
   // ✅ 조건을 만족할 때만 렌더링
   return (
-    <div className="text-center flex items-center justify-center gap-2 sm:gap-4 text-white">
-      <Clock10Icon className="w-8 h-8 sm:w-10 sm:h-10" />
-      <div className="font-rubik font-semibold text-2xl sm:text-3xl md:text-4xl tabular-nums">
+    <div className="text-center flex items-center justify-center gap-2">
+      <div className="font-rubik font-light text-2xl sm:text-3xl tabular-nums">
         {String(totalHours).padStart(2, '0')}:
         {String(countdown.minutes).padStart(2, '0')}:
         {String(countdown.seconds).padStart(2, '0')}

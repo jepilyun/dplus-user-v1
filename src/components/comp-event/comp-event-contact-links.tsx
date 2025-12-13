@@ -44,22 +44,22 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
 
     const i18n = getDplusI18n(langCode);
 
-    // 전화 - inline
+    // 전화 - box
     if (event.phone) {
       const intl = `${event.phone_country_code ? `+${event.phone_country_code} ` : ""}${event.phone}`;
       box.push({
         key: "phone",
-        icon: <Phone className="h-8 w-8 text-gray-700" />,
+        icon: <Phone className="h-8 w-8" />,
         text: intl,
         href: toTelUrl(event.phone),
       });
     }
 
-    // 이메일 - inline
+    // 이메일 - box
     if (event.email) {
       box.push({
         key: "email",
-        icon: <Mail className="h-8 w-8 text-gray-700" />,
+        icon: <Mail className="h-8 w-8" />,
         text: event.email,
         href: toMailUrl(event.email),
       });
@@ -69,7 +69,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.homepage) {
       box.push({
         key: "homepage",
-        icon: <Home className="h-8 w-8 text-gray-700" />,
+        icon: <Home className="h-8 w-8" />,
         text: i18n.labels.homepage,
         href: toAbsoluteUrl(event.homepage),
       });
@@ -79,7 +79,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.youtube_ch_id) {
       box.push({
         key: "youtube",
-        icon: <IconYoutube className="h-8 w-8 text-gray-700" />,
+        icon: <IconYoutube className="h-8 w-8" />,
         text: i18n.labels.youtube,
         href: toYoutubeChannelUrl(event.youtube_ch_id),
       });
@@ -89,7 +89,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.instagram_id) {
       box.push({
         key: "instagram",
-        icon: <IconInstagram className="h-8 w-8 text-gray-700" />,
+        icon: <IconInstagram className="h-8 w-8" />,
         text: i18n.labels.instagram,
         href: toInstagramUrl(event.instagram_id),
       });
@@ -99,7 +99,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.ticket_purchase) {
       box.push({
         key: "ticket_purchase",
-        icon: <Ticket className="h-8 w-8 text-gray-700" />,
+        icon: <Ticket className="h-8 w-8" />,
         text: i18n.labels.ticket_purchase,
         href: toAbsoluteUrl(event.ticket_purchase),
       });
@@ -109,7 +109,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.url) {
       box.push({
         key: "url",
-        icon: <Globe className="h-8 w-8 text-gray-700" />,
+        icon: <Globe className="h-8 w-8" />,
         text: i18n.labels.url,
         href: event.url,
       });
@@ -118,7 +118,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.product_purchase) {
       box.push({
         key: "product_purchase",
-        icon: <ShoppingBag className="h-8 w-8 text-gray-700" />,
+        icon: <ShoppingBag className="h-8 w-8" />,
         text: i18n.labels.product_purchase,
         href: toAbsoluteUrl(event.product_purchase),
       });
@@ -127,7 +127,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.detail_info_url) {
       box.push({
         key: "detail_info_url",
-        icon: <Info className="h-8 w-8 text-gray-700" />,
+        icon: <Info className="h-8 w-8" />,
         text: i18n.labels.detail_info_url,
         href: toAbsoluteUrl(event.detail_info_url),
       });
@@ -136,7 +136,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.watch_url) {
       box.push({
         key: "watch_url",
-        icon: <Tv className="h-8 w-8 text-gray-700" />,
+        icon: <Tv className="h-8 w-8" />,
         text: i18n.labels.watch_url,
         href: toAbsoluteUrl(event.watch_url),
       });
@@ -145,7 +145,7 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     if (event.apply_url) {
       box.push({
         key: "apply_url",
-        icon: <BadgeCheck className="h-8 w-8 text-gray-700" />,
+        icon: <BadgeCheck className="h-8 w-8" />,
         text: i18n.labels.apply_url,
         href: toAbsoluteUrl(event.apply_url),
       });
@@ -154,11 +154,14 @@ export default function CompEventContactLinks({ event, langCode }: { event: TEve
     return { inlineItems: inline, boxItems: box };
   }, [event, langCode]);
 
-  if (!inlineItems.length && !boxItems.length) return null;
+  // ✅ 콘텐츠가 없으면 null 반환
+  if (!inlineItems.length && !boxItems.length) {
+    return null;
+  }
 
   return (
-    <div className="m-auto w-full max-w-[1440px]" aria-label="event contact & links section">
-      <div className="rounded-xl bg-white/70">
+    <div className="m-auto w-full max-w-[840px]" aria-label="event contact & links section">
+      <div className="rounded-2xl">
         {/* Inline items (전화, 이메일) */}
         {inlineItems.length > 0 && (
           <ul className="space-y-4" aria-label="contact info">

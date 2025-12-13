@@ -22,9 +22,9 @@ export const InfoItem = ({
   // Box variant
   if (variant === "box") {
     const BoxContent = (
-      <div className="p-4 flex flex-col min-w-[180px] items-center gap-2 rounded-xl bg-white transition-all hover:bg-gray-50">
-        <span className="text-gray-700">{icon}</span>
-        <span className="text-center text-sm font-medium text-gray-900">
+      <div className="p-4 flex flex-col min-w-[160px] items-center gap-2 rounded-xl bg-white transition-all hover:bg-gray-900 hover:text-white">
+        <span>{icon}</span>
+        <span className="text-center text-sm font-medium">
           {text}
         </span>
       </div>

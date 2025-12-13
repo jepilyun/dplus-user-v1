@@ -12,9 +12,13 @@ import { useRouter } from "next/navigation";
 import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
 import ShareModal from "../comp-share/comp-share-modal";
 import { CompEventActionButtons } from "./comp-event-action-buttons";
-import { CompEventDetailHeader } from "./comp-event-detail-header";
-import { CompEventDetailMap } from "./comp-event-detail-map";
-import { CompEventDetailMainContent } from "./comp-event-detail-main-content";
+import { CompEventHeader } from "./comp-event-header";
+import { CompEventDetailMap } from "./comp-event-map";
+import { CompEventDescription } from "./comp-event-description";
+import { HeadlineTagsDetail } from "../headline-tags-detail";
+import { SupportedLocale } from "@/consts/const-config";
+import { CompEventDatetime } from "./comp-event-datetime";
+import CompEventContactLinks from "./comp-event-contact-links";
 
 
 /**
@@ -212,21 +216,32 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   }
 
   return (
-    <div className="px-4 max-w-[1440px] m-auto flex flex-col gap-8">
-      <div className="flex flex-col gap-0"
+    <div className="px-4 sm:px-6 max-w-[1080px] m-auto flex flex-col gap-8">
+      <div className="flex flex-col gap-4 sm:gap-6"
         data-event-code={eventDetail?.event.event_code}
         date-created-at={eventDetail?.event.created_at}
         date-updated-at={eventDetail?.event.updated_at}
       >
+        {/* <CompEventCountdownTimer startAtUtc={eventDetail?.event.start_at_utc || ''} /> */}
+
+        <CompEventHeader eventDetail={eventDetail ?? null} fullLocale={fullLocale} langCode={langCode as SupportedLocale} />
+
+        <CompEventDatetime 
+          datetime={eventDetail?.event.date ?? null}
+          fullLocale={fullLocale}
+          time={eventDetail?.event.time ?? null}
+          isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+        />
+
         <HeroImageSlider
           bucket="events"
           imageUrls={imageUrls}
           className="m-auto w-full"
         />
 
-        <CompEventDetailHeader eventDetail={eventDetail ?? null} fullLocale={fullLocale} />
+        <CompEventDescription eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 
-        <CompEventDetailMainContent eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
+        <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
 
         <CompEventDetailMap eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 

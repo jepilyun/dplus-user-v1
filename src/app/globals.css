@@ -99,12 +99,36 @@ body {
   background-color: var(--dplus-red);
 }
 
-.color-dplus-red {
+.fg-dplus-red {
   color: var(--dplus-red);
 }
 
 .border-dplus-red {
   border-color: var(--dplus-red);
+}
+
+.bg-gray-header {
+  background-color: #EAEAEA;
+}
+
+.fg-gray-header {
+  color: #EAEAEA;
+}
+
+.border-gray-header {
+  border-color: #EAEAEA;
+}
+
+.bg-google-red {
+  background-color: #DB4437;
+}
+
+.fg-google-red {
+  color: #DB4437;
+}
+
+.border-google-red {
+  border-color: #DB4437;
 }
 
 .bg-tag-country {

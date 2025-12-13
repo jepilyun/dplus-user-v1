@@ -39,9 +39,9 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
   
   return (
     <div className="flex flex-col m-auto w-full">
-      <div className="rounded-xl overflow-hidden">
+      <div className="rounded-2xl overflow-hidden">
         {eventDetail?.event.latitude && eventDetail?.event.longitude && (
-          <div className="w-full overflow-hidden relative h-48 md:h-72">
+          <div className="w-full overflow-hidden relative h-48 md:h-60">
             <GoogleMap
               latitude={eventDetail?.event.latitude || 0}
               longitude={eventDetail?.event.longitude || 0}
@@ -52,33 +52,21 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
             />
           </div>
         )}
-        <div className="py-4 sm:py-0 flex flex-col font-bold text-sm md:text-base sm:flex-row items-center justify-between 2xl:justify-center text-gray-600 bg-gray-50">
-          {eventDetail?.event.address_native && (
-            <Link href={eventDetail?.event.google_map_url ?? ''} target="_blank">
-              <div className="px-4 py-3 w-full hover:text-gray-900 cursor-pointer flex items-center gap-2 hover:scale-105 duration-300 transition-all">
-                <div className="m-auto w-full flex items-center gap-2">
-                  <MapPin className="w-5 h-5 flex-shrink-0" />
-                  {eventDetail?.event.address_native}
-                </div>
-              </div>
-            </Link>
-          )}
-          <div className="flex flex-row flex-wrap items-center justify-center sm:justify-end gap-2 px-4">
-            <button 
-              onClick={handleOpenGoogleMap}
-              className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
-            >
-              <Map className="w-5 h-5 flex-shrink-0" />
-              <span>{getDplusI18n(langCode).detail.open_in_maps}</span>
-            </button>
-            <button 
-              onClick={handleOpenDirections}
-              className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
-            >
-              <Navigation className="w-5 h-5 flex-shrink-0" />
-              <span>{getDplusI18n(langCode).detail.directions}</span>
-            </button>
-          </div>
+        <div className="px-4 py-1 flex flex-wrap font-bold text-sm md:text-base items-center justify-between text-gray-600 bg-gray-100">
+          <button 
+            onClick={handleOpenGoogleMap}
+            className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
+          >
+            <Map className="w-5 h-5 flex-shrink-0" />
+            <span>{getDplusI18n(langCode).detail.open_in_maps}</span>
+          </button>
+          <button 
+            onClick={handleOpenDirections}
+            className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
+          >
+            <Navigation className="w-5 h-5 flex-shrink-0" />
+            <span>{getDplusI18n(langCode).detail.directions}</span>
+          </button>
         </div>
       </div>
     </div>

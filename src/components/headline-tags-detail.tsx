@@ -10,6 +10,8 @@ export const HeadlineTagsDetail = ({
   categories,
   langCode,
   showCountry = true,
+  fgColor,
+  fgHoverColor,
 }: {
   targetCountryCode?: string | null;
   targetCountryName?: string | null;
@@ -18,25 +20,27 @@ export const HeadlineTagsDetail = ({
   categories?: TMapCategoryEventWithCategoryInfo[] | TMapCategoryFolderWithCategoryInfo[] | null;
   langCode?: (typeof SUPPORT_LANG_CODES)[number];
   showCountry?: boolean;
+  fgColor?: string;
+  fgHoverColor?: string;
 }) =>  {
   const i18n = getDplusI18n(langCode);
 
   return (
-    <div className="flex gap-2 sm:gap-4 flex-wrap justify-center font-bold text-lg text-gray-400 sm:text-xl">
+    <div className="flex gap-2 sm:gap-4 flex-wrap justify-center font-bold text-base" style={{ color: fgColor }}>
       {showCountry && targetCountryName && (
         <Link href={`/country/${targetCountryCode}`}>
-          <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all">#{targetCountryName}</div>
+          <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all" style={{ color: fgHoverColor }}>#{targetCountryName}</div>
         </Link>
       )}
       {targetCityName && (
         <Link href={`/city/${targetCityCode}`}>
-          <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all">#{targetCityName}</div>
+          <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all" style={{ color: fgHoverColor }}>#{targetCityName}</div>
         </Link>
       )}
       {categories && categories.length > 0 && (
         categories.map((category) => (
           <Link href={`/category/${category.category_info?.category_code}`} key={category.category_info?.category_code}>
-            <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all">#{category.category_info?.name_i18n}</div>
+            <div className="font-medium hover:text-gray-900 hover:scale-105 duration-300 transition-all" style={{ color: fgHoverColor }}>#{category.category_info?.name_i18n}</div>
           </Link>
         ))
       )}
