@@ -39,7 +39,7 @@ export function CompEventDatetime({
 
   return (
     <Link href={`/date/${datetime}`}>
-      <div className="flex flex-wrap gap-1 justify-start items-center font-bold text-xl sm:text-2xl opacity-70 hover:opacity-100 transition-all duration-300">
+      <div className="flex flex-wrap gap-1 justify-start items-center font-bold text-lg sm:text-2xl opacity-70 hover:opacity-100 transition-all duration-300">
         <div>
           {formatDateTime(
             new Date(datetime),
