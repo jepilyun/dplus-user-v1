@@ -41,7 +41,7 @@ export const CompEventActionButtons = ({
         <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
             {deviceType === "ios" ? (
-              <IconApple className="w-5 h-5 fill-white" />
+              <IconApple className="w-5 h-5" />
             ) : (
               <CalendarDays className="w-5 h-5" />
             )}
