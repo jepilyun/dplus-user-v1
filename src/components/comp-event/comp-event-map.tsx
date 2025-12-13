@@ -50,6 +50,15 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
               className="w-full h-full"
               clickHintText={eventDetail?.event.address_native ?? ''}
             />
+            {/* ✅ 주소 오버레이 */}
+            <div className="absolute top-4 right-4 text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg max-w-[calc(100%-2rem)] z-10">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span className="text-xs md:text-sm font-medium line-clamp-2">
+                  {eventDetail.event.address_native}
+                </span>
+              </div>
+            </div>
           </div>
         )}
         <div className="px-4 py-1 flex flex-wrap font-bold text-sm md:text-base items-center justify-between text-gray-600 bg-gray-100">

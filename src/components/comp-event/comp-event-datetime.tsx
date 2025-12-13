@@ -1,6 +1,6 @@
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import { Clock10 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 
@@ -39,31 +39,29 @@ export function CompEventDatetime({
 
   return (
     <Link href={`/date/${datetime}`}>
-      <div className="px-4 py-8 flex flex-col gap-6 justify-center items-center font-medium text-xl text-gray-900 bg-gray-100 rounded-2xl hover:text-white hover:bg-gray-900 transition-all duration-300">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Clock10 className="w-6 h-6" />
-          <div className="text-center">
-            {formatDateTime(
-              new Date(datetime),
-              fullLocale,
-              null,
-              null,
-              {
-                includeTime: false,
-                style: 'long'
-              }
-            )}
-          </div>
-          {/* 시간 라벨 */}
-          {hasValidTime(time) && (
-            <div className="whitespace-nowrap">
-              {formatTimeOnly(combinedDate, "ko-KR", null, null, {
-                timeFormat: "12h",
-                compactTime: true
-              })}
-            </div>
+      <div className="flex flex-wrap gap-1 justify-start items-center font-bold text-xl sm:text-2xl opacity-70 hover:opacity-100 transition-all duration-300">
+        <div>
+          {formatDateTime(
+            new Date(datetime),
+            fullLocale,
+            null,
+            null,
+            {
+              includeTime: false,
+              style: 'long'
+            }
           )}
         </div>
+        {/* 시간 라벨 */}
+        {hasValidTime(time) && (
+          <div className="whitespace-nowrap">
+            {formatTimeOnly(combinedDate, "ko-KR", null, null, {
+              timeFormat: "12h",
+              compactTime: true
+            })}
+          </div>
+        )}
+        <ArrowRight className="w-6 h-6 sm:hidden" />
       </div>
     </Link>
   );

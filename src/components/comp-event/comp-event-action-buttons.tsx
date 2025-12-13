@@ -17,14 +17,14 @@ export const CompEventActionButtons = ({
   handleShareClick: () => void;
 }) => {
   return (
-    <div className="my-12 flex flex-col gap-4 sm:flex-row sm:flex-wrap justify-center items-center">
+    <div className="grid grid-cols-3 gap-4">
       {/* Google Calendar */}
       <button
         onClick={() => handleCalendarSave("google")}
-        className="w-full sm:min-w-[160px] sm:max-w-[200px] group"
+        className="w-full group cursor-pointer"
       >
-        <div className="flex items-center justify-center gap-2 py-4 border border-google-red bg-google-red text-white rounded-full hover:opacity-90 transition-all duration-300">
-          <div className="flex items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
+        <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
             <IconGoogle className="w-5 h-5" />
             <span className="text-sm font-bold">
               {getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar}
@@ -36,10 +36,10 @@ export const CompEventActionButtons = ({
       {/* Apple Calendar / ICS Download */}
       <button
         onClick={() => handleCalendarSave(deviceType === "ios" ? "apple" : "ics")}
-        className="w-full sm:min-w-[160px] sm:max-w-[200px] group"
+        className="w-full group cursor-pointer"
       >
-        <div className="flex items-center justify-center gap-2 py-4 border border-gray-900 bg-gray-900 text-white rounded-full hover:opacity-90 transition-all duration-300">
-          <div className="flex items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
+        <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
             {deviceType === "ios" ? (
               <IconApple className="w-5 h-5 fill-white" />
             ) : (
@@ -57,10 +57,10 @@ export const CompEventActionButtons = ({
       {/* Share */}
       <button
         onClick={handleShareClick}
-        className="w-full sm:min-w-[160px] sm:max-w-[200px] group"
+        className="w-full group cursor-pointer"
       >
-        <div className="flex items-center justify-center gap-2 py-4 border border-gray-900 rounded-full hover:bg-gray-100 transition-all duration-300">
-          <div className="flex items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
+        <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
             <Share2 className="w-5 h-5" />
             <span className="text-sm font-bold">
               {getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share}

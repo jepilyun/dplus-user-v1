@@ -81,7 +81,7 @@ export function CompEventTimer({ startAtUtc }: CompEventTimerProps) {
   // ✅ 조건을 만족할 때만 렌더링
   return (
     <div className="text-center flex items-center justify-center gap-2">
-      <div className="font-rubik font-light text-2xl sm:text-3xl tabular-nums">
+      <div className="font-rubik font-light text-2xl sm:text-4xl tabular-nums">
         {String(totalHours).padStart(2, '0')}:
         {String(countdown.minutes).padStart(2, '0')}:
         {String(countdown.seconds).padStart(2, '0')}

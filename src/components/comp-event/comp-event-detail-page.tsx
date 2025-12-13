@@ -216,23 +216,19 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   }
 
   return (
-    <div className="px-4 sm:px-6 max-w-[1080px] m-auto flex flex-col gap-8">
-      <div className="flex flex-col gap-4 sm:gap-6"
+    <div className="px-4 max-w-[840px] m-auto flex flex-col gap-8">
+      <div className="flex flex-col gap-4"
         data-event-code={eventDetail?.event.event_code}
         date-created-at={eventDetail?.event.created_at}
         date-updated-at={eventDetail?.event.updated_at}
       >
-        {/* <CompEventCountdownTimer startAtUtc={eventDetail?.event.start_at_utc || ''} /> */}
-
         <CompEventHeader eventDetail={eventDetail ?? null} fullLocale={fullLocale} langCode={langCode as SupportedLocale} />
-
-        <CompEventDatetime 
-          datetime={eventDetail?.event.date ?? null}
-          fullLocale={fullLocale}
-          time={eventDetail?.event.time ?? null}
-          isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+        <CompEventActionButtons
+          langCode={langCode}
+          deviceType={deviceType}
+          handleCalendarSave={handleCalendarSave}
+          handleShareClick={handleShareClick}
         />
-
         <HeroImageSlider
           bucket="events"
           imageUrls={imageUrls}
@@ -246,13 +242,6 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         <CompEventDetailMap eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 
         {/* <div>Profile Image:{eventDetail?.content.profile}</div> */}
-
-        <CompEventActionButtons
-          langCode={langCode}
-          deviceType={deviceType}
-          handleCalendarSave={handleCalendarSave}
-          handleShareClick={handleShareClick}
-        />
         <div className="flex gap-4 justify-center flex-wrap">
           <CompLabelCount01 label="Views" count={viewCount} />
           <CompLabelCount01 label="Saved" count={savedCount} />

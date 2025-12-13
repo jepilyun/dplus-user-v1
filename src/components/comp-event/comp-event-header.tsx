@@ -6,6 +6,8 @@ import { computeBadgeColors } from "@/utils/color-generator"
 import { CompEventTimer } from "./comp-event-timer"
 import { SupportedLocale } from "@/consts/const-config"
 import { HeadlineTagsDetail } from "../headline-tags-detail"
+import { CompEventDatetime } from "./comp-event-datetime"
+import { MapPin } from "lucide-react"
 
 /*
  * 이벤트 상세 헤더
@@ -37,33 +39,43 @@ export const CompEventHeader = ({
 
   return (
     <div 
-      className="rounded-2xl px-2 py-14 flex flex-col items-center justify-center gap-8"
+      className="p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-between gap-8 sm:gap-12 aspect-[1/1] sm:aspect-[2/1]"
       style={{ backgroundColor: bg, color: fg }}
     >
-      <CompEventCountdown 
-        ddayLabel={ddayLabel}
-        fgColor={bg}
-        bgColor={fg}
-      />
-      <CompEventTimer startAtUtc={startAtUtc || ''} />
-      <div
-        id="event-title"
-        className="px-6 text-center md:px-8 font-black text-2xl sm:text-3xl"
-        data-event-code={eventDetail?.event.event_code}
-      >
-        {eventDetail?.event.title}
+      <div className="w-full flex flex-row flex-wrap gap-4 justify-between items-center">
+        <CompEventCountdown 
+          ddayLabel={ddayLabel}
+          fgColor={bg}
+          bgColor={fg}
+        />
+        <CompEventTimer startAtUtc={startAtUtc || ''} />
       </div>
-      <HeadlineTagsDetail
-        targetCountryCode={eventDetail?.event.target_country_code || null}
-        targetCountryName={eventDetail?.event.target_country_native || null}
-        targetCityCode={eventDetail?.event.target_city_code || null}
-        targetCityName={eventDetail?.event.target_city_native || null}
-        categories={eventDetail?.mapCategoryEvent?.items ?? null}
-        langCode={langCode}
-        showCountry={false}
-        fgColor={fg}
-        fgHoverColor={fg}
-      />
+      <div className="w-full flex flex-col gap-3 justify-center items-start">
+        <CompEventDatetime 
+          datetime={eventDetail?.event.date ?? null}
+          fullLocale={fullLocale}
+          time={eventDetail?.event.time ?? null}
+          isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+        />
+        <div
+          id="event-title"
+          className="font-black text-4xl sm:text-5xl"
+          data-event-code={eventDetail?.event.event_code}
+        >
+          {eventDetail?.event.title}
+        </div>
+        <HeadlineTagsDetail
+          targetCountryCode={eventDetail?.event.target_country_code || null}
+          targetCountryName={eventDetail?.event.target_country_native || null}
+          targetCityCode={eventDetail?.event.target_city_code || null}
+          targetCityName={eventDetail?.event.target_city_native || null}
+          categories={eventDetail?.mapCategoryEvent?.items ?? null}
+          langCode={langCode}
+          showCountry={false}
+          fgColor={fg}
+          fgHoverColor={fg}
+        />
+      </div>
     </div>
   )
 }
