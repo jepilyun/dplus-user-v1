@@ -317,17 +317,18 @@ type BadgeColors = { bg: string; fg: string };
  * @param dateStr - The date to generate a color for
  * @param explicitBg - The explicit background color
  * @param explicitFg - The explicit foreground color
- * @returns The badge colors
+ * @returns The badge colors with brighter variant
  */
 export function computeBadgeColors(
   dateStr?: string | null,
   explicitBg?: string | null,
   explicitFg?: string | null,
-): { bg: string; fg: string } {
+): { bg: string; bgBrighter: string; fg: string } {
   // 1) 명시 색상 우선
   if (explicitBg) {
     const fg = explicitFg ?? readableTextColor(explicitBg);
-    return { bg: explicitBg, fg };
+    const bgBrighter = adjustHslLightness(explicitBg, 15); // 15% 더 밝게
+    return { bg: explicitBg, bgBrighter, fg };
   }
 
   const target = dateStr
@@ -340,12 +341,14 @@ export function computeBadgeColors(
     weekStartsOn: 1,
   });
 
+  const bgBrighter = adjustHslLightness(bg, 15); // 15% 더 밝게
+
   // 과거 또는 D0/D+1/D+2 → 흰색 텍스트 고정
   if (d < 0 || d === 0 || d === 1 || d === 2) {
-    return { bg, fg: "#FFFFFF" };
+    return { bg, bgBrighter, fg: "#FFFFFF" };
   }
 
   // 그 외는 대비 기반으로 결정
   const fg = readableTextColor(bg);
-  return { bg, fg };
+  return { bg, bgBrighter, fg };
 }

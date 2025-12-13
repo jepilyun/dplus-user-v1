@@ -7,7 +7,6 @@ import { CompEventTimer } from "./comp-event-timer"
 import { SupportedLocale } from "@/consts/const-config"
 import { HeadlineTagsDetail } from "../headline-tags-detail"
 import { CompEventDatetime } from "./comp-event-datetime"
-import { MapPin } from "lucide-react"
 
 /*
  * 이벤트 상세 헤더
@@ -35,12 +34,15 @@ export const CompEventHeader = ({
   // D-Day 라벨 생성 (시간 포함)
   const ddayLabel = getDdayLabel(dday, langCode, localTime);
 
-  const { bg, fg } = computeBadgeColors(eventDetail?.event.date?.toString() ?? null);
+  const { bg, bgBrighter, fg } = computeBadgeColors(eventDetail?.event.date?.toString() ?? null);
 
   return (
     <div 
       className="p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-between gap-8 sm:gap-12 aspect-[3/4] sm:aspect-[2/1]"
-      style={{ backgroundColor: bg, color: fg }}
+      style={{ 
+        background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)`,
+        color: fg
+      }}
     >
       <div className="w-full flex flex-row flex-wrap gap-4 justify-between items-center">
         <CompEventCountdown 
@@ -50,6 +52,7 @@ export const CompEventHeader = ({
         />
         <CompEventTimer startAtUtc={startAtUtc || ''} />
       </div>
+      
       <div className="w-full flex flex-col gap-3 justify-center items-start">
         <CompEventDatetime 
           datetime={eventDetail?.event.date ?? null}
