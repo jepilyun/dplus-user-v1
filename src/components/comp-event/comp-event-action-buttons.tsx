@@ -17,55 +17,55 @@ export const CompEventActionButtons = ({
   handleShareClick: () => void;
 }) => {
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
       {/* Google Calendar */}
       <button
         onClick={() => handleCalendarSave("google")}
-        className="w-full group cursor-pointer"
+        className="group relative"
       >
-        <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
-            <IconGoogle className="w-5 h-5" />
-            <span className="text-sm font-bold">
-              {getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar}
-            </span>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-200/40 to-gray-300/60 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50 group-hover:opacity-70"></div>
+        <div className="relative flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-b from-white/90 via-gray-50/90 to-gray-100/90 text-gray-900 rounded-full backdrop-blur-2xl transition-all duration-500 border border-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_3px_6px_-1px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-3px_rgba(0,0,0,0.2)] active:translate-y-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/20 to-transparent rounded-full pointer-events-none"></div>
+          <IconGoogle className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110 filter" />
+          <span className="text-sm font-semibold relative z-10 filter">
+            {getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.google_calendar}
+          </span>
         </div>
       </button>
 
       {/* Apple Calendar / ICS Download */}
       <button
         onClick={() => handleCalendarSave(deviceType === "ios" ? "apple" : "ics")}
-        className="w-full group cursor-pointer"
+        className="group relative"
       >
-        <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
-            {deviceType === "ios" ? (
-              <IconApple className="w-5 h-5" />
-            ) : (
-              <CalendarDays className="w-5 h-5" />
-            )}
-            <span className="text-sm font-bold">
-              {deviceType === "ios"
-                ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar
-                : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
-            </span>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-200/40 to-gray-300/60 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50 group-hover:opacity-70"></div>
+        <div className="relative flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-b from-white/90 via-gray-50/90 to-gray-100/90 text-gray-900 rounded-full backdrop-blur-2xl transition-all duration-500 border border-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_3px_6px_-1px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-3px_rgba(0,0,0,0.2)] active:translate-y-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/20 to-transparent rounded-full pointer-events-none"></div>
+          {deviceType === "ios" ? (
+            <IconApple className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110 filter" />
+          ) : (
+            <CalendarDays className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110 filter" />
+          )}
+          <span className="text-sm font-semibold relative z-10 filter">
+            {deviceType === "ios"
+              ? getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.apple_calendar
+              : getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.ics_download}
+          </span>
         </div>
       </button>
 
       {/* Share */}
       <button
         onClick={handleShareClick}
-        className="w-full group cursor-pointer"
+        className="group relative"
       >
-        <div className="flex items-center justify-center gap-2 py-4 border border-gray-400 rounded-2xl sm:rounded-full hover:bg-gray-100 transition-all duration-300">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 group-hover:scale-110 transition-all duration-300">
-            <Share2 className="w-5 h-5" />
-            <span className="text-sm font-bold">
-              {getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share}
-            </span>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-gray-200/40 to-gray-300/60 rounded-full blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50 group-hover:opacity-70"></div>
+        <div className="relative flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-b from-white/90 via-gray-50/90 to-gray-100/90 text-gray-900 rounded-full backdrop-blur-2xl transition-all duration-500 border border-white/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_3px_6px_-1px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-3px_rgba(0,0,0,0.2)] active:translate-y-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/20 to-transparent rounded-full pointer-events-none"></div>
+          <Share2 className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:scale-110 filter" />
+          <span className="text-sm font-semibold relative z-10 filter">
+            {getDplusI18n(langCode as (typeof SUPPORT_LANG_CODES)[number]).detail.share}
+          </span>
         </div>
       </button>
     </div>
