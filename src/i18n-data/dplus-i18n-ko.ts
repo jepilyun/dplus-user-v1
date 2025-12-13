@@ -21,7 +21,7 @@ export const dplusI18nKO = {
   detail: {
     google_calendar: "캘린더 저장",
     apple_calendar: "캘린더 저장",
-    ics_download: "일정 다운로드",
+    ics_download: "다운로드",
     share: "공유하기",
     copy_link: "링크 복사",
     link_copied: "링크가 복사되었습니다.",
