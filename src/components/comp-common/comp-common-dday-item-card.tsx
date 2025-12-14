@@ -70,7 +70,7 @@ export default function CompCommonDdayItemCard({
       <div className="h-full relative overflow-hidden rounded-3xl shadow-[0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[0_16px_16px_rgba(0,0,0,0.2)] transition-all duration-300 flex flex-col bg-white">
         
         {/* 상단: 배경색 또는 이미지 영역 (2/3) */}
-        <div className="relative pt-4 px-4 aspect-[2/1]">
+        <div className="relative pt-4 px-4 w-full aspect-[2/1]">
           <div className="relative h-full w-full overflow-hidden rounded-2xl">
             {hasImage ? (
               <>
