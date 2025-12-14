@@ -414,7 +414,7 @@ export default function CompCountryDetailPage({
 
   return (
     <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
-      <div className="p-4 flex flex-col gap-8">
+      <div className="p-2 py-6 flex flex-col gap-8">
         {hasCategories && (
           <div className="mx-auto w-full max-w-[1440px] px-4">
             <div className="flex justify-center gap-2 flex-wrap">
