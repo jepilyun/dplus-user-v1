@@ -414,7 +414,7 @@ export default function CompCountryDetailPage({
 
   return (
     <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
-      <div className="p-2 py-6 flex flex-col gap-8">
+      <div className="p-4 flex flex-col gap-8">
         {hasCategories && (
           <div className="mx-auto w-full max-w-[1440px] px-4">
             <div className="flex justify-center gap-2 flex-wrap">
@@ -436,7 +436,7 @@ export default function CompCountryDetailPage({
         )}
 
         {hasCities && (
-          <div className="mx-auto w-full max-w-[1440px] px-4">
+          <div className="mx-auto w-full max-w-[1440px]">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
               {countryDetail?.cities?.items.map((item) => {
                 const bg = getCityBgUrl(item);
@@ -494,7 +494,7 @@ export default function CompCountryDetailPage({
         )}
 
         {events?.length ? (
-          <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
+          <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4">
             {events.map(item => (
               <CompCommonDdayItem 
                 key={item.event_info?.event_code} 
