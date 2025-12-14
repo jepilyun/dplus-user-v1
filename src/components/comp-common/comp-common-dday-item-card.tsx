@@ -109,7 +109,7 @@ export default function CompCommonDdayItemCard({
         >
           <div className="flex justify-end items-end gap-4">
             <div 
-              className="inline-flex items-center justify-center px-4 py-2 rounded-full font-rubik font-bold text-lg backdrop-blur-sm flex-shrink-0 aspect-square"
+              className="inline-flex items-center justify-center p-0 rounded-full font-rubik font-bold text-lg backdrop-blur-sm flex-shrink-0 aspect-square w-20"
               style={{ 
                 backgroundColor: bg,
                 color: fg
@@ -118,7 +118,7 @@ export default function CompCommonDdayItemCard({
               {ddayLabel}
             </div>
             <div className="flex flex-grow flex-wrap items-center gap-0.5 text-base text-gray-500">
-              <span suppressHydrationWarning className="truncate">
+              <span suppressHydrationWarning className={`truncate ${hasImage ? 'text-white opacity-90' : 'text-gray-500'}`}>
                 {event?.event_info?.date
                   ? formatDateTime(
                       new Date(event?.event_info?.date),
