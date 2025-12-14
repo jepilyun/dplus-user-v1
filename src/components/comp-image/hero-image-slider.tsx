@@ -83,7 +83,7 @@ export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSlide
   return (
     <>
       {/* 슬라이더 - 외부 컨테이너 */}
-      <div className={`mb-4 relative w-full bg-gray-900 rounded-4xl overflow-hidden ${className || ""} shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)]`}>
+      <div className={`relative w-full bg-gray-900 rounded-4xl overflow-hidden ${className || ""} shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)]`}>
         {/* ✅ 블러 배경 레이어 */}
         <div className="absolute inset-0 overflow-hidden">
           <Image
