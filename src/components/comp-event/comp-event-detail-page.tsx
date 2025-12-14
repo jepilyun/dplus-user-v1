@@ -216,7 +216,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   }
 
   return (
-    <div className="px-4 max-w-[840px] m-auto flex flex-col gap-8">
+    <div className="p-4 max-w-[840px] m-auto flex flex-col gap-8">
       <div className="flex flex-col gap-4"
         data-event-code={eventDetail?.event.event_code}
         date-created-at={eventDetail?.event.created_at}

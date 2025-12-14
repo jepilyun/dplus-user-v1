@@ -38,7 +38,7 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
   };
   
   return (
-    <div className="flex flex-col m-auto w-full border border-white rounded-4xl overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_2px_-1px_rgba(0,0,0,0.15)]">
+    <div className="flex flex-col m-auto w-full border border-white rounded-4xl overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)]">
       <div className="rounded-xl">
         {eventDetail?.event.latitude && eventDetail?.event.longitude && (
           <div className="w-full overflow-hidden relative h-48 md:h-60">

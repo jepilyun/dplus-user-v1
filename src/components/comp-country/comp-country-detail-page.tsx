@@ -414,7 +414,7 @@ export default function CompCountryDetailPage({
 
   return (
     <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
-      <div className="flex flex-col gap-8">
+      <div className="p-4 flex flex-col gap-8">
         {hasCategories && (
           <div className="mx-auto w-full max-w-[1440px] px-4">
             <div className="flex justify-center gap-2 flex-wrap">
@@ -424,7 +424,7 @@ export default function CompCountryDetailPage({
                   href={`/category/${item.category_code}`}
                   className="block"
                 >
-                  <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-white px-6 py-3 bg-gradient-to-b from-white/90 via-white/70 to-transparent transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_2px_3px_-1px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-3px_rgba(0,0,0,0.2)] active:translate-y-0">
+                  <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-white px-6 py-3 bg-gradient-to-b from-white/90 via-white/70 to-transparent transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_1px_0px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-5px_rgba(0,0,0,0.2)] active:translate-y-0">
                     <div className="text-md text-center">
                       {item.name_i18n ?? item.name}
                     </div>
