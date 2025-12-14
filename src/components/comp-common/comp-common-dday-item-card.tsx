@@ -111,7 +111,7 @@ export default function CompCommonDdayItemCard({
             <div 
               className="inline-flex items-center justify-center p-0 rounded-full font-rubik font-bold text-lg backdrop-blur-sm flex-shrink-0 aspect-square w-20"
               style={{ 
-                backgroundColor: bg,
+                background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)`,
                 color: fg
               }}
             >

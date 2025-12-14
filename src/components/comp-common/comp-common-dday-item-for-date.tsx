@@ -18,7 +18,7 @@ export default function CompCommonDdayItemForDate({
   const saveBeforeNav = useNavigationSave(); // ✅ 저장 함수 가져오기
 
   const code = event?.event_code ?? "default";
-  const { bg, fg } = computeBadgeColors(
+  const { bg, bgBrighter, fg } = computeBadgeColors(
     event?.date ?? null,
     event?.bg_color ?? undefined,
     event?.fg_color ?? undefined
@@ -72,7 +72,7 @@ export default function CompCommonDdayItemForDate({
       >
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
-          style={{ backgroundColor: bg }}
+          style={{ background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)` }}
           aria-label="D-day badge"
         >
           <div
