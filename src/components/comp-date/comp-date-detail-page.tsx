@@ -9,6 +9,7 @@ import DateNavigation from "./comp-date-navigation";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
 import { useDatePageRestoration } from "@/contexts/scroll-restoration-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
+import CompCommonDdayItemCardForDate from "../comp-common/comp-common-dday-item-card-for-date";
 
 type DatePageState = {
   events: TEventCardForDateDetail[];
@@ -354,12 +355,25 @@ export default function CompDateDetailPage({
       <DateNavigation currentDate={dateString} langCode={langCode} />
 
       {events?.length ? (
-        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
-          {events.map((item) => (
-            <CompCommonDdayItemForDate key={item.event_code} event={item} fullLocale={fullLocale} />
-          ))}
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
-        </div>
+        <>
+        {/* 모바일: CompCommonDdayItem */}
+          <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
+            {events.map((item) => (
+              <CompCommonDdayItemCardForDate key={item.event_code} event={item} fullLocale={fullLocale} />
+            ))}
+            {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
+          </div>
+
+          {/* 데스크톱: CompCommonDdayItemCard */}
+          <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
+            <div className="flex flex-col gap-4">
+              {events.map((item) => (
+                <CompCommonDdayItemForDate key={item.event_code} event={item} fullLocale={fullLocale} />
+              ))}
+            </div>
+            {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}
+          </div>
+        </>
       ) : (
         <div className="mx-auto w-full max-w-[1024px] px-2 sm:px-4 lg:px-6 text-center py-12 text-gray-500">
           No events found for this date.

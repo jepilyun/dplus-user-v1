@@ -446,7 +446,7 @@ export default function CompFolderDetailPage({
       {events?.length ? (
         <>
           {/* 모바일: CompCommonDdayItem */}
-          <div className="md:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
+          <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
               <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
             ))}
