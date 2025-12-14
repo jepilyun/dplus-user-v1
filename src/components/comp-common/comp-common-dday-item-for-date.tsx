@@ -87,7 +87,7 @@ export default function CompCommonDdayItemForDate({
 
         {/* 텍스트 */}
         <div className="flex flex-col flex-grow gap-0">
-        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200 group-hover:text-gray-800 group-hover:font-bold">
+          <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200">
             <span>
               {event?.date
                 ? formatDateTime(
@@ -104,7 +104,7 @@ export default function CompCommonDdayItemForDate({
             </span>
             {/* 모바일에서만 시간 표시 */}
             {hasValidTime(event?.time) && (
-              <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
+              <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs">
                 {formatTimeOnly(combinedDate, "ko-KR", null, null, {
                   timeFormat: "12h",
                   compactTime: true
@@ -124,7 +124,7 @@ export default function CompCommonDdayItemForDate({
                 })}
               </span>
             )}
-            <span>{event?.title}</span>
+            <span className="font-bold text-gray-700 group-hover:text-gray-900">{event?.title}</span>
           </div>
           {/* ✅ 모바일: 직사각형 이미지 (상단) */}
           {checkIfThumbnailExistsForDate(event) && (

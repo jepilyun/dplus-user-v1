@@ -37,47 +37,61 @@ export const CompEventHeader = ({
   const { bg, bgBrighter, fg } = computeBadgeColors(eventDetail?.event.date?.toString() ?? null);
 
   return (
-    <div 
-      className="p-6 sm:p-8 rounded-4xl flex flex-col items-center justify-between gap-8 sm:gap-12 aspect-[3/4] sm:aspect-[2/1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_3px_6px_0_rgba(0,0,0,0.15)]"
-      style={{ 
-        background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)`,
-        color: fg
-      }}
-    >
-      <div className="w-full flex flex-row flex-wrap gap-4 justify-between items-center">
-        <CompEventCountdown 
-          ddayLabel={ddayLabel}
-          fgColor={bg}
-          bgColor={fg}
-        />
-        <CompEventTimer startAtUtc={startAtUtc || ''} />
-      </div>
+    <div className="relative overflow-hidden rounded-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_1px_5px_0_rgba(0,0,0,0.15)]">
+      {/* 배경 그라데이션 */}
+      <div 
+        className="absolute inset-0"
+        style={{ 
+          background: `linear-gradient(60deg, ${bg} 0%, ${bgBrighter} 100%)`
+        }}
+      />
       
-      <div className="w-full flex flex-col gap-3 justify-center items-start">
-        <CompEventDatetime 
-          datetime={eventDetail?.event.date ?? null}
-          fullLocale={fullLocale}
-          time={eventDetail?.event.time ?? null}
-          isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
-        />
-        <div
-          id="event-title"
-          className="font-black text-4xl sm:text-5xl"
-          data-event-code={eventDetail?.event.event_code}
-        >
-          {eventDetail?.event.title}
+      {/* 상단 하이라이트 */}
+      <div 
+        className="absolute inset-0 bg-gradient-to-tr from-white/10 via-white/5 to-transparent pointer-events-none"
+        aria-hidden="true"
+      />
+      
+      {/* 콘텐츠 */}
+      <div 
+        className="relative z-10 p-6 sm:p-8 flex flex-col items-center justify-between gap-8 sm:gap-12 aspect-[3/4] sm:aspect-[2/1]"
+        style={{ color: fg }}
+      >
+        <div className="w-full flex flex-row flex-wrap gap-4 justify-between items-center">
+          <CompEventCountdown 
+            ddayLabel={ddayLabel}
+            fgColor={bg}
+            bgColor={fg}
+          />
+          <CompEventTimer startAtUtc={startAtUtc || ''} />
         </div>
-        <HeadlineTagsDetail
-          targetCountryCode={eventDetail?.event.target_country_code || null}
-          targetCountryName={eventDetail?.event.target_country_native || null}
-          targetCityCode={eventDetail?.event.target_city_code || null}
-          targetCityName={eventDetail?.event.target_city_native || null}
-          categories={eventDetail?.mapCategoryEvent?.items ?? null}
-          langCode={langCode}
-          showCountry={false}
-          fgColor={fg}
-          fgHoverColor={fg}
-        />
+        
+        <div className="w-full flex flex-col gap-3 justify-center items-start">
+          <CompEventDatetime 
+            datetime={eventDetail?.event.date ?? null}
+            fullLocale={fullLocale}
+            time={eventDetail?.event.time ?? null}
+            isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+          />
+          <div
+            id="event-title"
+            className="font-black text-4xl sm:text-5xl drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
+            data-event-code={eventDetail?.event.event_code}
+          >
+            {eventDetail?.event.title}
+          </div>
+          <HeadlineTagsDetail
+            targetCountryCode={eventDetail?.event.target_country_code || null}
+            targetCountryName={eventDetail?.event.target_country_native || null}
+            targetCityCode={eventDetail?.event.target_city_code || null}
+            targetCityName={eventDetail?.event.target_city_native || null}
+            categories={eventDetail?.mapCategoryEvent?.items ?? null}
+            langCode={langCode}
+            showCountry={false}
+            fgColor={fg}
+            fgHoverColor={fg}
+          />
+        </div>
       </div>
     </div>
   )

@@ -26,7 +26,7 @@ export const CompEventDescription = ({
   }
   
   return (
-    <div className="p-4 flex flex-col gap-4 rounded-4xl bg-white/90 border border-white text-gray-700">
+    <div className="p-4 flex flex-col gap-4 rounded-4xl bg-white border border-white text-gray-700">
       {hasDescription && (
         <div className="m-auto p-4 w-full text-lg max-w-[840px] whitespace-pre-line leading-relaxed">
           {eventDetail.event.description}
