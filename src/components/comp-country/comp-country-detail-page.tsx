@@ -18,6 +18,8 @@ import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context
 import { incrementCountryViewCount } from "@/utils/increment-count";
 import { NavigationSaveContext } from "@/contexts/navigation-save-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
+import { CompCountryCategoryItem } from "./comp-country-category-item";
+import { CompCountryCityItem } from "./comp-country-city-item";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -416,20 +418,10 @@ export default function CompCountryDetailPage({
     <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
       <div className="p-4 flex flex-col gap-8">
         {hasCategories && (
-          <div className="mx-auto w-full max-w-[1440px] px-4">
+          <div className="mx-auto w-full max-w-[1440px]">
             <div className="flex justify-center gap-2 flex-wrap">
               {countryDetail?.categories?.items.map((item) => (
-                <Link
-                  key={item.category_code}
-                  href={`/category/${item.category_code}`}
-                  className="block"
-                >
-                  <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-white px-6 py-3 bg-gradient-to-b from-white/90 via-white/70 to-transparent transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_1px_0px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-5px_rgba(0,0,0,0.2)] active:translate-y-0">
-                    <div className="text-md text-center">
-                      {item.name_i18n ?? item.name}
-                    </div>
-                  </div>
-                </Link>
+                <CompCountryCategoryItem key={item.category_code} category={item} />
               ))}
             </div>
           </div>
@@ -438,57 +430,9 @@ export default function CompCountryDetailPage({
         {hasCities && (
           <div className="mx-auto w-full max-w-[1440px]">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
-              {countryDetail?.cities?.items.map((item) => {
-                const bg = getCityBgUrl(item);
-                return (
-                  <Link
-                    key={item.city_code}
-                    href={`/city/${item.city_code}`}
-                    className={[
-                      "relative flex flex-col items-center justify-center gap-1",
-                      "h-full min-h-[120px] w-full rounded-3xl border border-gray-200 p-4",
-                      "transition-all duration-200 overflow-hidden group shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)]",
-                      bg ? "bg-gray-900" : "bg-gray-50 hover:bg-gray-100",
-                    ].join(" ")}
-                  >
-                    {bg && (
-                      <>
-                        <div
-                          className="absolute inset-0 bg-center bg-cover transition-transform duration-300 group-hover:scale-105"
-                          style={{ backgroundImage: `url(${bg})` }}
-                          aria-hidden="true"
-                        />
-                        <div 
-                          className="absolute inset-0 bg-black/60 transition-opacity duration-200 group-hover:bg-black/40" 
-                          aria-hidden="true"
-                        />
-                      </>
-                    )}
-                    <div className="relative z-10 w-full">
-                      <div
-                        className={[
-                          "text-xl font-bold text-center transition-transform duration-200",
-                          bg 
-                            ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] group-hover:scale-105" 
-                            : "text-gray-900",
-                        ].join(" ")}
-                      >
-                        {item.name_native ?? item.name}
-                      </div>
-                      <div
-                        className={[
-                          "text-sm text-center transition-transform duration-200",
-                          bg
-                            ? "text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:scale-105"
-                            : "text-muted-foreground",
-                        ].join(" ")}
-                      >
-                        {item.name}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+              {countryDetail?.cities?.items.map((item) => (
+                <CompCountryCityItem key={item.city_code} city={item} />
+              ))}
             </div>
           </div>
         )}
