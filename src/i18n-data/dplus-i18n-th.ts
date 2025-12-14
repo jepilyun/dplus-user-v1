@@ -28,5 +28,6 @@ export const dplusI18nTH = {
     link_copied: "ลิงค์ถูกคัดลอกแล้ว",
     open_in_maps: "เปิดในแผนที่",
     directions: "การนำทาง",
+    more_events: "เหตุการณ์อื่นๆ",
   }
 };

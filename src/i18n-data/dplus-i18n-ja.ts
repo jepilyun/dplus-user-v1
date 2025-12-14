@@ -28,5 +28,6 @@ export const dplusI18nJA = {
     link_copied: "リンクがコピーされました。",
     open_in_maps: "地図で開く",
     directions: "ルート",
+    more_events: "他のイベントを見る",
   }
 };

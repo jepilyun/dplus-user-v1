@@ -19,6 +19,10 @@ import { HeadlineTagsDetail } from "../headline-tags-detail";
 import { SupportedLocale } from "@/consts/const-config";
 import { CompEventDatetime } from "./comp-event-datetime";
 import CompEventContactLinks from "./comp-event-contact-links";
+import { CompActionButton } from "../comp-common/comp-action-button";
+import { ArrowRight } from "lucide-react";
+import { CompLinkButton } from "../comp-common/comp-link-button";
+import { getDplusI18n } from "@/utils/get-dplus-i18n";
 
 
 /**
@@ -258,6 +262,13 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         onShare={handleSocialShare}
         langCode={langCode}
       />
+      <div className="flex justify-center items-center">
+        <CompLinkButton
+          icon={<ArrowRight className="w-5 h-5" />}
+          label={getDplusI18n(langCode).detail.more_events}
+          onClick={() => router.push(`/${langCode}/date`)}
+        />
+      </div>
     </div>
   );
 }

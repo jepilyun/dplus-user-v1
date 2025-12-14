@@ -28,5 +28,6 @@ export const dplusI18nID = {
     link_copied: "Tautan telah disalin.",
     open_in_maps: "Buka di Peta",
     directions: "Rute",
+    more_events: "Acara Lainnya",
   }
 };
