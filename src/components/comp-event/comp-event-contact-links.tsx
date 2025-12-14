@@ -167,7 +167,7 @@ export default function CompEventContactLinks({
   if (links.length === 0) return null;
 
   return (
-    <div className="m-auto w-full max-w-[840px] ">
+    <div className="m-auto w-full max-w-[840px] text-gray-800">
       <ul className="space-y-4">
         {links.map((item) => (
           <InfoItem
