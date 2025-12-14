@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
+import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
 import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCategoryViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
@@ -48,7 +49,6 @@ export default function CompCategoryDetailPage({
     initialData ?? null
   );
 
-  // ✅ 데이터 버전: 2시간 블록
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [events, setEvents] = useState<TMapCategoryEventWithEventInfo[]>(
@@ -72,9 +72,6 @@ export default function CompCategoryDetailPage({
 
   const [viewCount, setViewCount] = useState(initialData?.category.view_count ?? 0);
 
-  /**
-   * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
-   */
   const fetchAndMergeData = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
@@ -95,7 +92,6 @@ export default function CompCategoryDetailPage({
 
       const serverEvents = res?.dbResponse?.mapCategoryEvent?.items ?? [];
       
-      // ✅ 새 데이터 버전 업데이트
       const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
@@ -105,7 +101,6 @@ export default function CompCategoryDetailPage({
         changed: newVersion !== dataVersion
       });
       
-      // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
         console.log('[Category Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
         console.log('[Category Merge] Server events:', serverEvents.length);
@@ -124,7 +119,6 @@ export default function CompCategoryDetailPage({
         
         console.log('[Category Merge] Additional events from restore:', additionalEvents.length);
         
-        // 오늘 이후 이벤트만 필터링
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const todayTimestamp = today.getTime();
@@ -201,7 +195,6 @@ export default function CompCategoryDetailPage({
     }
   };
 
-  // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
     if (!viewCountIncrementedRef.current && categoryCode) {
       viewCountIncrementedRef.current = true;
@@ -211,7 +204,6 @@ export default function CompCategoryDetailPage({
     }
   }, [categoryCode]);
 
-  // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
     if (restorationAttemptedRef.current) return;
     restorationAttemptedRef.current = true;
@@ -235,7 +227,6 @@ export default function CompCategoryDetailPage({
       seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
       setLoading(false);
       
-      // ✅ 더보기를 했던 경우에만 백그라운드 병합
       if (saved.events.length > LIST_LIMIT.default) {
         console.log('[Category Mount] 📡 Fetching server data for merge...');
         fetchAndMergeData(saved.events);
@@ -249,7 +240,6 @@ export default function CompCategoryDetailPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryCode, countryCode]);
 
-  // ✅ 클릭 이벤트 감지하여 저장
   useEffect(() => {
     const saveCurrentState = () => {
       const currentScrollY = window.scrollY;
@@ -275,7 +265,6 @@ export default function CompCategoryDetailPage({
       save<CategoryPageState>(state, dataVersion);
     };
 
-    // ✅ 모든 네비게이션 요소 클릭 감지
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       
@@ -303,7 +292,6 @@ export default function CompCategoryDetailPage({
     };
   }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
-  // ✅ 새로고침/탭 숨김 시 저장
   useEffect(() => {
     const persist = () => {
       const currentScrollY = window.scrollY;
@@ -330,7 +318,6 @@ export default function CompCategoryDetailPage({
     };
   }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
-  // ========================= 렌더 =========================
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -374,7 +361,7 @@ export default function CompCategoryDetailPage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-8">
       <div>
         {categoryDetail?.i18n?.name ? (
           <div className="text-center font-extrabold">
@@ -389,13 +376,25 @@ export default function CompCategoryDetailPage({
       </div>
 
       {events?.length ? (
-        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
-          {events.map((item) => (
-            <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} />
-          ))}
+        <>
+          {/* 모바일: CompCommonDdayItem */}
+          <div className="md:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
+            {events.map((item) => (
+              <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
+            ))}
+            {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
+          </div>
 
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
-        </div>
+          {/* 데스크톱: CompCommonDdayItemCard */}
+          <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
+            <div className="flex flex-col gap-4">
+              {events.map((item) => (
+                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} />
+              ))}
+            </div>
+            {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}
+          </div>
+        </>
       ) : (
         <div className="mx-auto w-full max-w-[1024px] px-2 sm:px-4 lg:px-6 text-center py-12 text-gray-500">
           No events found for this category.

@@ -12,11 +12,12 @@ import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
 
+type EventType = TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo;
 
 export default function CompCommonDdayItem({
   event,
   fullLocale,
-}: { event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo; fullLocale: string }) {
+}: { event: EventType; fullLocale: string }) {
   const router = useRouter();
   const saveBeforeNav = useNavigationSave();
   const [mounted, setMounted] = useState(false);
@@ -33,7 +34,6 @@ export default function CompCommonDdayItem({
   );
 
   const combinedDate = new Date(event?.event_info?.date ?? "");
-
   if (event?.event_info?.time) {
     parseAndSetTime(combinedDate, event.event_info.time);
   }
@@ -61,9 +61,7 @@ export default function CompCommonDdayItem({
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('a[data-tag-link]')) {
-      return;
-    }
+    if (target.closest('a[data-tag-link]')) return;
     
     saveBeforeNav?.();
     router.push(`/event/${code}`);
@@ -73,7 +71,7 @@ export default function CompCommonDdayItem({
     <div className="group m-auto w-full cursor-pointer" data-event-code={code}>
       <div 
         onClick={handleCardClick}
-        className="p-4 m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center rounded-2xl sm:rounded-full border-0 group sm:border border-white sm:bg-white/90 transition-all duration-300 sm:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_16px_16px_rgba(0,0,0,0.1)]"
+        className="p-4 m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-center rounded-2xl sm:rounded-full border border-white bg-white/90 transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_16px_16px_rgba(0,0,0,0.1)]"
       >
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border border-white"
@@ -91,7 +89,6 @@ export default function CompCommonDdayItem({
         </div>
 
         <div className="flex flex-col flex-grow gap-0">
-          {/* 날짜 */}
           <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200">
             <span suppressHydrationWarning>
               {event?.event_info?.date
@@ -108,7 +105,7 @@ export default function CompCommonDdayItem({
                 : ""}
             </span>
             {mounted && hasValidTime(event?.event_info?.time) && (
-              <span className="md:hidden inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 group-hover:text-white group-hover:bg-gray-700 text-xs">
+              <span className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs sm:text-sm md:text-base">
                 {formatTimeOnly(combinedDate, fullLocale, null, null, {
                   timeFormat: "12h",
                   compactTime: true
@@ -117,20 +114,10 @@ export default function CompCommonDdayItem({
             )}
           </div>
 
-          {/* 제목 & 시간 */}
-          <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200">
-            {mounted && hasValidTime(event?.event_info?.time) && (
-              <span className="hidden md:inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs sm:text-sm md:text-base">
-                {formatTimeOnly(combinedDate, fullLocale, null, null, {
-                  timeFormat: "12h",
-                  compactTime: true
-                })}
-              </span>
-            )}
+          <div className="mt-1 flex items-center gap-2 text-base sm:text-lg md:text-2xl font-medium leading-normal transition-all duration-200 group-hover:text-gray-800">
             <span className="font-bold text-gray-700 group-hover:text-gray-900">{event?.event_info?.title}</span>
           </div>
 
-          {/* City & Categories 태그 */}
           {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
             <div className="mt-1 flex items-center gap-1 flex-wrap">
               {event?.event_info?.city && (
@@ -154,27 +141,10 @@ export default function CompCommonDdayItem({
               ))}
             </div>
           )}
-          {/* ✅ 모바일: 직사각형 이미지 (상단) */}
-          {checkIfThumbnailExists(event) && (
-            <div 
-              onClick={handleCardClick}
-              className="sm:hidden w-full aspect-[16/9] rounded-lg overflow-hidden mt-2 mb-3"
-            >
-              <Image
-                src={generateStorageImageUrl("events", getThumbnailUrl(event) || null) || ""}
-                alt={event?.event_info?.title ?? "thumbnail"}
-                width={600}
-                height={338}
-                className="w-full h-full object-cover"
-                sizes="100vw"
-              />
-            </div>
-          )}
         </div>
 
-        {/* ✅ 데스크톱: 원형 썸네일 (우측) */}
         {checkIfThumbnailExists(event) && (
-          <div className="hidden sm:block shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
+          <div className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden">
             <Image
               src={generateStorageImageUrl("events", getThumbnailUrl(event) || null) || ""}
               alt={event?.event_info?.title ?? "thumbnail"}
@@ -190,11 +160,10 @@ export default function CompCommonDdayItem({
   );
 }
 
-
-function checkIfThumbnailExists(event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo) {
+function checkIfThumbnailExists(event: EventType) {
   return event?.event_info?.thumbnail_square || event?.event_info?.thumbnail_vertical || event?.event_info?.thumbnail_horizontal;
 }
 
-function getThumbnailUrl(event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo) {
+function getThumbnailUrl(event: EventType) {
   return event?.event_info?.thumbnail_square || event?.event_info?.thumbnail_vertical || event?.event_info?.thumbnail_horizontal;
 }

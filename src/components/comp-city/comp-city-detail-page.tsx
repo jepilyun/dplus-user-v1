@@ -16,6 +16,7 @@ import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-c
 import { useCityPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCityViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
+import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
 
 type CityPageState = {
   events: TMapCityEventWithEventInfo[];
@@ -408,7 +409,7 @@ export default function CompCityDetailPage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-8">
       <HeroImageBackgroundCarouselCity
         bucket="cities"
         imageUrls={imageUrls}
@@ -418,17 +419,25 @@ export default function CompCityDetailPage({
       />
 
       {events?.length ? (
-        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
-          {events.map((item) => (
-            <CompCommonDdayItem 
-              key={item.event_info?.event_code ?? item.event_code} 
-              event={item} 
-              fullLocale={fullLocale} 
-            />
-          ))}
+        <>
+          {/* 모바일: CompCommonDdayItem */}
+          <div className="md:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
+            {events.map((item) => (
+              <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
+            ))}
+            {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
+          </div>
 
-          {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
-        </div>
+          {/* 데스크톱: CompCommonDdayItemCard */}
+          <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
+            <div className="flex flex-col gap-4">
+              {events.map((item) => (
+                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} />
+              ))}
+            </div>
+            {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}
+          </div>
+        </>
       ) : null}
     </div>
   );

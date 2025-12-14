@@ -6,20 +6,18 @@ import { computeBadgeColors } from "@/utils/color-generator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { TMapCategoryEventWithEventInfo, TMapCityEventWithEventInfo, TMapCountryEventWithEventInfo, TMapFolderEventWithEventInfo, TMapGroupEventWithEventInfo, TMapStagEventWithEventInfo, TMapTagEventWithEventInfo } from "dplus_common_v1";
+import { TEventCardForDateDetail } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
 import { ArrowRight } from "lucide-react";
 
-type EventType = TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo;
-
-export default function CompCommonDdayItemCard({
+export default function CompCommonDdayItemCardForDate({
   event,
   fullLocale,
 }: { 
-  event: EventType; 
+  event: TEventCardForDateDetail; 
   fullLocale: string;
 }) {
   const router = useRouter();
@@ -30,24 +28,24 @@ export default function CompCommonDdayItemCard({
     setMounted(true);
   }, []);
 
-  const code = event?.event_info?.event_code ?? event?.event_code ?? "default";
+  const code = event?.event_code ?? "default";
   const { bg, bgBrighter, fg } = computeBadgeColors(
-    event?.event_info?.date ?? null,
-    event?.event_info?.bg_color ?? undefined,
-    event?.event_info?.fg_color ?? undefined
+    event?.date ?? null,
+    event?.bg_color ?? undefined,
+    event?.fg_color ?? undefined
   );
 
-  const combinedDate = new Date(event?.event_info?.date ?? "");
-  if (event?.event_info?.time) {
-    parseAndSetTime(combinedDate, event.event_info.time);
+  const combinedDate = new Date(event?.date ?? "");
+  if (event?.time) {
+    parseAndSetTime(combinedDate, event.time);
   }
 
   const hasValidTime = (timeStr: string | null | undefined): boolean => {
     return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
   };
 
-  const ddayLabel = event?.event_info?.date
-    ? getDdayLabel(calculateDaysFromToday(event?.event_info?.date))
+  const ddayLabel = event?.date
+    ? getDdayLabel(calculateDaysFromToday(event?.date))
     : "";
 
   const thumbnailUrl = getThumbnailUrl(event);
@@ -68,13 +66,13 @@ export default function CompCommonDdayItemCard({
       data-event-code={code}
       onClick={handleCardClick}
     >
-      <div className="relative overflow-hidden rounded-4xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-full">
+      <div className="relative overflow-hidden rounded-2xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-full">
         {/* 배경 레이어 */}
         {hasImage ? (
           <>
             <Image
               src={generateStorageImageUrl("events", thumbnailUrl) || ""}
-              alt={event?.event_info?.title ?? ""}
+              alt={event?.title ?? ""}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 33vw"
@@ -107,9 +105,9 @@ export default function CompCommonDdayItemCard({
             </div>
             <div className="flex flex-grow flex-wrap items-center gap-0.5 text-base">
               <span suppressHydrationWarning className={`truncate ${textColor} ${hasImage ? 'opacity-90' : ''}`}>
-                {event?.event_info?.date
+                {event?.date
                   ? formatDateTime(
-                      new Date(event?.event_info?.date),
+                      new Date(event?.date),
                       fullLocale,
                       null,
                       null,
@@ -117,7 +115,7 @@ export default function CompCommonDdayItemCard({
                     )
                   : ""}
               </span>
-              {mounted && hasValidTime(event?.event_info?.time) && (
+              {mounted && hasValidTime(event?.time) && (
                 <span className="inline-flex items-center whitespace-nowrap text-base flex-shrink-0">
                   {formatTimeOnly(combinedDate, fullLocale, null, null, {
                     timeFormat: "12h",
@@ -131,44 +129,13 @@ export default function CompCommonDdayItemCard({
           {/* 중간: 제목 */}
           <div 
             className="py-6 font-bold text-2xl flex-grow"
-            title={event?.event_info?.title ?? ""}
+            title={event?.title ?? ""}
           >
-            {event?.event_info?.title}
+            {event?.title}
           </div>
 
-          {/* 하단: 태그 + 화살표 */}
-          <div className="flex items-center justify-between gap-1.5">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {event?.event_info?.city && (
-                <Link 
-                  href={`/city/${event.event_info.city.city_code}`}
-                  data-tag-link
-                  className="text-sm px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
-                  style={{ 
-                    backgroundColor: hasImage ? '#FFFFFF' : '#22222210', 
-                    color: '#222222' 
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {event.event_info.city.name_native}
-                </Link>
-              )}
-              {event?.event_info?.categories?.slice(0, 2).map((category) => (
-                <Link
-                  key={category.category_code}
-                  href={`/category/${category.category_code}`}
-                  data-tag-link
-                  className="text-sm px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
-                  style={{ 
-                    backgroundColor: hasImage ? '#FFFFFF' : '#22222210', 
-                    color: '#222222' 
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {category.name_display}
-                </Link>
-              ))}
-            </div>
+          {/* 하단: 화살표만 (태그 없음) */}
+          <div className="flex items-center justify-end">
             <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-black'}`} />
           </div>
         </div>
@@ -177,6 +144,6 @@ export default function CompCommonDdayItemCard({
   );
 }
 
-function getThumbnailUrl(event: EventType) {
-  return event?.event_info?.thumbnail_square || event?.event_info?.thumbnail_vertical || event?.event_info?.thumbnail_horizontal;
+function getThumbnailUrl(event: TEventCardForDateDetail) {
+  return event?.thumbnail_square || event?.thumbnail_vertical || event?.thumbnail_horizontal;
 }

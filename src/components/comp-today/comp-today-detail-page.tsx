@@ -15,6 +15,7 @@ import {
 } from "@/utils/date-ymd";
 import { useTodayPageRestoration } from "@/contexts/scroll-restoration-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
+import CompCommonDdayItemCardForDate from "../comp-common/comp-common-dday-item-card-for-date";
 
 // 최소 유효성 검사
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
@@ -456,13 +457,13 @@ export default function CompTodayDetailPage({
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-8">
       <div className="text-center font-extrabold">
         <div className="text-3xl">{lang === "ko" ? "다가오는 일정" : "Upcoming"}</div>
       </div>
 
       {eventsWithSections.length > 0 ? (
-        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4 px-2 sm:px-4 lg:px-6">
+        <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 gap-4 md:px-4 lg:px-6">
           {(() => {
             let lastKey = "";
             const blocks: JSX.Element[] = [];
@@ -471,8 +472,8 @@ export default function CompTodayDetailPage({
               if (item.section.key !== lastKey) {
                 lastKey = item.section.key;
                 blocks.push(
-                  <div key={`sec-${item.section.key}`} className="sticky top-[80px]">
-                    <div className="px-4 lg:px-8 py-3 text-gray-800 bg-gray-100 rounded-sm border-gray-200">
+                  <div key={`sec-${item.section.key}`}>
+                    <div className="px-4 lg:px-8 pt-12 pb-4 text-gray-800 rounded-sm border-gray-200">
                       <div className="text-sm sm:text-md md:text-lg uppercase tracking-wide text-gray-600 font-semibold">
                         {item.section.label}{" "}
                         <span className="text-gray-400">{item.section.sub}</span>
@@ -483,11 +484,17 @@ export default function CompTodayDetailPage({
               }
 
               blocks.push(
-                <CompCommonDdayItemForDate
-                  key={item.event_code}
-                  event={item}
-                  fullLocale={fullLocale}
-                />
+                <div key={`event-${item.event_code}`}>
+                  {/* 모바일: CompCommonDdayItemCardForDate */}
+                  <div className="md:hidden">
+                    <CompCommonDdayItemCardForDate event={item} fullLocale={fullLocale} />
+                  </div>
+
+                  {/* 데스크톱: CompCommonDdayItemForDate */}
+                  <div className="hidden md:block">
+                    <CompCommonDdayItemForDate event={item} fullLocale={fullLocale} />
+                  </div>
+                </div>
               );
             }
 
