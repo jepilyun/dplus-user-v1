@@ -266,7 +266,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         <CompLinkButton
           icon={<ArrowRight className="w-5 h-5" />}
           label={getDplusI18n(langCode).detail.more_events}
-          onClick={() => router.push(`/${langCode}/date`)}
+          onClick={() => router.push(`/${langCode}`)}
         />
       </div>
     </div>
