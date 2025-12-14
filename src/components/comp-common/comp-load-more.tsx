@@ -1,3 +1,5 @@
+"use client";
+
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { Button, CircularProgress } from "@mui/material";
 
@@ -8,8 +10,6 @@ interface CompLoadMoreProps {
 }
 
 export const CompLoadMore = ({ onLoadMore, loading, locale }: CompLoadMoreProps) => {
-  const { load_more } = getDplusI18n(locale);
-
   return (
     <div className="flex justify-center py-8">
       <Button
@@ -21,27 +21,29 @@ export const CompLoadMore = ({ onLoadMore, loading, locale }: CompLoadMoreProps)
         sx={{
           minWidth: 200,
           height: 48,
-          borderRadius: "24px",
+          borderRadius: "9999px", // rounded-full
           textTransform: "none",
-          fontWeight: "bold",
-          border: 0,
-          boxShadow: "none",
-          color: "#FFF", // 글자색
-          backgroundColor: "#333", // 기본 배경 (연한 회색)
+          fontWeight: 600,
+          fontSize: "1rem", // View All과 동일 폰트
+          backgroundColor: "#ffffff",
+          color: "#444",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+
           "&:hover": {
-            backgroundColor: "#444", // hover 시 조금 더 진하게
-            boxShadow: "none",
+            backgroundColor: "#fff",
+            color: "#333",
+            boxShadow: "inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 3px 6px -1px rgba(0, 0, 0, 0.15)",
           },
           "&:active": {
-            backgroundColor: "#555", // 클릭 순간 더 진하게
+            backgroundColor: "#efefef",
           },
           "&.Mui-disabled": {
-            backgroundColor: "#CCC",
-            color: "#A0A0A0",
+            backgroundColor: "#efefef",
+            color: "#888",
           },
         }}
       >
-        {loading ? "Loading..." : load_more}
+        {loading ? "Loading..." : getDplusI18n(locale).load_more}
       </Button>
     </div>
   );

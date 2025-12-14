@@ -52,7 +52,7 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
             />
             {/* ✅ 주소 오버레이 */}
             <div className="absolute top-4 right-4 text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg max-w-[calc(100%-2rem)] z-10">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span className="text-xs md:text-sm font-medium line-clamp-2">
                   {eventDetail.event.address_native}

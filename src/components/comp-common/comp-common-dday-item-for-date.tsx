@@ -66,7 +66,10 @@ export default function CompCommonDdayItemForDate({
 
   return (
     <Link href={`/event/${code}`}>
-      <div className="group m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center p-4 rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200" data-event-code={code}>
+      <div 
+        className="p-4 m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center rounded-3xl sm:rounded-full border-0 group sm:border border-white sm:bg-white/90 hover:bg-white sm:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_6px_rgba(0,0,0,0.05)]" 
+        data-event-code={code}
+      >
         <div
           className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
           style={{ backgroundColor: bg }}

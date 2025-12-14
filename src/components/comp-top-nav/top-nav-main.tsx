@@ -14,7 +14,7 @@ export default function TopNavMain() {
           <div className="absolute inset-0 pointer-events-none"></div>
           
           {/* 콘텐츠 - 최대 840px */}
-          <div className="relative z-10 max-w-[840px] mx-auto flex justify-between items-center">
+          <div className="relative z-10 max-w-[1440px] mx-auto flex justify-between items-center">
             <Link href="/">
               <DplusLogo className="w-8 h-8" />
             </Link>

@@ -8,15 +8,11 @@ import { Phone, Home, Mail, Ticket, Globe, ShoppingBag, Info, Tv, BadgeCheck } f
 import { IconYoutube } from "@/icons/icon-youtube";
 import { IconInstagram } from "@/icons/icon-instagram";
 
-
 type TEventMinimal = {
-  address_native?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
   phone?: string | null;
   phone_country_code?: string | null;
-  homepage?: string | null;
   email?: string | null;
+  homepage?: string | null;
   youtube_ch_id?: string | null;
   instagram_id?: string | null;
   url?: string | null;
@@ -32,170 +28,156 @@ type TLinkItem = {
   icon: ReactNode;
   text: string;
   href: string;
-  breakWords?: boolean;
 };
 
-export default function CompEventContactLinks({ event, langCode }: { event: TEventMinimal | null | undefined, langCode: string }) {
-  const { inlineItems, boxItems } = useMemo(() => {
-    if (!event) return { inlineItems: [], boxItems: [] };
+/**
+ * URL에서 프로토콜, 경로, 끝의 슬래시 제거 (도메인만 표시)
+ * @param url 원본 URL
+ * @returns 정리된 URL (도메인만)
+ */
+const cleanUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url.startsWith('http') ? url : `https://${url}`);
+    return urlObj.hostname;
+  } catch {
+    // URL 파싱 실패 시 수동 처리
+    return url
+      .replace(/^https?:\/\//, '')  // http:// 또는 https:// 제거
+      .replace(/\/.*$/, '')          // 첫 번째 / 이후 전부 제거
+      .replace(/\/$/, '');           // 마지막 / 제거
+  }
+};
 
-    const inline: TLinkItem[] = [];
-    const box: TLinkItem[] = [];
+export default function CompEventContactLinks({ 
+  event, 
+  langCode 
+}: { 
+  event: TEventMinimal | null | undefined;
+  langCode: string;
+}) {
+  const links = useMemo(() => {
+    if (!event) return [];
 
+    const items: TLinkItem[] = [];
     const i18n = getDplusI18n(langCode);
 
-    // 전화 - box
     if (event.phone) {
-      const intl = `${event.phone_country_code ? `+${event.phone_country_code} ` : ""}${event.phone}`;
-      box.push({
+      const phoneText = `${event.phone_country_code ? `+${event.phone_country_code} ` : ""}${event.phone}`;
+      items.push({
         key: "phone",
-        icon: <Phone className="h-8 w-8" />,
-        text: intl,
+        icon: <Phone className="h-5 w-5" />,
+        text: phoneText,
         href: toTelUrl(event.phone),
       });
     }
 
-    // 이메일 - box
     if (event.email) {
-      box.push({
+      items.push({
         key: "email",
-        icon: <Mail className="h-8 w-8" />,
+        icon: <Mail className="h-5 w-5" />,
         text: event.email,
         href: toMailUrl(event.email),
       });
     }
 
-    // 홈페이지 - box
     if (event.homepage) {
-      box.push({
+      items.push({
         key: "homepage",
-        icon: <Home className="h-8 w-8" />,
-        text: i18n.labels.homepage,
+        icon: <Home className="h-5 w-5" />,
+        text: cleanUrl(event.homepage),
         href: toAbsoluteUrl(event.homepage),
       });
     }
 
-    // 유튜브 - box
     if (event.youtube_ch_id) {
-      box.push({
+      items.push({
         key: "youtube",
-        icon: <IconYoutube className="h-8 w-8" />,
+        icon: <IconYoutube className="h-5 w-5" />,
         text: i18n.labels.youtube,
         href: toYoutubeChannelUrl(event.youtube_ch_id),
       });
     }
 
-    // 인스타그램 - box
     if (event.instagram_id) {
-      box.push({
+      items.push({
         key: "instagram",
-        icon: <IconInstagram className="h-8 w-8" />,
-        text: i18n.labels.instagram,
+        icon: <IconInstagram className="h-5 w-5" />,
+        text: event.instagram_id,
         href: toInstagramUrl(event.instagram_id),
       });
     }
 
-    // 티켓 구매 - box
     if (event.ticket_purchase) {
-      box.push({
+      items.push({
         key: "ticket_purchase",
-        icon: <Ticket className="h-8 w-8" />,
-        text: i18n.labels.ticket_purchase,
+        icon: <Ticket className="h-5 w-5" />,
+        text: cleanUrl(event.ticket_purchase),
         href: toAbsoluteUrl(event.ticket_purchase),
       });
     }
 
-    // 기타 URL - box
     if (event.url) {
-      box.push({
+      items.push({
         key: "url",
-        icon: <Globe className="h-8 w-8" />,
-        text: i18n.labels.url,
+        icon: <Globe className="h-5 w-5" />,
+        text: cleanUrl(event.url),
         href: event.url,
       });
     }
 
     if (event.product_purchase) {
-      box.push({
+      items.push({
         key: "product_purchase",
-        icon: <ShoppingBag className="h-8 w-8" />,
-        text: i18n.labels.product_purchase,
+        icon: <ShoppingBag className="h-5 w-5" />,
+        text: cleanUrl(event.product_purchase),
         href: toAbsoluteUrl(event.product_purchase),
       });
     }
 
     if (event.detail_info_url) {
-      box.push({
+      items.push({
         key: "detail_info_url",
-        icon: <Info className="h-8 w-8" />,
-        text: i18n.labels.detail_info_url,
+        icon: <Info className="h-5 w-5" />,
+        text: cleanUrl(event.detail_info_url),
         href: toAbsoluteUrl(event.detail_info_url),
       });
     }
 
     if (event.watch_url) {
-      box.push({
+      items.push({
         key: "watch_url",
-        icon: <Tv className="h-8 w-8" />,
-        text: i18n.labels.watch_url,
+        icon: <Tv className="h-5 w-5" />,
+        text: cleanUrl(event.watch_url),
         href: toAbsoluteUrl(event.watch_url),
       });
     }
 
     if (event.apply_url) {
-      box.push({
+      items.push({
         key: "apply_url",
-        icon: <BadgeCheck className="h-8 w-8" />,
-        text: i18n.labels.apply_url,
+        icon: <BadgeCheck className="h-5 w-5" />,
+        text: cleanUrl(event.apply_url),
         href: toAbsoluteUrl(event.apply_url),
       });
     }
 
-    return { inlineItems: inline, boxItems: box };
+    return items;
   }, [event, langCode]);
 
-  // ✅ 콘텐츠가 없으면 null 반환
-  if (!inlineItems.length && !boxItems.length) {
-    return null;
-  }
+  if (links.length === 0) return null;
 
   return (
-    <div className="m-auto w-full max-w-[840px]" aria-label="event contact & links section">
-      <div className="rounded-2xl">
-        {/* Inline items (전화, 이메일) */}
-        {inlineItems.length > 0 && (
-          <ul className="space-y-4" aria-label="contact info">
-            {inlineItems.map((it) => (
-              <InfoItem
-                key={it.key}
-                icon={it.icon}
-                text={it.text}
-                href={it.href}
-                variant="inline"
-                {...(it.breakWords ? { breakWords: true } : {})}
-              />
-            ))}
-          </ul>
-        )}
-
-        {/* Box items (홈페이지, SNS 등) */}
-        {boxItems.length > 0 && (
-          <ul
-            className="flex flex-wrap items-center justify-center gap-4"
-            aria-label="external links"
-          >
-            {boxItems.map((it) => (
-              <InfoItem
-                key={it.key}
-                icon={it.icon}
-                text={it.text}
-                href={it.href}
-                variant="box"
-              />
-            ))}
-          </ul>
-        )}
-      </div>
+    <div className="m-auto w-full max-w-[840px] ">
+      <ul className="space-y-4">
+        {links.map((item) => (
+          <InfoItem
+            key={item.key}
+            icon={item.icon}
+            text={item.text}
+            href={item.href}
+          />
+        ))}
+      </ul>
     </div>
   );
 }

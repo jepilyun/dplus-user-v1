@@ -34,7 +34,7 @@ const socialLinks = [
 
 export default function CompFooter() {
   return (
-    <footer className="mt-12 border-t border-gray-200">
+    <footer className="mt-8 border-t border-gray-200 w-full max-w-[1440px] mx-auto">
       {/* 소셜 미디어 링크 */}
       <div className="flex flex-wrap justify-center gap-6 py-8">
         {socialLinks.map((social) => (

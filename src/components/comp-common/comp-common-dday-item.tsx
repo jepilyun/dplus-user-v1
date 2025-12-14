@@ -5,7 +5,7 @@ import { getDdayLabel } from "@/utils/dday-label";
 import { computeBadgeColors } from "@/utils/color-generator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react"; // ✅ 추가
+import { useEffect, useState } from "react";
 import { TMapCategoryEventWithEventInfo, TMapCityEventWithEventInfo, TMapCountryEventWithEventInfo, TMapFolderEventWithEventInfo, TMapGroupEventWithEventInfo, TMapStagEventWithEventInfo, TMapTagEventWithEventInfo } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
@@ -18,7 +18,7 @@ export default function CompCommonDdayItem({
   fullLocale,
 }: { event: TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo; fullLocale: string }) {
   const router = useRouter();
-  const saveBeforeNav = useNavigationSave(); // ✅ 저장 함수 가져오기
+  const saveBeforeNav = useNavigationSave();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function CompCommonDdayItem({
   }, []);
 
   const code = event?.event_info?.event_code ?? event?.event_code ?? "default";
-  const { bg, fg } = computeBadgeColors(
+  const { bg, bgBrighter, fg } = computeBadgeColors(
     event?.event_info?.date ?? null,
     event?.event_info?.bg_color ?? undefined,
     event?.event_info?.fg_color ?? undefined
@@ -65,22 +65,19 @@ export default function CompCommonDdayItem({
       return;
     }
     
-    // ✅ 네비게이션 직전에 저장
     saveBeforeNav?.();
-    
     router.push(`/event/${code}`);
   };
 
   return (
     <div className="group m-auto w-full cursor-pointer" data-event-code={code}>
-      {/* ✅ 기존 카드 레이아웃 */}
       <div 
         onClick={handleCardClick}
-        className="flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center p-4 rounded-sm sm:rounded-full border-0 hover:bg-gray-50 sm:border border-gray-200"
+        className="p-4 m-auto w-full flex flex-row gap-5 sm:gap-6 md:gap-8 items-start sm:items-center rounded-2xl sm:rounded-full border-0 group sm:border border-white sm:bg-white/90 transition-all duration-300 sm:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_16px_16px_rgba(0,0,0,0.1)]"
       >
         <div
-          className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full"
-          style={{ backgroundColor: bg }}
+          className="shrink-0 w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full border border-white"
+          style={{ background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)` }}
           aria-label="D-day badge"
         >
           <div

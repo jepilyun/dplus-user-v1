@@ -1,61 +1,30 @@
+import { ArrowRight } from "lucide-react";
+
 /**
  * 정보 아이템
  * @param icon 아이콘
  * @param text 텍스트
  * @param href 링크
- * @param variant 스타일 variant ('inline' | 'box')
  * @param breakWords 줄바꿈 허용 여부
  */
 export const InfoItem = ({
   icon,
   text,
   href,
-  variant = "inline",
   breakWords = false,
 }: {
   icon: React.ReactNode;
   text: string;
   href?: string;
-  variant?: "inline" | "box";
   breakWords?: boolean;
 }) => {
-  // Box variant
-  if (variant === "box") {
-    const BoxContent = (
-      <div className="p-4 flex flex-col min-w-[160px] items-center gap-2 rounded-xl bg-white transition-all hover:bg-gray-900 hover:text-white">
-        <span>{icon}</span>
-        <span className="text-center text-sm font-medium">
-          {text}
-        </span>
-      </div>
-    );
-
-    return (
-      <li>
-        {href ? (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block"
-          >
-            {BoxContent}
-          </a>
-        ) : (
-          BoxContent
-        )}
-      </li>
-    );
-  }
-
-  // Inline variant (기존 스타일)
   const content = href ? (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={`block ${breakWords ? "break-words" : "truncate hover:underline"}`}
-      title={text}
+      className={`block ${breakWords ? "break-words" : "truncate"}`}
+      title={href}
     >
       {text}
     </a>
@@ -66,9 +35,10 @@ export const InfoItem = ({
   );
 
   return (
-    <li className="flex items-center gap-4 min-w-0">
-      <span className="mt-0.5 shrink-0">{icon}</span>
-      <div className="min-w-0 flex-1">{content}</div>
+    <li className="px-6 p-4 rounded-full flex items-center gap-4 w-full bg-white/90 border border-white transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_16px_16px_rgba(0,0,0,0.1)] overflow-hidden">
+      <span className="flex-shrink-0">{icon}</span>
+      <div className="flex-1 overflow-hidden">{content}</div>
+      <ArrowRight className="flex-shrink-0 w-5 h-5" />
     </li>
   );
 };

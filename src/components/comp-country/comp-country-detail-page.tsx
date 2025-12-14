@@ -446,8 +446,8 @@ export default function CompCountryDetailPage({
                     href={`/city/${item.city_code}`}
                     className={[
                       "relative flex flex-col items-center justify-center gap-1",
-                      "h-full min-h-[120px] w-full rounded-2xl border border-gray-200 p-4",
-                      "transition-all duration-200 overflow-hidden group",
+                      "h-full min-h-[120px] w-full rounded-3xl border border-gray-200 p-4",
+                      "transition-all duration-200 overflow-hidden group shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)]",
                       bg ? "bg-gray-900" : "bg-gray-50 hover:bg-gray-100",
                     ].join(" ")}
                   >
