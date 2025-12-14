@@ -71,7 +71,7 @@ export default function CompCommonDdayItemCard({
         
         {/* 상단: 배경색 또는 이미지 영역 (2/3) */}
         <div className="relative flex-[2] pt-4 px-4 aspect-[2/1]">
-          <div className="relative w-full h-full overflow-hidden rounded-2xl">
+          <div className="relative h-full overflow-hidden rounded-2xl">
             {hasImage ? (
               <>
                 {/* 배경 이미지 */}
