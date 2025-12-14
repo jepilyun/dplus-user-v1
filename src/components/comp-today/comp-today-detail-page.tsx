@@ -15,7 +15,7 @@ import {
 } from "@/utils/date-ymd";
 import { useTodayPageRestoration } from "@/contexts/scroll-restoration-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayItemCardForDate from "../comp-common/comp-common-dday-item-card-for-date";
+import CompCommonDdayCardForDate from "../comp-common/comp-common-dday-card-for-date";
 
 // 최소 유효성 검사
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
@@ -487,7 +487,7 @@ export default function CompTodayDetailPage({
                 <div key={`event-${item.event_code}`}>
                   {/* 모바일: CompCommonDdayItemCardForDate */}
                   <div className="md:hidden">
-                    <CompCommonDdayItemCardForDate event={item} fullLocale={fullLocale} />
+                    <CompCommonDdayCardForDate event={item} fullLocale={fullLocale} />
                   </div>
 
                   {/* 데스크톱: CompCommonDdayItemForDate */}

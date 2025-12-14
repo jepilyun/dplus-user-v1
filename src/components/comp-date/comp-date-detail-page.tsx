@@ -9,7 +9,7 @@ import DateNavigation from "./comp-date-navigation";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
 import { useDatePageRestoration } from "@/contexts/scroll-restoration-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayItemCardForDate from "../comp-common/comp-common-dday-item-card-for-date";
+import CompCommonDdayCardForDate from "../comp-common/comp-common-dday-card-for-date";
 
 type DatePageState = {
   events: TEventCardForDateDetail[];
@@ -359,7 +359,7 @@ export default function CompDateDetailPage({
         {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayItemCardForDate key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCardForDate key={item.event_code} event={item} fullLocale={fullLocale} />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

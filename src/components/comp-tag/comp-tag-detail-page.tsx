@@ -12,7 +12,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useTagPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
 import { incrementTagViewCount } from "@/utils/increment-count";
-import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
+import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 
 type TagPageState = {
   events: TMapTagEventWithEventInfo[];
@@ -341,7 +341,7 @@ export default function CompTagDetailPage({
           {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCard key={item.event_code} event={item} fullLocale={fullLocale} />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

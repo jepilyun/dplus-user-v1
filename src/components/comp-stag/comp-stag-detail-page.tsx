@@ -16,7 +16,7 @@ import { HeroImageBackgroundCarouselStag } from "../comp-image/hero-background-c
 import { useStagPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementStagViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
+import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 
 type StagPageState = {
   events: TMapStagEventWithEventInfo[];
@@ -423,7 +423,7 @@ export default function CompStagDetailPage({
           {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCard key={item.event_code} event={item} fullLocale={fullLocale} />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

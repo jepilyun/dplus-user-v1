@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
+import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCategoryViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
@@ -380,7 +380,7 @@ export default function CompCategoryDetailPage({
           {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCard key={item.event_code} event={item} fullLocale={fullLocale} />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

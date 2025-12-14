@@ -18,7 +18,7 @@ import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
+import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 
 type FolderPageState = {
   events: TMapFolderEventWithEventInfo[];
@@ -448,7 +448,7 @@ export default function CompFolderDetailPage({
           {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayItemCard key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCard key={item.event_code} event={item} fullLocale={fullLocale} />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

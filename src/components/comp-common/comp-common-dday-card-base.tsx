@@ -3,23 +3,37 @@
 import { calculateDaysFromToday } from "@/utils/calc-dates";
 import { getDdayLabel } from "@/utils/dday-label";
 import { computeBadgeColors } from "@/utils/color-generator";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { TEventCardForDateDetail } from "dplus_common_v1";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
 import { ArrowRight } from "lucide-react";
 
-export default function CompCommonDdayItemCardForDate({
-  event,
-  fullLocale,
-}: { 
-  event: TEventCardForDateDetail; 
+interface DdayItemCardBaseProps {
+  eventCode: string;
+  date: string | null;
+  time: string | null | undefined;
+  title: string;
+  bgColor?: string;
+  fgColor?: string;
+  thumbnailUrl: string | null;
   fullLocale: string;
-}) {
+  tags?: React.ReactNode;
+}
+
+export default function CompCommonDdayItemCardBase({
+  eventCode,
+  date,
+  time,
+  title,
+  bgColor,
+  fgColor,
+  thumbnailUrl,
+  fullLocale,
+  tags,
+}: DdayItemCardBaseProps) {
   const router = useRouter();
   const saveBeforeNav = useNavigationSave();
   const [mounted, setMounted] = useState(false);
@@ -28,27 +42,19 @@ export default function CompCommonDdayItemCardForDate({
     setMounted(true);
   }, []);
 
-  const code = event?.event_code ?? "default";
-  const { bg, bgBrighter, fg } = computeBadgeColors(
-    event?.date ?? null,
-    event?.bg_color ?? undefined,
-    event?.fg_color ?? undefined
-  );
+  const { bg, bgBrighter, fg } = computeBadgeColors(date, bgColor, fgColor);
 
-  const combinedDate = new Date(event?.date ?? "");
-  if (event?.time) {
-    parseAndSetTime(combinedDate, event.time);
+  const combinedDate = new Date(date ?? "");
+  if (time) {
+    parseAndSetTime(combinedDate, time);
   }
 
   const hasValidTime = (timeStr: string | null | undefined): boolean => {
     return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
   };
 
-  const ddayLabel = event?.date
-    ? getDdayLabel(calculateDaysFromToday(event?.date))
-    : "";
+  const ddayLabel = date ? getDdayLabel(calculateDaysFromToday(date)) : "";
 
-  const thumbnailUrl = getThumbnailUrl(event);
   const hasImage = !!thumbnailUrl;
   const textColor = hasImage ? 'text-white' : 'text-gray-500';
 
@@ -57,13 +63,13 @@ export default function CompCommonDdayItemCardForDate({
     if (target.closest('a[data-tag-link]')) return;
     
     saveBeforeNav?.();
-    router.push(`/event/${code}`);
+    router.push(`/event/${eventCode}`);
   };
 
   return (
     <div 
       className="group w-full cursor-pointer" 
-      data-event-code={code}
+      data-event-code={eventCode}
       onClick={handleCardClick}
     >
       <div className="relative overflow-hidden rounded-2xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-full">
@@ -72,7 +78,7 @@ export default function CompCommonDdayItemCardForDate({
           <>
             <Image
               src={generateStorageImageUrl("events", thumbnailUrl) || ""}
-              alt={event?.title ?? ""}
+              alt={title ?? ""}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 33vw"
@@ -103,11 +109,11 @@ export default function CompCommonDdayItemCardForDate({
             >
               {ddayLabel}
             </div>
-            <div className="flex flex-grow flex-wrap items-center gap-0.5 text-base">
+            <div className="flex flex-grow flex-wrap items-center gap-1 text-base">
               <span suppressHydrationWarning className={`truncate ${textColor} ${hasImage ? 'opacity-90' : ''}`}>
-                {event?.date
+                {date
                   ? formatDateTime(
-                      new Date(event?.date),
+                      new Date(date),
                       fullLocale,
                       null,
                       null,
@@ -115,7 +121,7 @@ export default function CompCommonDdayItemCardForDate({
                     )
                   : ""}
               </span>
-              {mounted && hasValidTime(event?.time) && (
+              {mounted && hasValidTime(time) && (
                 <span className="inline-flex items-center whitespace-nowrap text-base flex-shrink-0">
                   {formatTimeOnly(combinedDate, fullLocale, null, null, {
                     timeFormat: "12h",
@@ -129,21 +135,24 @@ export default function CompCommonDdayItemCardForDate({
           {/* 중간: 제목 */}
           <div 
             className="py-6 font-bold text-2xl flex-grow"
-            title={event?.title ?? ""}
+            title={title ?? ""}
           >
-            {event?.title}
+            {title}
           </div>
 
-          {/* 하단: 화살표만 (태그 없음) */}
-          <div className="flex items-center justify-end">
+          {/* 하단: 태그 + 화살표 */}
+          <div className="flex items-center justify-between gap-1.5">
+            {tags ? (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {tags}
+              </div>
+            ) : (
+              <div />
+            )}
             <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-black'}`} />
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-function getThumbnailUrl(event: TEventCardForDateDetail) {
-  return event?.thumbnail_square || event?.thumbnail_vertical || event?.thumbnail_horizontal;
 }

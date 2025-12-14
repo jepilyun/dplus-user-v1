@@ -17,7 +17,7 @@ import { NavigationSaveContext } from "@/contexts/navigation-save-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import { CompCountryCategoryItem } from "./comp-country-category-item";
 import { CompCountryCityItem } from "./comp-country-city-item";
-import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
+import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -439,7 +439,7 @@ export default function CompCountryDetailPage({
           <>
           <div className="mx-auto w-full max-w-[1440px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {events.map(item => (
-              <CompCommonDdayItemCard 
+              <CompCommonDdayCard 
                 key={item.event_info?.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 

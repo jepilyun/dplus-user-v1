@@ -26,9 +26,9 @@ export function HeroImageBackgroundCarouselStag({ bucket, imageUrls = [], interv
 
   return (
     <div className={clsx(
-      "relative w-full overflow-hidden rounded-xl",
+      "relative w-full overflow-hidden rounded-4xl sm:rounded-xl",
       hasImages 
-        ? "h-[240px] md:h-[360px] lg:h-[480px]" 
+        ? "h-[200px] md:h-[280px]" 
         : "h-[120px] md:h-[180px] bg-white"
     )}>
       {hasImages && imageUrls.map((url, idx) => (
