@@ -68,7 +68,7 @@ export default function CompCommonDdayItemCard({
       data-event-code={code}
       onClick={handleCardClick}
     >
-      <div className="relative overflow-hidden rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-auto sm:aspect-square">
+      <div className="relative overflow-hidden rounded-4xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-auto md:aspect-square">
         {/* 배경 레이어 */}
         {hasImage ? (
           <>
@@ -104,13 +104,12 @@ export default function CompCommonDdayItemCard({
 
         {/* 콘텐츠 */}
         <div 
-          className="relative z-10 p-6 h-full flex flex-col justify-start gap-6"
+          className="relative z-10 p-5 h-full flex flex-col justify-start w-full"
           style={{ color: hasImage ? '#FFFFFF' : '#222222' }}
         >
-          {/* 상단: D-Day Badge */}
-          <div className="flex justify-start">
+          <div className="flex justify-end items-end gap-4">
             <div 
-              className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-rubik font-bold text-lg backdrop-blur-sm"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-full font-rubik font-bold text-lg backdrop-blur-sm flex-shrink-0 aspect-square"
               style={{ 
                 backgroundColor: bg,
                 color: fg
@@ -118,12 +117,7 @@ export default function CompCommonDdayItemCard({
             >
               {ddayLabel}
             </div>
-          </div>
-          
-          {/* 하단: 날짜, 제목, 태그 */}
-          <div className="flex flex-col gap-3 justify-start h-full">
-            {/* 날짜 & 시간 */}
-            <div className="flex items-center gap-2 text-base font-bold opacity-70">
+            <div className="flex flex-grow flex-wrap items-center gap-0.5 text-base text-gray-500">
               <span suppressHydrationWarning className="truncate">
                 {event?.event_info?.date
                   ? formatDateTime(
@@ -140,11 +134,7 @@ export default function CompCommonDdayItemCard({
               </span>
               {mounted && hasValidTime(event?.event_info?.time) && (
                 <span 
-                  className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-xs backdrop-blur-sm flex-shrink-0" 
-                  style={{ 
-                    backgroundColor: `${fg}40`, 
-                    color: fg 
-                  }}
+                  className="inline-flex items-center whitespace-nowrap text-base backdrop-blur-sm flex-shrink-0" 
                 >
                   {formatTimeOnly(combinedDate, fullLocale, null, null, {
                     timeFormat: "12h",
@@ -153,16 +143,19 @@ export default function CompCommonDdayItemCard({
                 </span>
               )}
             </div>
-
+          </div>
+          
+          {/* 하단: 제목, 태그 */}
+          <div className="flex flex-col gap-1 justify-start h-full">
             <div 
-              className="font-bold text-2xl flex-grow"
+              className="py-4 font-bold text-2xl flex-grow"
               title={event?.event_info?.title ?? ""}
             >
               {event?.event_info?.title}
             </div>
 
-            {/* City & Categories 태그 */}
-            {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
+            <div className="flex items-center justify-between gap-1.5">
+            {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) ? (
               <div className="flex items-center gap-1.5 flex-wrap">
                 {event?.event_info?.city && (
                   <Link 
@@ -194,11 +187,10 @@ export default function CompCommonDdayItemCard({
                   </Link>
                 ))}
               </div>
-            )}
+            ) : <div></div>}
+            <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-black'}`} />
+            </div>
           </div>
-        </div>
-        <div className="absolute right-6 bottom-6 z-10">
-          <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-black'}`} />
         </div>
       </div>
     </div>
