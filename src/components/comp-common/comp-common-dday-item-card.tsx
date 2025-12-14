@@ -11,6 +11,7 @@ import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
+import { ArrowRight } from "lucide-react";
 
 export default function CompCommonDdayItemCard({
   event,
@@ -67,7 +68,7 @@ export default function CompCommonDdayItemCard({
       data-event-code={code}
       onClick={handleCardClick}
     >
-      <div className="relative overflow-hidden rounded-xl shadow-[0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[0_16px_16px_rgba(0,0,0,0.2)] transition-all duration-300 aspect-square">
+      <div className="relative overflow-hidden rounded-xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-auto sm:aspect-square">
         {/* 배경 레이어 */}
         {hasImage ? (
           <>
@@ -79,12 +80,12 @@ export default function CompCommonDdayItemCard({
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
-            
+                        
             {/* 반투명 그라데이션 오버레이 */}
             <div 
               className="absolute inset-0"
               style={{
-                background: `linear-gradient(135deg, #00000080 0%, #00000040 100%)`
+                background: `linear-gradient(135deg, #000000CC 0%, #00000010 200%)`,
               }}
               aria-hidden="true"
             />
@@ -111,8 +112,8 @@ export default function CompCommonDdayItemCard({
             <div 
               className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-rubik font-bold text-lg backdrop-blur-sm"
               style={{ 
-                backgroundColor: hasImage ? '#FFFFFF' : bg,
-                color: hasImage ? '#000000' : fg
+                backgroundColor: bg,
+                color: fg
               }}
             >
               {ddayLabel}
@@ -120,9 +121,9 @@ export default function CompCommonDdayItemCard({
           </div>
           
           {/* 하단: 날짜, 제목, 태그 */}
-          <div className="flex flex-col gap-3 justify-start">
+          <div className="flex flex-col gap-3 justify-start h-full">
             {/* 날짜 & 시간 */}
-            <div className="flex items-center gap-2 text-base font-bold opacity-80">
+            <div className="flex items-center gap-2 text-base font-bold opacity-70">
               <span suppressHydrationWarning className="truncate">
                 {event?.event_info?.date
                   ? formatDateTime(
@@ -154,7 +155,7 @@ export default function CompCommonDdayItemCard({
             </div>
 
             <div 
-              className="font-bold text-2xl"
+              className="font-bold text-2xl flex-grow"
               title={event?.event_info?.title ?? ""}
             >
               {event?.event_info?.title}
@@ -167,10 +168,10 @@ export default function CompCommonDdayItemCard({
                   <Link 
                     href={`/city/${event.event_info.city.city_code}`}
                     data-tag-link
-                    className="text-xs px-2.5 py-1 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
+                    className="text-sm px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
                     style={{ 
-                      backgroundColor: `${hasImage ? '#FFFFFF80' : `#22222210`}`, 
-                      color: hasImage ? '#FFFFFF' : '#222222' 
+                      backgroundColor: `${hasImage ? '#FFFFFF' : `#22222210`}`, 
+                      color: '#222222' 
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -182,10 +183,10 @@ export default function CompCommonDdayItemCard({
                     key={category.category_code}
                     href={`/category/${category.category_code}`}
                     data-tag-link
-                    className="text-xs px-2.5 py-1 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
+                    className="text-sm px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
                     style={{ 
-                      backgroundColor: `${hasImage ? '#FFFFFF80' : `#22222210`}`, 
-                      color: hasImage ? '#FFFFFF' : '#222222' 
+                      backgroundColor: `${hasImage ? '#FFFFFF' : `#22222210`}`, 
+                      color: '#222222' 
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
@@ -195,6 +196,9 @@ export default function CompCommonDdayItemCard({
               </div>
             )}
           </div>
+        </div>
+        <div className="absolute right-6 bottom-6 z-10">
+          <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-black'}`} />
         </div>
       </div>
     </div>
