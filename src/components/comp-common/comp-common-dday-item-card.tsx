@@ -63,7 +63,7 @@ export default function CompCommonDdayItemCard({
 
   return (
     <div 
-      className="group m-auto w-full cursor-pointer h-full" 
+      className="group w-full cursor-pointer h-full" 
       data-event-code={code}
       onClick={handleCardClick}
     >
