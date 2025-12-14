@@ -63,133 +63,138 @@ export default function CompCommonDdayItemCard({
 
   return (
     <div 
-      className="group w-full cursor-pointer h-full" 
+      className="group w-full cursor-pointer" 
       data-event-code={code}
       onClick={handleCardClick}
     >
-      <div className="h-full relative overflow-hidden rounded-3xl shadow-[0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[0_16px_16px_rgba(0,0,0,0.2)] transition-all duration-300 flex flex-col bg-white">
-        
-        {/* 상단: 배경색 또는 이미지 영역 (2/3) */}
-        <div className="relative pt-4 px-4 w-full aspect-[2/1]">
-          <div className="relative h-full w-full overflow-hidden rounded-2xl">
-            {hasImage ? (
-              <>
-                {/* 배경 이미지 */}
-                <Image
-                  src={generateStorageImageUrl("events", thumbnailUrl) || ""}
-                  alt={event?.event_info?.title ?? ""}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                />
-                
-                {/* 어두운 오버레이 */}
-                <div 
-                  className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/50 to-black/10"
-                  aria-hidden="true"
-                />
-              </>
-            ) : (
-              <>
-                {/* 배경 그라데이션 */}
-                <div 
-                  className="absolute inset-0"
-                  style={{ 
-                    background: `linear-gradient(30deg, ${bg} 0%, ${bgBrighter} 100%)`
-                  }}
-                />
-                {/* 상단 하이라이트 */}
-                <div 
-                  className="absolute inset-0 bg-gradient-to-b from-white/10 via-white/5 to-transparent pointer-events-none"
-                  aria-hidden="true"
-                />
-              </>
-            )}
+      <div className="relative overflow-hidden rounded-xl shadow-[0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[0_16px_16px_rgba(0,0,0,0.2)] transition-all duration-300 aspect-square">
+        {/* 배경 레이어 */}
+        {hasImage ? (
+          <>
+            {/* 배경 이미지 */}
+            <Image
+              src={generateStorageImageUrl("events", thumbnailUrl) || ""}
+              alt={event?.event_info?.title ?? ""}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 33vw"
+            />
             
-            {/* 콘텐츠 */}
+            {/* 반투명 그라데이션 오버레이 */}
             <div 
-              className="relative z-10 p-4 h-full flex flex-col items-center justify-center gap-4"
-              style={{ color: hasImage ? '#FFFFFF' : fg }}
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(135deg, #00000080 0%, #00000040 100%)`
+              }}
+              aria-hidden="true"
+            />
+          </>
+        ) : (
+          <>
+            {/* 배경 그라데이션 */}
+            <div 
+              className="absolute inset-0 bg-white"
+            />
+            <div 
+              className="absolute inset-0"
+            />
+          </>
+        )}
+
+        {/* 콘텐츠 */}
+        <div 
+          className="relative z-10 p-6 h-full flex flex-col justify-start gap-6"
+          style={{ color: hasImage ? '#FFFFFF' : '#222222' }}
+        >
+          {/* 상단: D-Day Badge */}
+          <div className="flex justify-start">
+            <div 
+              className="inline-flex items-center justify-center px-4 py-2 rounded-lg font-rubik font-bold text-lg backdrop-blur-sm"
+              style={{ 
+                backgroundColor: hasImage ? '#FFFFFF' : bg,
+                color: hasImage ? '#000000' : fg
+              }}
             >
-              {/* 상단: D-Day Badge */}
-              <div className="flex justify-center">
-                <div 
-                  className="inline-flex items-center justify-center font-rubik font-extrabold text-4xl"
+              {ddayLabel}
+            </div>
+          </div>
+          
+          {/* 하단: 날짜, 제목, 태그 */}
+          <div className="flex flex-col gap-3 justify-start">
+            {/* 날짜 & 시간 */}
+            <div className="flex items-center gap-2 text-base font-bold opacity-80">
+              <span suppressHydrationWarning className="truncate">
+                {event?.event_info?.date
+                  ? formatDateTime(
+                      new Date(event?.event_info?.date),
+                      fullLocale,
+                      null,
+                      null,
+                      {
+                        includeTime: false,
+                        style: 'long'
+                      }
+                    )
+                  : ""}
+              </span>
+              {mounted && hasValidTime(event?.event_info?.time) && (
+                <span 
+                  className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-xs backdrop-blur-sm flex-shrink-0" 
                   style={{ 
-                    color: fg
+                    backgroundColor: `${fg}40`, 
+                    color: fg 
                   }}
                 >
-                  {ddayLabel}
-                </div>
-              </div>
-              
-              {/* 하단: 날짜 & 시간 */}
-              <div className="flex items-center gap-2 text-base md:text-sm">
-                <span suppressHydrationWarning className="truncate font-medium">
-                  {event?.event_info?.date
-                    ? formatDateTime(
-                        new Date(event?.event_info?.date),
-                        fullLocale,
-                        null,
-                        null,
-                        {
-                          includeTime: false,
-                          style: 'long'
-                        }
-                      )
-                    : ""}
+                  {formatTimeOnly(combinedDate, fullLocale, null, null, {
+                    timeFormat: "12h",
+                    compactTime: true
+                  })}
                 </span>
-                {mounted && hasValidTime(event?.event_info?.time) && (
-                  <span 
-                    className="inline-flex items-center whitespace-nowrap text-base md:text-xs flex-shrink-0" 
-                    style={{ color: fg }}
-                  >
-                    {formatTimeOnly(combinedDate, fullLocale, null, null, {
-                      timeFormat: "12h",
-                      compactTime: true
-                    })}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 하단: 흰색 배경 영역 (1/3) */}
-        <div className="bg-white pt-4 pb-5 px-5 flex flex-col justify-between gap-3 min-h-0 h-full">
-          <div 
-            className="font-bold text-lg leading-relaxed text-gray-900"
-            title={event?.event_info?.title ?? ""}
-          >
-            {event?.event_info?.title}
-          </div>
-
-          {/* City & Categories 태그 */}
-          {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
-            <div className="flex items-center gap-1 flex-wrap">
-              {event?.event_info?.city && (
-                <Link 
-                  href={`/city/${event.event_info.city.city_code}`}
-                  data-tag-link
-                  className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors truncate max-w-[120px]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {event.event_info.city.name_native}
-                </Link>
               )}
-              {event?.event_info?.categories?.slice(0, 2).map((category) => (
-                <Link
-                  key={category.category_code}
-                  href={`/category/${category.category_code}`}
-                  data-tag-link
-                  className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors truncate max-w-[120px]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {category.name_display}
-                </Link>
-              ))}
             </div>
-          )}
+
+            <div 
+              className="font-bold text-2xl"
+              title={event?.event_info?.title ?? ""}
+            >
+              {event?.event_info?.title}
+            </div>
+
+            {/* City & Categories 태그 */}
+            {(event?.event_info?.city || (event?.event_info?.categories && event?.event_info?.categories?.length > 0)) && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {event?.event_info?.city && (
+                  <Link 
+                    href={`/city/${event.event_info.city.city_code}`}
+                    data-tag-link
+                    className="text-xs px-2.5 py-1 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
+                    style={{ 
+                      backgroundColor: `${hasImage ? '#FFFFFF80' : `#22222210`}`, 
+                      color: hasImage ? '#FFFFFF' : '#222222' 
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {event.event_info.city.name_native}
+                  </Link>
+                )}
+                {event?.event_info?.categories?.slice(0, 2).map((category) => (
+                  <Link
+                    key={category.category_code}
+                    href={`/category/${category.category_code}`}
+                    data-tag-link
+                    className="text-xs px-2.5 py-1 rounded-full backdrop-blur-sm transition-opacity hover:opacity-80 truncate max-w-[140px]"
+                    style={{ 
+                      backgroundColor: `${hasImage ? '#FFFFFF80' : `#22222210`}`, 
+                      color: hasImage ? '#FFFFFF' : '#222222' 
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {category.name_display}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
