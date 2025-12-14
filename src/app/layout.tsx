@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {`try { if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; } } catch(_) {}`}
       </Script>
 
-      <body>
+      <body className="bg-light-gray">
         {/* ✅ GTM (noscript) must be first in body */}
         <noscript>
           <iframe

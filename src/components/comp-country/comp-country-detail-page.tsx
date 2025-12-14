@@ -424,7 +424,7 @@ export default function CompCountryDetailPage({
                   href={`/category/${item.category_code}`}
                   className="block"
                 >
-                  <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-gray-200 px-6 py-3 transition hover:bg-gray-50 hover:font-bold">
+                  <div className="flex flex-col items-center justify-center gap-1 h-full w-full rounded-full border border-white px-6 py-3 bg-gradient-to-b from-white/90 via-white/70 to-transparent transition shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_2px_3px_-1px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-3px_rgba(0,0,0,0.2)] active:translate-y-0">
                     <div className="text-md text-center">
                       {item.name_i18n ?? item.name}
                     </div>

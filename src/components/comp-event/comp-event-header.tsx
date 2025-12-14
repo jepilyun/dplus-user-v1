@@ -38,7 +38,7 @@ export const CompEventHeader = ({
 
   return (
     <div 
-      className="p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-between gap-8 sm:gap-12 aspect-[3/4] sm:aspect-[2/1]"
+      className="p-6 sm:p-8 rounded-4xl flex flex-col items-center justify-between gap-8 sm:gap-12 aspect-[3/4] sm:aspect-[2/1]"
       style={{ 
         background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)`,
         color: fg

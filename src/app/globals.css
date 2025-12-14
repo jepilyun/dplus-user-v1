@@ -8,6 +8,7 @@
   --key-color: #2DB0E0;
   --key-color-light: #6FD8FE;
   --dplus-red: #EF007D;
+  --light-gray: #F2F2F2;
 }
 
 @theme inline {
@@ -93,6 +94,10 @@ body {
   h1 {
     color: var(--white);
   }
+}
+
+.bg-light-gray {
+  background-color: var(--light-gray);
 }
 
 .bg-dplus-red {

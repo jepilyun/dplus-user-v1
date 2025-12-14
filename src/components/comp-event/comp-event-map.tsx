@@ -38,8 +38,8 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
   };
   
   return (
-    <div className="flex flex-col m-auto w-full">
-      <div className="rounded-2xl overflow-hidden">
+    <div className="flex flex-col m-auto w-full border border-white rounded-4xl overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_2px_-1px_rgba(0,0,0,0.15)]">
+      <div className="rounded-xl">
         {eventDetail?.event.latitude && eventDetail?.event.longitude && (
           <div className="w-full overflow-hidden relative h-48 md:h-60">
             <GoogleMap
@@ -61,7 +61,7 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
             </div>
           </div>
         )}
-        <div className="px-4 py-1 flex flex-wrap font-bold text-sm md:text-base items-center justify-between text-gray-600 bg-gray-100">
+        <div className="px-4 py-1 flex flex-wrap font-bold text-sm md:text-base items-center justify-between text-gray-600 bg-white">
           <button 
             onClick={handleOpenGoogleMap}
             className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
