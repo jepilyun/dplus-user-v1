@@ -409,7 +409,7 @@ export default function CompStagDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <HeroImageBackgroundCarouselStag
         bucket="stags"
         imageUrls={imageUrls}

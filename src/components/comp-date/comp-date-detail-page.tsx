@@ -351,7 +351,7 @@ export default function CompDateDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <DateNavigation currentDate={dateString} langCode={langCode} />
 
       {events?.length ? (

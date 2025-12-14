@@ -416,7 +416,7 @@ export default function CompFolderDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <HeadlineTagsDetail
         targetCountryCode={folderDetail?.folder.target_country_code || null}
         targetCountryName={folderDetail?.folder.target_country_native || null}

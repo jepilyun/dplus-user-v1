@@ -457,7 +457,7 @@ export default function CompTodayDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <div className="text-center font-extrabold">
         <div className="text-3xl">{lang === "ko" ? "다가오는 일정" : "Upcoming"}</div>
       </div>

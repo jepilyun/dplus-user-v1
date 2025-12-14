@@ -409,7 +409,7 @@ export default function CompCityDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <HeroImageBackgroundCarouselCity
         bucket="cities"
         imageUrls={imageUrls}

@@ -417,7 +417,7 @@ export default function CompGroupDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <HeroImageBackgroundCarouselGroup
         bucket="groups"
         imageUrls={imageUrls}

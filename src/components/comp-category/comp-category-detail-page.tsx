@@ -361,7 +361,7 @@ export default function CompCategoryDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-8">
+    <div className="p-4 flex flex-col gap-4">
       <div>
         {categoryDetail?.i18n?.name ? (
           <div className="text-center font-extrabold">
