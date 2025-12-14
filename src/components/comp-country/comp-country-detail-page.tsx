@@ -10,16 +10,14 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getCountryHeroImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
-import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
-import Link from "next/link";
-import { getCityBgUrl } from "@/utils/get-city-bg-image";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCountryViewCount } from "@/utils/increment-count";
 import { NavigationSaveContext } from "@/contexts/navigation-save-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import { CompCountryCategoryItem } from "./comp-country-category-item";
 import { CompCountryCityItem } from "./comp-country-city-item";
+import CompCommonDdayItemCard from "../comp-common/comp-common-dday-item-card";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -438,23 +436,24 @@ export default function CompCountryDetailPage({
         )}
 
         {events?.length ? (
-          <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 sm:gap-4">
+          <>
+          <div className="mx-auto w-full max-w-[1440px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {events.map(item => (
-              <CompCommonDdayItem 
+              <CompCommonDdayItemCard 
                 key={item.event_info?.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
               />
             ))}
-
-            {eventsHasMore && (
-              <CompLoadMore 
-                onLoadMore={loadMoreEvents} 
-                loading={eventsLoading} 
-                locale={langCode}
-              />
-            )}
           </div>
+          {eventsHasMore && (
+            <CompLoadMore 
+              onLoadMore={loadMoreEvents} 
+              loading={eventsLoading} 
+              locale={langCode}
+            />
+          )}
+          </>
         ) : null}
       </div>
     </NavigationSaveContext.Provider>
