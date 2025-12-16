@@ -28,6 +28,7 @@ export const dplusI18nID = {
     link_copied: "Tautan telah disalin.",
     open_in_maps: "Buka di Peta",
     directions: "Rute",
+    move_to_home: "Pindah ke Menu Utama",
     more_events: "Acara Lainnya",
   }
 };

@@ -28,6 +28,7 @@ export const dplusI18nJA = {
     link_copied: "リンクがコピーされました。",
     open_in_maps: "地図で開く",
     directions: "ルート",
+    move_to_home: "ホームメニューに移動",
     more_events: "他のイベントを見る",
   }
 };

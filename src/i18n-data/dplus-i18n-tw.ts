@@ -28,6 +28,7 @@ export const dplusI18nTW = {
     link_copied: "連結已複製",
     open_in_maps: "在 Google 地圖中開啟",
     directions: "路線",
+    move_to_home: "移動到首頁",
     more_events: "其他活動",
   }
 };

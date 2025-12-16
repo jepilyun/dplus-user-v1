@@ -27,6 +27,7 @@ export const dplusI18nKO = {
     link_copied: "링크가 복사되었습니다.",
     open_in_maps: "구글 지도에서 열기",
     directions: "길찾기",
+    move_to_home: "홈 메뉴로 이동",
     more_events: "다른 일정 더 보기",
   }
 };

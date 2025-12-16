@@ -28,6 +28,7 @@ export const dplusI18nZH = {
     link_copied: "链接已复制",
     open_in_maps: "在 Google 地图中打开",
     directions: "路线",
+    move_to_home: "移动到首页",
     more_events: "其他活动",
   }
 };

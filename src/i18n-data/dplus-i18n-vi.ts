@@ -28,6 +28,7 @@ export const dplusI18nVI = {
     link_copied: "Liên kết đã được sao chép.",
     open_in_maps: "Mở trong Google Maps",
     directions: "Hướng dẫn",
+    move_to_home: "Di chuyển đến Trang chủ",
     more_events: "Sự kiện khác",
   }
 };

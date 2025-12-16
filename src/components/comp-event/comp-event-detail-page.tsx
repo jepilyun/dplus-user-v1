@@ -265,7 +265,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       <div className="flex justify-center items-center">
         <CompLinkButton
           icon={<ArrowRight className="w-5 h-5" />}
-          label={getDplusI18n(langCode).detail.more_events}
+          label={getDplusI18n(langCode).detail.move_to_home}
           onClick={() => router.push(`/`)}
         />
       </div>
