@@ -80,7 +80,7 @@ export default function CompCommonDdayItemCardBase({
               src={generateStorageImageUrl("events", thumbnailUrl) || ""}
               alt={title ?? ""}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-300 group-hover:scale-110"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
             <div 

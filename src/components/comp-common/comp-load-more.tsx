@@ -21,25 +21,29 @@ export const CompLoadMore = ({ onLoadMore, loading, locale }: CompLoadMoreProps)
         sx={{
           minWidth: 200,
           height: 48,
-          borderRadius: "9999px", // rounded-full
+          borderRadius: "9999px",
           textTransform: "none",
           fontWeight: 600,
-          fontSize: "1rem", // View All과 동일 폰트
-          backgroundColor: "#ffffff",
+          fontSize: "1rem",
+          border: "1px solid white",
+          background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8), transparent)",
           color: "#444",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          boxShadow: "inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 1px 1px 0px rgba(0, 0, 0, 0.15)",
+          transition: "all 0.15s ease-in-out",
 
           "&:hover": {
-            backgroundColor: "#fff",
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8), transparent)",
             color: "#333",
-            boxShadow: "inset 0 1px 0 0 rgba(255, 255, 255, 0.8), 0 3px 6px -1px rgba(0, 0, 0, 0.15)",
+            boxShadow: "inset 0 1px 0 0 rgba(255, 255, 255, 0.9), 0 6px 8px -5px rgba(0, 0, 0, 0.2)",
           },
           "&:active": {
-            backgroundColor: "#efefef",
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.8), transparent)",
+            transform: "translateY(0)",
           },
           "&.Mui-disabled": {
-            backgroundColor: "#efefef",
+            background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.6), transparent)",
             color: "#888",
+            border: "1px solid rgba(255, 255, 255, 0.5)",
           },
         }}
       >
