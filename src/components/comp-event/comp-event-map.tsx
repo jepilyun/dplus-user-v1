@@ -11,19 +11,19 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n"
  * @returns 
  */
 export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: ResponseEventDetailForUserFront | null, langCode: (typeof SUPPORT_LANG_CODES)[number] }) => {
-  if (!eventDetail || !eventDetail.event.address_native || !eventDetail.event.latitude || !eventDetail.event.longitude) return null;
+  if (!eventDetail || !eventDetail.eventDetail?.eventInfo?.address_native || !eventDetail.eventDetail?.eventInfo?.latitude || !eventDetail.eventDetail?.eventInfo?.longitude) return null;
 
   // ✅ 구글 지도 열기 핸들러
   const handleOpenGoogleMap = () => {
-    if (eventDetail?.event.google_map_url) {
-      window.open(eventDetail?.event.google_map_url, '_blank');
+    if (eventDetail?.eventDetail?.eventInfo?.google_map_url) {
+      window.open(eventDetail?.eventDetail?.eventInfo?.google_map_url, '_blank');
     }
   };
 
   // ✅ 길찾기 URL 가져오기
   const getDirectionsUrl = () => {
-    if (eventDetail?.event.latitude && eventDetail?.event.longitude) {
-      return `https://www.google.com/maps/dir/?api=1&destination=${eventDetail?.event.latitude},${eventDetail?.event.longitude}`;
+    if (eventDetail?.eventDetail?.eventInfo?.latitude && eventDetail?.eventDetail?.eventInfo?.longitude) {
+      return `https://www.google.com/maps/dir/?api=1&destination=${eventDetail?.eventDetail?.eventInfo.latitude},${eventDetail?.eventDetail?.eventInfo?.longitude}`;
     }
     
     return null;
@@ -40,22 +40,22 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
   return (
     <div className="flex flex-col m-auto w-full border border-white rounded-4xl overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_3px_0_rgba(0,0,0,0.15)]">
       <div className="rounded-xl">
-        {eventDetail?.event.latitude && eventDetail?.event.longitude && (
+        {eventDetail?.eventDetail?.eventInfo?.latitude && eventDetail?.eventDetail?.eventInfo?.longitude && (
           <div className="w-full overflow-hidden relative h-48 md:h-60">
             <GoogleMap
-              latitude={eventDetail?.event.latitude || 0}
-              longitude={eventDetail?.event.longitude || 0}
-              title={eventDetail?.event.title}
+              latitude={eventDetail?.eventDetail?.eventInfo?.latitude || 0}
+              longitude={eventDetail?.eventDetail?.eventInfo?.longitude || 0}
+              title={eventDetail?.eventDetail?.eventInfo?.title}
               zoom={15}
               className="w-full h-full"
-              clickHintText={eventDetail?.event.address_native ?? ''}
+              clickHintText={eventDetail?.eventDetail?.eventInfo?.address_native ?? ''}
             />
             {/* ✅ 주소 오버레이 */}
             <div className="absolute top-4 right-4 text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg max-w-[calc(100%-2rem)] z-10">
               <div className="flex items-center justify-center gap-2">
                 <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span className="text-xs md:text-sm font-medium line-clamp-2">
-                  {eventDetail.event.address_native}
+                  {eventDetail?.eventDetail?.eventInfo?.address_native}
                 </span>
               </div>
             </div>

@@ -26,38 +26,25 @@ export async function generateMetadata(
 
   // API 호출 (에러 대비 안전가드)
   const response = await reqGetStagDetail(params.stagCode, langCode, 0, 36).catch(() => null);
-  const data = response?.dbResponse?.stag ?? null;
-  const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
+  const stagDetail = response?.dbResponse?.stagDetail ?? null;
+  const metadata = stagDetail?.metadata ?? null;
   
-  const title = pick(metadataI18n?.title, data?.metadata_title, data?.stag_native + " - " + data?.stag, defaultMetadata.title);
-  const description = pick(
-    metadataI18n?.description,
-    data?.metadata_description,
-    defaultMetadata.description
-  );
-  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.stag_native + " - " + data?.stag, defaultMetadata.og_title);
-  const ogDesc = pick(
-    metadataI18n?.og_description,
-    data?.metadata_og_description,
-    defaultMetadata.og_description
-  );
+  const title = pick(metadata?.title, stagDetail?.stagInfo?.stag + " - " + metadata?.title, defaultMetadata.title);
+  const description = pick(metadata?.description, defaultMetadata.description);
+  const ogTitle = pick(metadata?.og_title, stagDetail?.stagInfo?.stag + " - " + metadata?.title, defaultMetadata.og_title);
+  const ogDesc = pick(metadata?.og_description, defaultMetadata.og_description);
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "stags");
-  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "stags");
-  const ogImageFromStag = getStagOgImageUrl(data); // 이미 절대 URL
+  const ogImageFromI18n = ensureAbsoluteUrl(metadata?.og_image, "stags");
   const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
 
   const ogImage = pick(
     ogImageFromI18n,
-    ogImageFromMetadata,
-    ogImageFromStag,
     defaultOgImage
   );
 
   const keywords = buildKeywords(
-    metadataI18n?.tag_set as string[] | null | undefined,
-    data?.metadata_keywords ?? null,
+    metadata?.tag_set as string[] | null | undefined,
     defaultMetadata.keywords
   );
 
@@ -118,7 +105,7 @@ export default async function StagDetailPage({
       (typeof initialData === "object" && !Array.isArray(initialData) && Object.keys(initialData).length === 0);
 
     // ✅ 응답이 없거나 실패한 경우 404
-    if (!response?.success || isEmptyObj || !initialData?.stag) {
+    if (!response?.success || isEmptyObj || !initialData?.stagDetail) {
       notFound();
     }
 

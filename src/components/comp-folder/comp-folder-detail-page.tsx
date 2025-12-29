@@ -55,7 +55,7 @@ export default function CompFolderDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getFolderDetailImageUrls(initialData.folder) : []
+    initialData ? getFolderDetailImageUrls(initialData.folderDetail?.folderInfo) : []
   );
 
   const [events, setEvents] = useState<TMapFolderEventWithEventInfo[]>(
@@ -77,8 +77,8 @@ export default function CompFolderDetailPage({
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.folder.view_count ?? 0);
-  const [sharedCount, setSharedCount] = useState(initialData?.folder.shared_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.folderDetail?.folderInfo?.view_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.folderDetail?.folderInfo?.shared_count ?? 0);
 
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
@@ -95,16 +95,16 @@ export default function CompFolderDetailPage({
 
       const isEmptyObj = !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
 
-      if (!res?.success || isEmptyObj || !db?.folder) {
+      if (!res?.success || isEmptyObj || !db?.folderDetail?.folderInfo) {
         setError("not-found");
         setLoading(false);
         return;
       }
 
       setFolderDetail(db);
-      setImageUrls(getFolderDetailImageUrls(db.folder));
-      setViewCount(db?.folder?.view_count ?? 0);
-      setSharedCount(db?.folder?.shared_count ?? 0);
+      setImageUrls(getFolderDetailImageUrls(db.folderDetail?.folderInfo));
+      setViewCount(db?.folderDetail?.folderInfo?.view_count ?? 0);
+      setSharedCount(db?.folderDetail?.folderInfo?.shared_count ?? 0);
 
       const serverEvents = db?.folderEvent?.items ?? [];
       
@@ -143,7 +143,7 @@ export default function CompFolderDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          const eventDate = item.event_info?.date || item.date;
+          const eventDate = item.event_info?.date;
           
           if (eventDate) {
             const date = new Date(eventDate);
@@ -194,8 +194,8 @@ export default function CompFolderDetailPage({
 
   const handleShareClick = async () => {
     const shareData = {
-      title: folderDetail?.folder.title || "이벤트 세트 공유",
-      text: folderDetail?.folder.description || "이벤트 세트 정보를 확인해보세요!",
+      title: folderDetail?.folderDetail?.folderInfo?.title || "이벤트 세트 공유",
+      text: folderDetail?.folderDetail?.description?.description || "이벤트 세트 정보를 확인해보세요!",
       url: window.location.href,
     };
 
@@ -418,23 +418,23 @@ export default function CompFolderDetailPage({
   return (
     <div className="p-4 flex flex-col gap-4">
       <HeadlineTagsDetail
-        targetCountryCode={folderDetail?.folder.target_country_code || null}
-        targetCountryName={folderDetail?.folder.target_country_native || null}
-        targetCityCode={folderDetail?.folder.target_city_code || null}
-        targetCityName={folderDetail?.folder.target_city_native || null}
+        targetCountryCode={folderDetail?.folderDetail?.folderInfo?.target_country_code || null}
+        targetCountryName={folderDetail?.folderDetail?.folderInfo?.target_country_native || null}
+        targetCityCode={folderDetail?.folderDetail?.folderInfo?.target_city_code || null}
+        targetCityName={folderDetail?.folderDetail?.folderInfo?.target_city_native || null}
         categories={folderDetail?.mapCategoryFolder?.items ?? null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
 
-      <div id="folder-title" className="text-center font-extrabold text-3xl" data-folder-code={folderDetail?.folder.folder_code}>
-        {folderDetail?.folder.title}
+      <div id="folder-title" className="text-center font-extrabold text-3xl" data-folder-code={folderDetail?.folderDetail?.folderInfo?.folder_code}>
+        {folderDetail?.folderDetail?.folderInfo?.title}
       </div>
 
       <HeroImageSlider bucket="folders" imageUrls={imageUrls} className="m-auto w-full" />
 
-      {folderDetail?.folder.description && (
+      {folderDetail?.folderDetail?.description?.description && (
         <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">
-          {folderDetail?.folder.description}
+          {folderDetail?.folderDetail?.description?.description}
         </div>
       )}
 

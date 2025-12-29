@@ -70,7 +70,7 @@ export default function CompCategoryDetailPage({
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.category.view_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.categoryDetail?.categoryInfo?.view_count ?? 0);
 
   const fetchAndMergeData = async (restoredEvents?: TMapCategoryEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
@@ -81,14 +81,14 @@ export default function CompCategoryDetailPage({
     try {
       const res = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
   
-      if (!res?.dbResponse || !res?.dbResponse?.category) {
+      if (!res?.dbResponse || !res?.dbResponse?.categoryDetail) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
       setCategoryDetail(res.dbResponse);
-      setViewCount(res.dbResponse?.category?.view_count ?? 0);
+      setViewCount(res.dbResponse?.categoryDetail?.categoryInfo?.view_count ?? 0);
 
       const serverEvents = res?.dbResponse?.mapCategoryEvent?.items ?? [];
       
@@ -124,7 +124,7 @@ export default function CompCategoryDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          const eventDate = item?.event_info?.date || item?.date;
+          const eventDate = item?.event_info?.date;
           if (eventDate) {
             const date = new Date(eventDate);
             return date.getTime() >= todayTimestamp;
@@ -363,14 +363,14 @@ export default function CompCategoryDetailPage({
   return (
     <div className="p-4 flex flex-col gap-4">
       <div>
-        {categoryDetail?.i18n?.name ? (
+        {categoryDetail?.categoryDetail?.i18n?.items?.[0]?.name ? (
           <div className="text-center font-extrabold">
-            <div className="text-3xl">{categoryDetail?.i18n?.name}</div>
-            <div className="text-gray-400 text-lg font-thin">{categoryDetail?.category?.name}</div>
+            <div className="text-3xl">{categoryDetail?.categoryDetail?.i18n?.items?.[0]?.name}</div>
+            <div className="text-gray-400 text-lg font-thin">{categoryDetail?.categoryDetail?.categoryInfo?.name}</div>
           </div>
         ) : (
           <div className="text-center font-extrabold">
-            <div className="text-3xl">{categoryDetail?.category?.name}</div>
+            <div className="text-3xl">{categoryDetail?.categoryDetail?.categoryInfo?.name}</div>
           </div>
         )}
       </div>

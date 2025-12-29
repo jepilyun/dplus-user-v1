@@ -1,5 +1,5 @@
 import { ICalendarEvent, ISODateInput } from "@/types";
-import { TEventDetail } from "dplus_common_v1";
+import { TEventDescription, TEventDetail } from "dplus_common_v1";
 import {
   addDaysToDate,
   addMinutes,
@@ -39,6 +39,7 @@ const toGoogleDate = (date: ISODateInput, allDay = false): string => {
  */
 export const generateCalendarEvent = (
   eventDetail: TEventDetail | null,
+  description: TEventDescription | null,
 ): ICalendarEvent => {
   if (!eventDetail) throw new Error("이벤트 정보가 없습니다.");
 
@@ -59,9 +60,6 @@ export const generateCalendarEvent = (
     event.endDate = addMinutes(toDate(event.startDate), eventDetail.duration);
   }
   
-  // Description 구성 (DPlus URL 포함)
-  const description = eventDetail.description || '';
-
   if (eventDetail.event_code) {
     const dplusUrl = `https://dplus.app/event/${eventDetail.event_code}`;
     const dplusLink = description 
@@ -69,16 +67,16 @@ export const generateCalendarEvent = (
       : `📱 View on DPlus: ${dplusUrl}`;
     event.description = dplusLink;
   } else if (description) {
-    event.description = description;
+    event.description = description.description ?? '';
   }
   
   if (eventDetail.address_native) event.location = eventDetail.address_native;
   if (eventDetail.tz) event.timezone = eventDetail.tz;
   
-  if (eventDetail.url) {
+  if (description?.url) {
     event.website = { 
-      name: eventDetail.url_label ?? "Event Website", 
-      url: eventDetail.url 
+      name: description.url_label ?? "Event Website", 
+      url: description.url 
     };
   }
   
@@ -320,10 +318,11 @@ function pickUid(d: TEventDetail, prefer?: string): string {
  */
 export const generateAppleCalendarEvent = (
   detail: TEventDetail,
+  description: TEventDescription | null,
   opts?: Partial<GenerateICSOptions>,
 ): { icsText: string; filename: string } => {
   // 1) 기존 정규화 로직 재사용
-  const baseEvent: ICalendarEvent = generateCalendarEvent(detail);
+  const baseEvent: ICalendarEvent = generateCalendarEvent(detail, description);
 
   // 2) RRULE/좌표 등 Apple-친화적 옵션 구성
   const rrule = detail.is_repeat_annually ? "FREQ=YEARLY" : undefined;
@@ -362,11 +361,11 @@ export const addToAndroidCalendar = (event: ICalendarEvent) => {
 };
 
 
-export const addToCalendar = (detail: TEventDetail | null, platform?: DeviceType) => {
+export const addToCalendar = (detail: TEventDetail | null, description: TEventDescription | null, platform?: DeviceType) => {
   if (!detail) return;
 
   const detectedPlatform = platform || detectDevice();
-  const { icsText, filename } = generateAppleCalendarEvent(detail, {
+  const { icsText, filename } = generateAppleCalendarEvent(detail, description, {
     useTZID: true,
   });
 
@@ -382,7 +381,7 @@ export const addToCalendar = (detail: TEventDetail | null, platform?: DeviceType
     case 'android':
       try {
         // 먼저 Google Calendar 앱으로 시도
-        addToAndroidCalendar(generateCalendarEvent(detail));
+        addToAndroidCalendar(generateCalendarEvent(detail, description));
       } catch {
         // 실패하면 ICS 다운로드로 폴백
         const a = document.createElement("a");

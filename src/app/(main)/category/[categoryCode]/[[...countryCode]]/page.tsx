@@ -26,39 +26,32 @@ export async function generateMetadata(
 
   // API 호출 (에러 대비 안전가드)
   const response = await reqGetCategoryDetail(params.countryCode ?? "AA", params.categoryCode, langCode, 0, 36).catch(() => null);
-  const data = response?.dbResponse?.category ?? null;
-  const i18n = response?.dbResponse?.i18n ?? null;
-  const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
+  const categoryDetail = response?.dbResponse?.categoryDetail ?? null;
+  const i18n = categoryDetail?.i18n ?? null;
+  const metadataI18n = categoryDetail?.metadataI18n?.items?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, data?.metadata_title, data?.name + " - " + i18n?.name, defaultMetadata.title);
+  const title = pick(metadataI18n?.title, categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name, defaultMetadata.title);
   const description = pick(
     metadataI18n?.description,
-    data?.metadata_description,
     defaultMetadata.description
   );
-  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.name + " - " + i18n?.name, defaultMetadata.og_title);
+  const ogTitle = pick(metadataI18n?.og_title, categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name, defaultMetadata.og_title);
   const ogDesc = pick(
     metadataI18n?.og_description,
-    data?.metadata_og_description,
     defaultMetadata.og_description
   );
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
   const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "categories");
-  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "categories");
-  const ogImageFromCategory = getCategoryOgImageUrl(data); // 이미 절대 URL
   const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
 
   const ogImage = pick(
     ogImageFromI18n,
-    ogImageFromMetadata,
-    ogImageFromCategory,
     defaultOgImage
   );
 
   const keywords = buildKeywords(
     metadataI18n?.tag_set as string[] | null | undefined,
-    data?.metadata_keywords ?? null,
     defaultMetadata.keywords
   );
 
@@ -136,7 +129,7 @@ export default async function CategoryDetailPage({
       (typeof initialData === "object" && !Array.isArray(initialData) && Object.keys(initialData).length === 0);
 
     // ✅ 응답이 없거나 실패한 경우 404
-    if (!response?.success || isEmptyObj || !initialData?.category) {
+    if (!response?.success || isEmptyObj || !initialData?.categoryDetail) {
       notFound();
     }
 

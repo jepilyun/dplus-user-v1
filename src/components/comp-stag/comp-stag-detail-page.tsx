@@ -53,7 +53,7 @@ export default function CompStagDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getStagDetailImageUrls(initialData.stag) : []
+    initialData ? getStagDetailImageUrls(initialData.stagDetail?.stagInfo) : []
   );
 
   const [events, setEvents] = useState<TMapStagEventWithEventInfo[]>(
@@ -75,7 +75,7 @@ export default function CompStagDetailPage({
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.stag.view_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.stagDetail?.stagInfo?.view_count ?? 0);
 
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
@@ -95,15 +95,15 @@ export default function CompStagDetailPage({
           !Array.isArray(res?.dbResponse) &&
           Object.keys(res?.dbResponse).length === 0);
   
-      if (!res?.success || isEmptyObj || !res?.dbResponse?.stag) {
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.stagDetail?.stagInfo) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
       setStagDetail(res.dbResponse);
-      setImageUrls(getStagDetailImageUrls(res.dbResponse.stag));
-      setViewCount(res.dbResponse?.stag?.view_count ?? 0);
+      setImageUrls(getStagDetailImageUrls(res.dbResponse.stagDetail?.stagInfo));
+      setViewCount(res.dbResponse?.stagDetail?.stagInfo?.view_count ?? 0);
   
       const serverEvents = res?.dbResponse?.mapStagEvent?.items ?? [];
       
@@ -142,7 +142,7 @@ export default function CompStagDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          const eventDate = item.event_info?.date || item.date;
+          const eventDate = item.event_info?.date;
           
           if (eventDate) {
             const date = new Date(eventDate);
@@ -193,8 +193,8 @@ export default function CompStagDetailPage({
 
   const handleShareClick = async () => {
     const shareData = {
-      title: stagDetail?.stag.stag || "이벤트 세트 공유",
-      text: stagDetail?.stag.stag_native || "이벤트 세트 정보를 확인해보세요!",
+      title: stagDetail?.stagDetail?.stagInfo?.stag || "이벤트 세트 공유",
+      text: stagDetail?.stagDetail?.stagInfo?.stag_native || "이벤트 세트 정보를 확인해보세요!",
       url: window.location.href,
     };
 
@@ -414,7 +414,7 @@ export default function CompStagDetailPage({
         bucket="stags"
         imageUrls={imageUrls}
         interval={5000}
-        stagDetail={stagDetail?.stag || null}
+        stagDetail={stagDetail?.stagDetail?.stagInfo || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
 

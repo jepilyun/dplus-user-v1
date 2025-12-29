@@ -27,42 +27,33 @@ export async function generateMetadata(
   const defaultMetadata = getMetadataByLang(langCode);
 
   const response = await reqGetEventDetail(params.eventCode, langCode).catch(() => null);
-  const data = response?.dbResponse?.event ?? null;
-  const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
+  const eventDetail = response?.dbResponse?.eventDetail ?? null;
+  const metadata = eventDetail?.metadata ?? null;
   
-  const title = pick(metadataI18n?.title, data?.metadata_title, data?.title, defaultMetadata.title);
+  const title = pick(metadata?.title, eventDetail?.eventInfo?.title + " - " + metadata?.title, defaultMetadata.title);
   const description = pick(
-    metadataI18n?.description,
-    data?.metadata_description,
-    data?.description,
+    metadata?.description,
     defaultMetadata.description
   );
-  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.title, defaultMetadata.og_title);
+  const ogTitle = pick(metadata?.og_title, eventDetail?.eventInfo?.title + " - " + metadata?.title, defaultMetadata.og_title);
 
   const ogDesc = pick(
-    metadataI18n?.og_description,
-    data?.metadata_og_description,
-    data?.description,
+    metadata?.og_description,
     defaultMetadata.og_description
   );
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "categories");
-  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "categories");
-  const ogImageFromCategory = getEventOgImageUrl(data); // 이미 절대 URL
+  const ogImageFromI18n = ensureAbsoluteUrl(metadata?.og_image, "events");
   const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
 
   // ✅ 우선순위: 커스텀 OG 이미지 > 첫 번째 이벤트 이미지 > 디폴트
   const ogImage = pick(
     ogImageFromI18n,
-    ogImageFromMetadata,
-    ogImageFromCategory,
     defaultOgImage
   );
 
   const keywords = buildKeywords(
-    metadataI18n?.tag_set as string[] | null | undefined,
-    data?.metadata_keywords ?? null,
+    metadata?.tag_set as string[] | null | undefined,
     defaultMetadata.keywords
   );
 
@@ -129,7 +120,7 @@ export default async function EventDetailPage({
       (typeof eventDetail === "object" && !Array.isArray(eventDetail) && Object.keys(eventDetail).length === 0);
 
     // ✅ 데이터가 없거나 event 객체가 없으면 404
-    if (!response?.success || isEmptyObj || !eventDetail?.event) {
+    if (!response?.success || isEmptyObj || !eventDetail?.eventDetail) {
       notFound();
     }
 

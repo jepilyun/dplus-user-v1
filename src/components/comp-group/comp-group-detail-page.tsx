@@ -53,7 +53,7 @@ export default function CompGroupDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getGroupDetailImageUrls(initialData.group) : []
+    initialData ? getGroupDetailImageUrls(initialData.groupDetail?.groupInfo) : []
   );
 
   const [events, setEvents] = useState<TMapGroupEventWithEventInfo[]>(
@@ -75,8 +75,8 @@ export default function CompGroupDetailPage({
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.group.view_count ?? 0);
-  const [sharedCount, setSharedCount] = useState(initialData?.group.shared_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.groupDetail?.groupInfo?.view_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.groupDetail?.groupInfo?.shared_count ?? 0);
 
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
@@ -96,16 +96,16 @@ export default function CompGroupDetailPage({
           !Array.isArray(res?.dbResponse) &&
           Object.keys(res?.dbResponse).length === 0);
   
-      if (!res?.success || isEmptyObj || !res?.dbResponse?.group) {
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.groupDetail?.groupInfo) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
       setGroupDetail(res.dbResponse);
-      setImageUrls(getGroupDetailImageUrls(res.dbResponse.group));
-      setViewCount(res.dbResponse?.group?.view_count ?? 0);
-      setSharedCount(res.dbResponse?.group?.shared_count ?? 0);
+      setImageUrls(getGroupDetailImageUrls(res.dbResponse.groupDetail?.groupInfo));
+      setViewCount(res.dbResponse?.groupDetail?.groupInfo?.view_count ?? 0);
+      setSharedCount(res.dbResponse?.groupDetail?.groupInfo?.shared_count ?? 0);
 
       const serverEvents = res?.dbResponse?.mapGroupEvent?.items ?? [];
       
@@ -144,7 +144,7 @@ export default function CompGroupDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          const eventDate = item.event_info?.date || item.date;
+          const eventDate = item.event_info?.date;
           
           if (eventDate) {
             const date = new Date(eventDate);
@@ -195,8 +195,8 @@ export default function CompGroupDetailPage({
 
   const handleShareClick = async () => {
     const shareData = {
-      title: groupDetail?.group.name || "이벤트 세트 공유",
-      text: groupDetail?.group.name_native || "이벤트 세트 정보를 확인해보세요!",
+      title: groupDetail?.groupDetail?.groupInfo?.name || "이벤트 세트 공유",
+      text: groupDetail?.groupDetail?.groupInfo?.name_native || "이벤트 세트 정보를 확인해보세요!",
       url: window.location.href,
     };
 
@@ -422,7 +422,7 @@ export default function CompGroupDetailPage({
         bucket="groups"
         imageUrls={imageUrls}
         interval={5000}
-        groupDetail={groupDetail?.group || null}
+        groupDetail={groupDetail?.groupDetail?.groupInfo || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
 

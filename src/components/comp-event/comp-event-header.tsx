@@ -39,11 +39,11 @@ export const CompEventHeader = ({
     const urls: string[] = [];
     
     [
-      eventDetail?.event.thumbnail_main_01,
-      eventDetail?.event.thumbnail_main_02,
-      eventDetail?.event.thumbnail_main_03,
-      eventDetail?.event.thumbnail_main_04,
-      eventDetail?.event.thumbnail_main_05,
+      eventDetail?.eventDetail?.images?.items?.[0]?.url,
+      eventDetail?.eventDetail?.images?.items?.[1]?.url,
+      eventDetail?.eventDetail?.images?.items?.[2]?.url,
+      eventDetail?.eventDetail?.images?.items?.[3]?.url,
+      eventDetail?.eventDetail?.images?.items?.[4]?.url,
     ]
       .filter(Boolean)
       .forEach((url) => {
@@ -89,14 +89,14 @@ export const CompEventHeader = ({
   if (!eventDetail) return null;
 
   // UTC 시간을 사용자 타임존으로 변환
-  const startAtUtc = eventDetail?.event.start_at_utc;
+  const startAtUtc = eventDetail?.eventDetail?.eventInfo?.start_at_utc;
   const dday = startAtUtc ? getDdayFromUTC(startAtUtc) : 0;
   const localTime = startAtUtc ? getLocalTimeFromUTC(startAtUtc) : undefined;
   
   // D-Day 라벨 생성 (시간 포함)
   const ddayLabel = getDdayLabel(dday, langCode, localTime);
 
-  const { bg, bgBrighter, fg } = computeBadgeColors(eventDetail?.event.date?.toString() ?? null);
+  const { bg, bgBrighter, fg } = computeBadgeColors(eventDetail?.eventDetail?.eventInfo?.date?.toString() ?? null);
 
   return (
     <div className="flex flex-col gap-4">
@@ -140,23 +140,23 @@ export const CompEventHeader = ({
               
               <div className="w-full flex flex-col gap-3 justify-center items-start">
                 <CompEventDatetime 
-                  datetime={eventDetail?.event.date ?? null}
+                  datetime={eventDetail?.eventDetail?.eventInfo?.date ? new Date(eventDetail?.eventDetail?.eventInfo?.date) : null}
                   fullLocale={fullLocale}
-                  time={eventDetail?.event.time ?? null}
-                  isRepeatAnnually={eventDetail?.event.is_repeat_annually ?? false}
+                  time={eventDetail?.eventDetail?.eventInfo?.time ?? null}
+                  isRepeatAnnually={eventDetail?.eventDetail?.eventInfo?.is_repeat_annually ?? false}
                 />
                 <div
                   id="event-title"
                   className="font-black text-4xl sm:text-5xl drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]"
-                  data-event-code={eventDetail?.event.event_code}
+                  data-event-code={eventDetail?.eventDetail?.eventInfo?.event_code}
                 >
-                  {eventDetail?.event.title}
+                  {eventDetail?.eventDetail?.eventInfo?.title}
                 </div>
                 <HeadlineTagsDetail
-                  targetCountryCode={eventDetail?.event.target_country_code || null}
-                  targetCountryName={eventDetail?.event.target_country_native || null}
-                  targetCityCode={eventDetail?.event.target_city_code || null}
-                  targetCityName={eventDetail?.event.target_city_native || null}
+                  targetCountryCode={eventDetail?.eventDetail?.eventInfo?.target_country_code || null}
+                  targetCountryName={eventDetail?.eventDetail?.eventInfo?.target_country_native || null}
+                  targetCityCode={eventDetail?.eventDetail?.eventInfo?.target_city_code || null}
+                  targetCityName={eventDetail?.eventDetail?.eventInfo?.target_city_native || null}
                   categories={eventDetail?.mapCategoryEvent?.items ?? null}
                   langCode={langCode}
                   showCountry={false}
@@ -179,7 +179,7 @@ export const CompEventHeader = ({
               <div className="relative aspect-[3/4] sm:aspect-[2/1]">
                 <Image
                   src={imageUrl}
-                  alt={`${eventDetail?.event.title} - ${index + 1}`}
+                  alt={`${eventDetail?.eventDetail?.eventInfo?.title} - ${index + 1}`}
                   fill
                   priority={false}
                   style={{ objectFit: "cover" }}

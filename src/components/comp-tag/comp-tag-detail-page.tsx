@@ -102,7 +102,7 @@ export default function CompTagDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          const eventDate = item.event_info?.date || item.date;
+          const eventDate = item.event_info?.date;
           
           if (eventDate) {
             const date = new Date(eventDate);

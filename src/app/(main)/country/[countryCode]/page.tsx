@@ -26,38 +26,25 @@ export async function generateMetadata(
 
   // API 호출 (에러 대비 안전가드)
   const response = await reqGetCountryDetail(params.countryCode, langCode, 0, 36).catch(() => null);
-  const data = response?.dbResponse?.country ?? null;
-  const metadataI18n = response?.dbResponse?.metadataI18n?.[0] ?? null;
+  const countryDetail = response?.dbResponse?.countryDetail ?? null;
+  const metadataI18n = countryDetail?.metadataI18n?.items?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, data?.metadata_title, data?.country_name, defaultMetadata.title);
-  const description = pick(
-    metadataI18n?.description,
-    data?.metadata_description,
-    defaultMetadata.description
-  );
-  const ogTitle = pick(metadataI18n?.og_title, data?.metadata_og_title, data?.country_name, defaultMetadata.og_title);
-  const ogDesc = pick(
-    metadataI18n?.og_description,
-    data?.metadata_og_description,
-    defaultMetadata.og_description
-  );
+  const title = pick(metadataI18n?.title, countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title, defaultMetadata.title);
+  const description = pick(metadataI18n?.description, defaultMetadata.description);
+  const ogTitle = pick(metadataI18n?.og_title, countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title, defaultMetadata.og_title);
+  const ogDesc = pick(metadataI18n?.og_description, defaultMetadata.og_description);
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
   const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "countries");
-  const ogImageFromMetadata = ensureAbsoluteUrl(data?.metadata_og_image, "countries");
-  const ogImageFromCountry = getCountryOgImageUrl(data); // 이미 절대 URL
   const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
 
   const ogImage = pick(
     ogImageFromI18n,
-    ogImageFromMetadata,
-    ogImageFromCountry,
     defaultOgImage
   );
 
   const keywords = buildKeywords(
     metadataI18n?.tag_set as string[] | null | undefined,
-    data?.metadata_keywords ?? null,
     defaultMetadata.keywords
   );
 
@@ -129,7 +116,7 @@ export default async function CountryDetailPage({
       (typeof initialData === "object" && !Array.isArray(initialData) && Object.keys(initialData).length === 0);
 
     // ✅ 응답이 없거나 실패한 경우 404
-    if (!response?.success || isEmptyObj || !initialData?.country) {
+    if (!response?.success || isEmptyObj || !initialData?.countryDetail) {
       notFound();
     }
 

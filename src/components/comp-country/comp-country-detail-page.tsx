@@ -54,7 +54,7 @@ export default function CompCountryDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getCountryHeroImageUrls(initialData.country as TCountryDetail) : []
+    initialData ? getCountryHeroImageUrls(initialData.countryDetail?.countryInfo as TCountryDetail) : []
   );
   const [hasCategories, setHasCategories] = useState(
     (initialData?.categories?.items?.length ?? 0) > 0
@@ -83,7 +83,7 @@ export default function CompCountryDetailPage({
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const [viewCount, setViewCount] = useState(
-    initialData?.country?.view_count ?? 0
+    initialData?.countryDetail?.countryInfo?.view_count ?? 0
   );
 
   /**
@@ -104,7 +104,7 @@ export default function CompCountryDetailPage({
         (typeof res.dbResponse === "object" && 
           !Array.isArray(res.dbResponse) && 
           Object.keys(res.dbResponse).length === 0) ||
-        !res.dbResponse.country;
+        !res.dbResponse.countryDetail;
   
       if (isEmptyObj) {
         setError("not-found");
@@ -113,10 +113,10 @@ export default function CompCountryDetailPage({
       }
   
       setCountryDetail(res.dbResponse ?? null);
-      setImageUrls(getCountryHeroImageUrls(res.dbResponse?.country as TCountryDetail));
+      setImageUrls(getCountryHeroImageUrls(res.dbResponse?.countryDetail?.countryInfo as TCountryDetail));
       setHasCategories((res.dbResponse?.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse?.cities?.items?.length ?? 0) > 0);
-      setViewCount(res.dbResponse?.country?.view_count ?? 0);
+      setViewCount(res.dbResponse?.countryDetail?.countryInfo?.view_count ?? 0);
 
       const serverEvents = res.dbResponse?.mapCountryEvent?.items ?? [];
       
@@ -155,8 +155,8 @@ export default function CompCountryDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          if (item.date) {
-            const eventDate = new Date(item.date);
+          if (item.event_info?.date) {
+            const eventDate = new Date(item.event_info?.date);
             return eventDate.getTime() >= todayTimestamp;
           }
           return true;
@@ -204,8 +204,8 @@ export default function CompCountryDetailPage({
 
   const handleShareClick = async () => {
     const shareData = {
-      title: countryDetail?.country.country_name || "이벤트 세트 공유",
-      text: countryDetail?.country.country_name || "이벤트 세트 정보를 확인해보세요!",
+      title: countryDetail?.countryDetail?.countryInfo?.country_name || "이벤트 세트 공유",
+      text: countryDetail?.countryDetail?.countryInfo?.country_name || "이벤트 세트 정보를 확인해보세요!",
       url: window.location.href,
     };
     if (navigator.share) {

@@ -41,12 +41,12 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   const [loading, setLoading] = useState(true);
 
   const [eventDetail, setEventDetail] = useState<ResponseEventDetailForUserFront | null>(initialData ?? null);
-  const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventDetailImageUrls(initialData.event) : []);
+  const [imageUrls, setImageUrls] = useState<string[]>(initialData ? getEventDetailImageUrls(initialData.eventDetail?.eventInfo) : []);
 
   // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
-  const [viewCount, setViewCount] = useState(initialData?.event?.view_count ?? 0);
-  const [savedCount, setSavedCount] = useState(initialData?.event?.saved_count ?? 0);
-  const [sharedCount, setSharedCount] = useState(initialData?.event?.shared_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.eventDetail?.eventInfo?.view_count ?? 0);
+  const [savedCount, setSavedCount] = useState(initialData?.eventDetail?.eventInfo?.saved_count ?? 0);
+  const [sharedCount, setSharedCount] = useState(initialData?.eventDetail?.eventInfo?.shared_count ?? 0);
   
   const [showShareModal, setShowShareModal] = useState(false);
 
@@ -65,7 +65,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
         !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
 
       // 응답은 있지만 데이터가 없는 경우 (404)
-      if (!res?.success || isEmptyObj || !db?.event) {
+      if (!res?.success || isEmptyObj || !db?.eventDetail) {
         setError('not-found');
         setLoading(false);
         return;
@@ -74,11 +74,11 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       setEventDetail(db);
 
       // ✅ view_count 업데이트
-      setViewCount(db?.event?.view_count ?? 0);
-      setSavedCount(db?.event?.saved_count ?? 0);
-      setSharedCount(db?.event?.shared_count ?? 0);
+      setViewCount(db?.eventDetail?.eventInfo?.view_count ?? 0);
+      setSavedCount(db?.eventDetail?.eventInfo?.saved_count ?? 0);
+      setSharedCount(db?.eventDetail?.eventInfo?.shared_count ?? 0);
 
-      setImageUrls(getEventDetailImageUrls(db.event));
+      setImageUrls(getEventDetailImageUrls(db.eventDetail?.eventInfo));
       setError(null);
     } catch (e) {
       // 네트워크 에러나 서버 에러
@@ -92,8 +92,8 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   // ✅ 공유 기능 핸들러 (개선)
   const handleShareClick = async () => {
     const shareData = {
-      title: eventDetail?.event.title || '이벤트 공유',
-      text: eventDetail?.event.description || '이벤트 정보를 확인해보세요!',
+      title: eventDetail?.eventDetail?.eventInfo?.title || '이벤트 공유',
+      text: eventDetail?.eventDetail?.description?.description || '이벤트 정보를 확인해보세요!',
       url: window.location.href,
     };
 
@@ -134,12 +134,12 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
 
   // ✅ 캘린더 저장 핸들러 (saved_count 증가)
   const handleCalendarSave = async (type: 'google' | 'apple' | 'ics') => {
-    const calendarEvent = generateCalendarEvent(eventDetail?.event ?? null);
+    const calendarEvent = generateCalendarEvent(eventDetail?.eventDetail?.eventInfo ?? null, eventDetail?.eventDetail?.description ?? null);
     
     if (type === 'google') {
       addToGoogleCalendar(calendarEvent);
     } else {
-      addToCalendar(eventDetail?.event ?? null);
+      addToCalendar(eventDetail?.eventDetail?.eventInfo ?? null, eventDetail?.eventDetail?.description ?? null);
     }
 
     // ✅ 캘린더 저장 시 카운트 증가
@@ -222,9 +222,9 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
   return (
     <div className="p-4 max-w-[840px] m-auto flex flex-col gap-8">
       <div className="flex flex-col gap-4"
-        data-event-code={eventDetail?.event.event_code}
-        date-created-at={eventDetail?.event.created_at}
-        date-updated-at={eventDetail?.event.updated_at}
+        data-event-code={eventDetail?.eventDetail?.eventInfo?.event_code}
+        date-created-at={eventDetail?.eventDetail?.eventInfo?.created_at}
+        date-updated-at={eventDetail?.eventDetail?.eventInfo?.updated_at}
       >
         <CompEventHeader eventDetail={eventDetail ?? null} fullLocale={fullLocale} langCode={langCode as SupportedLocale} />
         <CompEventActionButtons
@@ -241,7 +241,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
 
         <CompEventDescription eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 
-        <CompEventContactLinks event={eventDetail?.event} langCode={langCode} />
+        <CompEventContactLinks event={eventDetail?.eventDetail.description ?? null} langCode={langCode} />
 
         <CompEventDetailMap eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 
@@ -256,8 +256,8 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
       <ShareModal
         open={showShareModal}
         onClose={() => setShowShareModal(false)}
-        title={eventDetail?.event.title || '이벤트 공유'}
-        text={eventDetail?.event.description || ''}
+        title={eventDetail?.eventDetail?.eventInfo?.title || '이벤트 공유'}
+        text={eventDetail?.eventDetail?.description?.description || ''}
         url={typeof window !== 'undefined' ? window.location.href : ''}
         onShare={handleSocialShare}
         langCode={langCode}

@@ -53,7 +53,7 @@ export default function CompCityDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getCityDetailImageUrls(initialData.city) : []
+    initialData ? getCityDetailImageUrls(initialData.cityDetail?.cityInfo) : []
   );
 
   const [events, setEvents] = useState<TMapCityEventWithEventInfo[]>(
@@ -75,7 +75,7 @@ export default function CompCityDetailPage({
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.city.view_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.cityDetail?.cityInfo?.view_count ?? 0);
 
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
@@ -95,15 +95,15 @@ export default function CompCityDetailPage({
           !Array.isArray(res?.dbResponse) &&
           Object.keys(res?.dbResponse).length === 0);
   
-      if (!res?.success || isEmptyObj || !res?.dbResponse?.city) {
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.cityDetail) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
       setCityDetail(res.dbResponse);
-      setImageUrls(getCityDetailImageUrls(res.dbResponse.city));
-      setViewCount(res.dbResponse?.city?.view_count ?? 0);
+      setImageUrls(getCityDetailImageUrls(res.dbResponse.cityDetail?.cityInfo));
+      setViewCount(res.dbResponse?.cityDetail?.cityInfo?.view_count ?? 0);
 
       const serverEvents = res?.dbResponse?.mapCityEvent?.items ?? [];
       
@@ -142,7 +142,7 @@ export default function CompCityDetailPage({
         const todayTimestamp = today.getTime();
         
         const futureEvents = additionalEvents.filter(item => {
-          const eventDate = item.event_info?.date || item.date;
+          const eventDate = item.event_info?.date;
           
           if (eventDate) {
             const date = new Date(eventDate);
@@ -193,8 +193,8 @@ export default function CompCityDetailPage({
 
   const handleShareClick = async () => {
     const shareData = {
-      title: cityDetail?.city.name || "이벤트 세트 공유",
-      text: cityDetail?.city.name || "이벤트 세트 정보를 확인해보세요!",
+      title: cityDetail?.cityDetail?.cityInfo?.name || "이벤트 세트 공유",
+      text: cityDetail?.cityDetail?.cityInfo?.name || "이벤트 세트 정보를 확인해보세요!",
       url: window.location.href,
     };
 
@@ -414,7 +414,7 @@ export default function CompCityDetailPage({
         bucket="cities"
         imageUrls={imageUrls}
         interval={5000}
-        cityDetail={cityDetail?.city || null}
+        cityDetail={cityDetail?.cityDetail?.cityInfo || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
 
