@@ -30,9 +30,17 @@ export async function generateMetadata(
   const cityDetail = response?.dbResponse?.cityDetail ?? null;
   const metadataI18n = cityDetail?.metadataI18n?.items?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, cityDetail?.cityInfo?.name + " - " + cityDetail?.i18n?.items?.[0]?.name, defaultMetadata.title);
+  const title = pick(
+    metadataI18n?.title, 
+    cityDetail?.i18n?.items?.[0]?.name ? (cityDetail?.cityInfo?.name + " - " + cityDetail?.i18n?.items?.[0]?.name) : cityDetail?.cityInfo?.name, 
+    defaultMetadata.title
+  );
   const description = pick(metadataI18n?.description, defaultMetadata.description);
-  const ogTitle = pick(metadataI18n?.og_title, cityDetail?.cityInfo?.name + " - " + cityDetail?.i18n?.items?.[0]?.name, defaultMetadata.og_title);
+  const ogTitle = pick(
+    metadataI18n?.og_title, 
+    cityDetail?.i18n?.items?.[0]?.name ? (cityDetail?.cityInfo?.name + " - " + cityDetail?.i18n?.items?.[0]?.name) : cityDetail?.cityInfo?.name, 
+    defaultMetadata.og_title
+  );
   const ogDesc = pick(metadataI18n?.og_description, defaultMetadata.og_description);
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환

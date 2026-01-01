@@ -30,9 +30,17 @@ export async function generateMetadata(
   const countryDetail = response?.dbResponse?.countryDetail ?? null;
   const metadataI18n = countryDetail?.metadataI18n?.items?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title, defaultMetadata.title);
+  const title = pick(
+    metadataI18n?.title, 
+    metadataI18n?.title ? (countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title) : countryDetail?.countryInfo?.country_name, 
+    defaultMetadata.title
+  );
   const description = pick(metadataI18n?.description, defaultMetadata.description);
-  const ogTitle = pick(metadataI18n?.og_title, countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title, defaultMetadata.og_title);
+  const ogTitle = pick(
+    metadataI18n?.og_title, 
+    metadataI18n?.title ? (countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title) : countryDetail?.countryInfo?.country_name, 
+    defaultMetadata.og_title
+  );
   const ogDesc = pick(metadataI18n?.og_description, defaultMetadata.og_description);
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환

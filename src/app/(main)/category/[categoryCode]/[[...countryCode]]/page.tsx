@@ -34,12 +34,20 @@ export async function generateMetadata(
   const i18n = categoryDetail?.i18n ?? null;
   const metadataI18n = categoryDetail?.metadataI18n?.items?.[0] ?? null;
   
-  const title = pick(metadataI18n?.title, categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name, defaultMetadata.title);
+  const title = pick(
+    metadataI18n?.title, 
+    i18n?.items?.[0]?.name ? (categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name) : categoryDetail?.categoryInfo?.name, 
+    defaultMetadata.title
+  );
   const description = pick(
     metadataI18n?.description,
     defaultMetadata.description
   );
-  const ogTitle = pick(metadataI18n?.og_title, categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name, defaultMetadata.og_title);
+  const ogTitle = pick(
+    metadataI18n?.og_title, 
+    i18n?.items?.[0]?.name ? (categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name) : categoryDetail?.categoryInfo?.name, 
+    defaultMetadata.og_title
+  );
   const ogDesc = pick(
     metadataI18n?.og_description,
     defaultMetadata.og_description

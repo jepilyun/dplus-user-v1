@@ -30,9 +30,17 @@ export async function generateMetadata(
   const stagDetail = response?.dbResponse?.stagDetail ?? null;
   const metadata = stagDetail?.metadata ?? null;
   
-  const title = pick(metadata?.title, stagDetail?.stagInfo?.stag + " - " + metadata?.title, defaultMetadata.title);
+  const title = pick(
+    metadata?.title, 
+    metadata?.title ? (stagDetail?.stagInfo?.stag + " - " + metadata?.title) : stagDetail?.stagInfo?.stag, 
+    defaultMetadata.title
+  );
   const description = pick(metadata?.description, defaultMetadata.description);
-  const ogTitle = pick(metadata?.og_title, stagDetail?.stagInfo?.stag + " - " + metadata?.title, defaultMetadata.og_title);
+  const ogTitle = pick(
+    metadata?.og_title, 
+    metadata?.title ? (stagDetail?.stagInfo?.stag + " - " + metadata?.title) : stagDetail?.stagInfo?.stag, 
+    defaultMetadata.og_title
+  );
   const ogDesc = pick(metadata?.og_description, defaultMetadata.og_description);
 
   // ✅ OG 이미지: 모든 경로를 절대 URL로 변환

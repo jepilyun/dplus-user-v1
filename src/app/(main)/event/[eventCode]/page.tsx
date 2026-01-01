@@ -29,12 +29,20 @@ export async function generateMetadata(
   const eventDetail = response?.dbResponse?.eventDetail ?? null;
   const metadata = eventDetail?.metadata ?? null;
   
-  const title = pick(metadata?.title, eventDetail?.eventInfo?.title + " - " + metadata?.title, defaultMetadata.title);
+  const title = pick(
+    metadata?.title, 
+    metadata?.title ? (eventDetail?.eventInfo?.title + " - " + metadata?.title) : eventDetail?.eventInfo?.title, 
+    defaultMetadata.title
+  );
   const description = pick(
     metadata?.description,
     defaultMetadata.description
   );
-  const ogTitle = pick(metadata?.og_title, eventDetail?.eventInfo?.title + " - " + metadata?.title, defaultMetadata.og_title);
+  const ogTitle = pick(
+    metadata?.og_title, 
+    metadata?.title ? (eventDetail?.eventInfo?.title + " - " + metadata?.title) : eventDetail?.eventInfo?.title,
+    defaultMetadata.og_title
+  );
 
   const ogDesc = pick(
     metadata?.og_description,
