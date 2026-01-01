@@ -5,10 +5,8 @@ import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCityDetailPage from "@/components/comp-city/comp-city-detail-page";
 import { reqGetCityCodes, reqGetCityDetail } from "@/actions/action";
 import { Metadata } from "next";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { getCityOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 import { getMetadataByLang } from "@/consts/const-metadata";
@@ -19,13 +17,14 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { cityCode: string } }
+  { params }: { params: Promise<{ cityCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { cityCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
   // API 호출 (에러 대비 안전가드)
-  const response = await reqGetCityDetail(params.cityCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetCityDetail(cityCode, langCode, 0, 36).catch(() => null);
   const cityDetail = response?.dbResponse?.cityDetail ?? null;
   const metadataI18n = cityDetail?.metadataI18n?.items?.[0] ?? null;
   
@@ -68,7 +67,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/city/${params?.cityCode}`,
+      canonical: `https://www.dplus.app/city/${cityCode}`,
     },
   };
 }
@@ -94,17 +93,18 @@ export async function generateStaticParams() {
  */
 export default async function CityDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { cityCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ cityCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { cityCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
     const response = await reqGetCityDetail(
-      params.cityCode,
+      cityCode,
       langCode,
       0,
       LIST_LIMIT.default
@@ -124,7 +124,7 @@ export default async function CityDetailPage({
 
     return (
       <CompCityDetailPage
-        cityCode={params.cityCode}
+        cityCode={cityCode}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={initialData}

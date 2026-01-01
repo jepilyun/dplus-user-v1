@@ -5,10 +5,8 @@ import { Metadata } from "next";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCategoryDetailPage from "@/components/comp-category/comp-category-detail-page";
 import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/actions/action";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { getCategoryOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 import { getMetadataByLang } from "@/consts/const-metadata";
@@ -19,13 +17,17 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { categoryCode: string; countryCode?: string } }
+  { params }: { params: Promise<{ categoryCode: string; countryCode?: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const resolvedParams = await params;
+  const categoryCode = resolvedParams.categoryCode;
+  const countryCode = resolvedParams.countryCode ?? "AA";
+
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
   // API 호출 (에러 대비 안전가드)
-  const response = await reqGetCategoryDetail(params.countryCode ?? "AA", params.categoryCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, 36).catch(() => null);
   const categoryDetail = response?.dbResponse?.categoryDetail ?? null;
   const i18n = categoryDetail?.i18n ?? null;
   const metadataI18n = categoryDetail?.metadataI18n?.items?.[0] ?? null;
@@ -75,7 +77,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/category/${params?.categoryCode}/${params?.countryCode ?? 'AA'}`,
+      canonical: `https://www.dplus.app/category/${categoryCode}/${countryCode ?? 'AA'}`,
     },
   };
 }
@@ -103,19 +105,21 @@ export async function generateStaticParams() {
  */
 export default async function CategoryDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { categoryCode: string, countryCode: string[] };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ categoryCode: string; countryCode?: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
-  const countryCode = params.countryCode?.[0] ?? "AA";
+  const { categoryCode, countryCode } = await params;
+
+  const resolvedCountryCode = countryCode ?? "AA";
+  const { fullLocale, langCode } = await getRequestLocale();
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
     const response = await reqGetCategoryDetail(
-      countryCode,
-      params.categoryCode,
+      resolvedCountryCode,
+      categoryCode,
       langCode,
       0,
       LIST_LIMIT.default
@@ -135,8 +139,8 @@ export default async function CategoryDetailPage({
 
     return (
       <CompCategoryDetailPage
-        categoryCode={params.categoryCode}
-        countryCode={countryCode}
+        categoryCode={categoryCode}
+        countryCode={resolvedCountryCode}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={initialData}

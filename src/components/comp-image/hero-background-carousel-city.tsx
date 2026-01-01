@@ -3,11 +3,16 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { HeadlineTagsDetail } from "../headline-tags-detail";
 import { SUPPORT_LANG_CODES, TCityDetail } from "dplus_common_v1";
 
-export function HeroImageBackgroundCarouselCity({ bucket, imageUrls = [], interval = 5000, cityDetail, langCode }: {
+export function HeroImageBackgroundCarouselCity({ 
+  bucket, 
+  imageUrls = [], 
+  interval = 5000, 
+  cityDetail, 
+  langCode 
+}: {
   bucket: string;
   imageUrls: string[];
   interval?: number;
@@ -31,9 +36,8 @@ export function HeroImageBackgroundCarouselCity({ bucket, imageUrls = [], interv
       hasImages 
         ? "h-[200px] md:h-[280px]" 
         : "h-[120px] md:h-[180px] bg-white"
-    )}>
+    )} data-bucket={bucket}>
       {hasImages && imageUrls.map((url, idx) => (
-        console.log('url', url),
         <Image
           key={url}
           src={url}

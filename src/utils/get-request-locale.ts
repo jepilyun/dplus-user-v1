@@ -10,18 +10,18 @@ import "server-only";
  * 3) Accept-Language
  * 4) default: ko-KR
  */
-export function getRequestLocale(override?: {
+export async function getRequestLocale(override?: {
   langCode?: string;
   fullLocale?: string;
   countryCode?: string;
-}): {
+}): Promise<{
   fullLocale: string;
   langCode: string;
   baseLang: string;
   countryCode: string;
-} {
-  const h = headers();
-  const c = cookies();
+}> {
+  const h = await headers();
+  const c = await cookies();
 
   const acceptLanguage = h.get("accept-language") ?? "";
 

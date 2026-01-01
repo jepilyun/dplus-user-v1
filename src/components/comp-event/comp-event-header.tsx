@@ -3,7 +3,7 @@
 import { getDdayLabel } from "@/utils/dday-label"
 import { CompEventCountdown } from "./comp-event-countdown"
 import { getDdayFromUTC, getLocalTimeFromUTC } from "@/utils/calc-dates"
-import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1"
+import { ResponseEventDetailForUserFront } from "dplus_common_v1"
 import { computeBadgeColors } from "@/utils/color-generator"
 import { CompEventTimer } from "./comp-event-timer"
 import { SupportedLocale } from "@/consts/const-config"
@@ -54,7 +54,7 @@ export const CompEventHeader = ({
     return Array.from(new Set(urls));
   }, [eventDetail]);
 
-  const hasImages = availableImages.length > 0;
+  // const hasImages = availableImages.length > 0;
   const totalSlides = 1 + availableImages.length;
 
   // ✅ 스크롤 이벤트 핸들러

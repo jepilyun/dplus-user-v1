@@ -4,11 +4,9 @@ import { reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
 import {
   LIST_LIMIT,
   ResponseCountryDetailForUserFront,
-  TCountryDetail,
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getCountryHeroImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
@@ -53,9 +51,10 @@ export default function CompCountryDetailPage({
   // ✅ 데이터 버전: 2시간 블록 (예: "123456" → 2시간마다 변경)
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
-  const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getCountryHeroImageUrls(initialData.countryDetail?.countryInfo as TCountryDetail) : []
-  );
+  // const [imageUrls, setImageUrls] = useState<string[]>(
+  //   initialData ? getCountryHeroImageUrls(initialData.countryDetail?.countryInfo as TCountryDetail) : []
+  // );
+
   const [hasCategories, setHasCategories] = useState(
     (initialData?.categories?.items?.length ?? 0) > 0
   );
@@ -113,7 +112,7 @@ export default function CompCountryDetailPage({
       }
   
       setCountryDetail(res.dbResponse ?? null);
-      setImageUrls(getCountryHeroImageUrls(res.dbResponse?.countryDetail?.countryInfo as TCountryDetail));
+      // setImageUrls(getCountryHeroImageUrls(res.dbResponse?.countryDetail?.countryInfo as TCountryDetail));
       setHasCategories((res.dbResponse?.categories?.items?.length ?? 0) > 0);
       setHasCities((res.dbResponse?.cities?.items?.length ?? 0) > 0);
       setViewCount(res.dbResponse?.countryDetail?.countryInfo?.view_count ?? 0);
@@ -202,25 +201,25 @@ export default function CompCountryDetailPage({
     }
   };
 
-  const handleShareClick = async () => {
-    const shareData = {
-      title: countryDetail?.countryDetail?.countryInfo?.country_name || "이벤트 세트 공유",
-      text: countryDetail?.countryDetail?.countryInfo?.country_name || "이벤트 세트 정보를 확인해보세요!",
-      url: window.location.href,
-    };
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (error) {
-        console.error("공유 실패:", error);
-      }
-    } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareData.text
-      )}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
-    }
-  };
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: countryDetail?.countryDetail?.countryInfo?.country_name || "이벤트 세트 공유",
+  //     text: countryDetail?.countryDetail?.countryInfo?.country_name || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
@@ -268,9 +267,10 @@ export default function CompCountryDetailPage({
   useEffect(() => {
     if (!viewCountIncrementedRef.current && countryCode) {
       viewCountIncrementedRef.current = true;
-      incrementCountryViewCount(countryCode).then(newCount => {
-        if (newCount !== null) setViewCount(newCount);
-      });
+      incrementCountryViewCount(countryCode)
+        .then(newCount => {
+          if (newCount !== null) setViewCount(newCount);
+        });
     }
   }, [countryCode]);
 
@@ -414,7 +414,7 @@ export default function CompCountryDetailPage({
 
   return (
     <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
-      <div className="p-4 flex flex-col gap-8">
+      <div className="p-4 flex flex-col gap-8" data-view-count={viewCount}>
         {hasCategories && (
           <div className="mx-auto w-full max-w-[1440px]">
             <div className="flex justify-center gap-2 flex-wrap">

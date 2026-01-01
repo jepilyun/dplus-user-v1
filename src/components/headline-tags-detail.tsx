@@ -24,6 +24,7 @@ export const HeadlineTagsDetail = ({
   fgHoverColor?: string;
 }) =>  {
   const i18n = getDplusI18n(langCode);
+  console.log("i18n", i18n);
 
   return (
     <div className="flex gap-2 sm:gap-4 flex-wrap justify-center font-bold text-lg sm:text-xl" style={{ color: fgColor }}>

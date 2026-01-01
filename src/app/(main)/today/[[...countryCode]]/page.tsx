@@ -1,7 +1,6 @@
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompTodayDetailPage from "@/components/comp-today/comp-today-detail-page";
 import { Metadata } from "next";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { reqGetTodayList } from "@/actions/action";
@@ -14,14 +13,15 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { countryCode: string } }
+  { params }: { params: Promise<{ countryCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { countryCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
   const title = pick("Today - " + defaultMetadata.title, defaultMetadata.title);
   const description = pick(defaultMetadata.description);
-  const ogTitle = pick("Today - " + params.countryCode, defaultMetadata.og_title);
+  const ogTitle = pick("Today - " + countryCode, defaultMetadata.og_title);
   const ogDesc = pick(defaultMetadata.og_description);
   
   // ✅ 디폴트 OG 이미지 (절대 URL)
@@ -35,7 +35,7 @@ export async function generateMetadata(
     description,
     keywords,
     openGraph: {
-      title: `${title} | dplus.app`,
+      title: `${ogTitle ?? title} | dplus.app`,
       description: ogDesc,
       images: ogImage,
     },
@@ -47,7 +47,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/today/${params?.countryCode}`,
+      canonical: `https://www.dplus.app/today/${countryCode}`,
     },
   };
 }
@@ -59,20 +59,21 @@ export async function generateMetadata(
  */
 export default async function TodayPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { countryCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ countryCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
-  const countryCode = params.countryCode?.[0] ?? "KR";
+  const { countryCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
+  const resolvedCountryCode = countryCode ?? "KR";
 
-  const response = await reqGetTodayList(countryCode, 0, LIST_LIMIT.default).catch(() => null);
+  const response = await reqGetTodayList(resolvedCountryCode, 0, LIST_LIMIT.default).catch(() => null);
   const initialData = response?.dbResponse ?? null;
 
   return (
     <CompTodayDetailPage 
-      countryCode={params.countryCode}
+      countryCode={resolvedCountryCode}
       fullLocale={fullLocale}
       langCode={langCode}
       initialData={initialData}

@@ -182,8 +182,8 @@ const SECTION_LABELS = {
   },
 } as const;
 
-type SectionKey = keyof typeof SECTION_LABELS.en;
-type Language = "en" | "ko";
+// type SectionKey = keyof typeof SECTION_LABELS.en;
+// type Language = "en" | "ko";
 
 /**
  * 날짜에 해당하는 섹션 정보 반환 (다국어 지원)
@@ -236,9 +236,9 @@ export function getSectionForDate(
     tz,
   );
   if (inRangeYmd(ymd, thisMStart, thisMEnd)) {
-    const monthName = new Date(`${thisMStart}T00:00:00`)
-      .toLocaleString("en-US", { month: "short" })
-      .toUpperCase();
+    // const monthName = new Date(`${thisMStart}T00:00:00`)
+    //   .toLocaleString("en-US", { month: "short" })
+    //   .toUpperCase();
     return {
       key: "this-month",
       label: SECTION_LABELS[lang]["this-month"],

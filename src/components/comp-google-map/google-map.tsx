@@ -25,7 +25,7 @@ export default function GoogleMap({
   zoom = 15,
   className = "w-full h-full",
   style,
-  clickHintText = "",
+  // clickHintText = "",
   markerConfig = {
     scale: 1.0,
     background: "#ff1744",

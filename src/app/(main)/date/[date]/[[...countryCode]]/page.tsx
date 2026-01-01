@@ -1,6 +1,5 @@
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompDateDetailPage from "@/components/comp-date/comp-date-detail-page";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { Metadata } from "next";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
@@ -14,14 +13,15 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { date: string, countryCode: string } }
+  { params }: { params: Promise<{ date: string, countryCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { date, countryCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
-  const title = pick(params.date + " - " + defaultMetadata.title, defaultMetadata.title);
+  const title = pick(date + " - " + defaultMetadata.title, defaultMetadata.title);
   const description = pick(defaultMetadata.description);
-  const ogTitle = pick(params.date + " - " + params.countryCode, defaultMetadata.og_title);
+  const ogTitle = pick(date + " - " + countryCode, defaultMetadata.og_title);
   const ogDesc = pick(defaultMetadata.og_description);
   
   // ✅ 디폴트 OG 이미지 (절대 URL)
@@ -31,16 +31,16 @@ export async function generateMetadata(
   const keywords = buildKeywords(null, defaultMetadata.keywords);
 
   return {
-    title: `${params.date} - ${title} | dplus.app`,
+    title: `${date} - ${title} | dplus.app`,
     description,
     keywords,
     openGraph: {
-      title: `${params.date} - ${ogTitle} | dplus.app`,
+      title: `${date} - ${ogTitle} | dplus.app`,
       description: ogDesc,
       images: ogImage,
     },
     alternates: {
-      canonical: `https://www.dplus.app/date/${params?.date}/${params?.countryCode}`,
+      canonical: `https://www.dplus.app/date/${date}/${countryCode}`,
     },
   };
 }
@@ -53,17 +53,18 @@ export async function generateMetadata(
  */
 export default async function DateDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { date: string, countryCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ date: string, countryCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { date, countryCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
   const response = await reqGetDateList(
-    params.countryCode,
-    params.date,
+    countryCode,
+    date,
     0,
     LIST_LIMIT.default
   ).catch(() => null);
@@ -72,8 +73,8 @@ export default async function DateDetailPage({
 
   return (
     <CompDateDetailPage
-      dateString={params.date}
-      countryCode={params.countryCode}
+      dateString={date}
+      countryCode={countryCode}
       fullLocale={fullLocale}
       langCode={langCode}
       initialData={initialData}

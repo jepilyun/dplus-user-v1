@@ -318,6 +318,7 @@ export default function CompTodayDetailPage({
       // 저장은 raw 기준으로(섹션은 복원 시 재계산)
       const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
         const { section, ...rest } = it;
+        console.log("section", section);
         return rest;
       });
 
@@ -369,6 +370,7 @@ export default function CompTodayDetailPage({
       
       const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
         const { section, ...rest } = it;
+        console.log("section", section);
         return rest;
       });
       
@@ -399,7 +401,10 @@ export default function CompTodayDetailPage({
   useEffect(() => {
     if (!eventsWithSections.length) return;
     setEventsWithSections((prev) =>
-      attachSections(prev.map(({ section, ...raw }) => raw))
+      attachSections(prev.map(({ section, ...raw }) => {
+        console.log("section", section);
+        return raw;
+      }))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tz, lang]);

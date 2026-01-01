@@ -1,6 +1,5 @@
 "use client";
 
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import Image from "next/image";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
@@ -13,7 +12,11 @@ type HeroImageSliderProps = {
   className?: string;
 };
 
-export function HeroImageSlider({ bucket, imageUrls, className }: HeroImageSliderProps) {
+export function HeroImageSlider({ 
+  // bucket, 
+  imageUrls, 
+  className 
+}: HeroImageSliderProps) {
   // ✅ imageUrls는 이미 getEventDetailImageUrls()로 변환된 절대 URL들
   const urls = useMemo(
     () => (imageUrls ?? []).filter(Boolean) as string[],

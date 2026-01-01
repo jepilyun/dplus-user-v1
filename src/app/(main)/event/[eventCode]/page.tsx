@@ -4,14 +4,10 @@ export const revalidate = 14400; // 4시간 캐시
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트
 import { Metadata } from "next";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { reqGetEventCodeList, reqGetEventDetail } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
 import { notFound } from "next/navigation";
-import { getEventOgImageUrl } from "@/utils/set-image-urls";
-import { calculateDaysFromToday } from "@/utils/calc-dates";
-import { getDdayLabel } from "@/utils/dday-label";
 import { getMetadataByLang } from "@/consts/const-metadata";
 
 
@@ -21,12 +17,13 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { eventCode: string } }
+  { params }: { params: Promise<{ eventCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { eventCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
-  const response = await reqGetEventDetail(params.eventCode, langCode).catch(() => null);
+  const response = await reqGetEventDetail(eventCode, langCode).catch(() => null);
   const eventDetail = response?.dbResponse?.eventDetail ?? null;
   const metadata = eventDetail?.metadata ?? null;
   
@@ -64,7 +61,7 @@ export async function generateMetadata(
     description,
     keywords,
     openGraph: {
-      title: pageTitle,
+      title: `${ogTitle ?? pageTitle} | dplus.app`,
       description: ogDesc,
       images: ogImage,
     },
@@ -76,7 +73,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/event/${params?.eventCode}`,
+      canonical: `https://www.dplus.app/event/${eventCode}`,
     },
   };
 }
@@ -103,15 +100,16 @@ export async function generateStaticParams() {
  */
 export default async function EventDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { eventCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ eventCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { eventCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   try {
-    const response = await reqGetEventDetail(params.eventCode, langCode);
+    const response = await reqGetEventDetail(eventCode, langCode);
     const eventDetail = response?.dbResponse ?? null;
 
     // ✅ 데이터 검증
@@ -126,7 +124,7 @@ export default async function EventDetailPage({
 
     return (
       <CompEventDetailPage
-        eventCode={params.eventCode}
+        eventCode={eventCode}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={eventDetail}

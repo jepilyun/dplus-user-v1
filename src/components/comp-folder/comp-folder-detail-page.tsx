@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context";
-import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
+import { incrementFolderViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 
@@ -192,32 +192,32 @@ export default function CompFolderDetailPage({
     }
   };
 
-  const handleShareClick = async () => {
-    const shareData = {
-      title: folderDetail?.folderDetail?.folderInfo?.title || "이벤트 세트 공유",
-      text: folderDetail?.folderDetail?.description?.description || "이벤트 세트 정보를 확인해보세요!",
-      url: window.location.href,
-    };
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: folderDetail?.folderDetail?.folderInfo?.title || "이벤트 세트 공유",
+  //     text: folderDetail?.folderDetail?.description?.description || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        console.log('공유 성공');
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //       console.log('공유 성공');
         
-        const newCount = await incrementFolderSharedCount(folderCode);
-        if (newCount !== null) {
-          setSharedCount(newCount);
-        }
-      } catch (error) {
-        console.error("공유 실패:", error);
-      }
-    } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareData.text
-      )}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
-    }
-  };
+  //       const newCount = await incrementFolderSharedCount(folderCode);
+  //       if (newCount !== null) {
+  //         setSharedCount(newCount);
+  //       }
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;

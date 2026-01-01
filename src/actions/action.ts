@@ -302,7 +302,7 @@ export const reqGetCityEvents = async (
 export const reqGetCityCodes = async (
   limit: number = 100,
 ): Promise<ResponseDplusAPI<{ city_code: string }[]>> => {
-  const res = await fetch(apiUrlCity("getCityCodes"), {
+  const res = await fetch(apiUrlCity("getCityCodes", { limit }), {
     method: "GET",
     credentials: "include",
     next: { 

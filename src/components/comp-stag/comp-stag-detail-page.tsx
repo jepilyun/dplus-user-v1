@@ -191,26 +191,26 @@ export default function CompStagDetailPage({
     }
   };
 
-  const handleShareClick = async () => {
-    const shareData = {
-      title: stagDetail?.stagDetail?.stagInfo?.stag || "이벤트 세트 공유",
-      text: stagDetail?.stagDetail?.stagInfo?.stag_native || "이벤트 세트 정보를 확인해보세요!",
-      url: window.location.href,
-    };
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: stagDetail?.stagDetail?.stagInfo?.stag || "이벤트 세트 공유",
+  //     text: stagDetail?.stagDetail?.stagInfo?.stag_native || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (error) {
-        console.error("공유 실패:", error);
-      }
-    } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareData.text
-      )}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
-    }
-  };
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
@@ -409,7 +409,7 @@ export default function CompStagDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
       <HeroImageBackgroundCarouselStag
         bucket="stags"
         imageUrls={imageUrls}

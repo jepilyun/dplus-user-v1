@@ -5,10 +5,8 @@ import { getRequestLocale } from "@/utils/get-request-locale";
 import CompGroupDetailPage from "@/components/comp-group/comp-group-detail-page";
 import { reqGetGroupCodes, reqGetGroupDetail } from "@/actions/action";
 import { Metadata } from "next";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { getGroupOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 import { getMetadataByLang } from "@/consts/const-metadata";
@@ -19,13 +17,14 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { groupCode: string } }
+  { params }: { params: Promise<{ groupCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { groupCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
   // API 호출 (에러 대비 안전가드)
-  const response = await reqGetGroupDetail(params.groupCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetGroupDetail(groupCode, langCode, 0, 36).catch(() => null);
   const groupDetail = response?.dbResponse?.groupDetail ?? null;
   const metadata = groupDetail?.metadata ?? null;
   
@@ -68,7 +67,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/group/${params?.groupCode}`,
+      canonical: `https://www.dplus.app/group/${groupCode}`,
     },
   };
 }
@@ -94,17 +93,18 @@ export async function generateStaticParams() {
  */
 export default async function GroupDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { groupCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ groupCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { groupCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
     const response = await reqGetGroupDetail(
-      params.groupCode,
+      groupCode,
       langCode,
       0,
       LIST_LIMIT.default
@@ -124,7 +124,7 @@ export default async function GroupDetailPage({
 
     return (
       <CompGroupDetailPage
-        groupCode={params.groupCode}
+        groupCode={groupCode}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={initialData}

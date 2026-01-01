@@ -8,7 +8,7 @@ import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_commo
  */
 export const CompEventDescription = ({ 
   eventDetail, 
-  langCode 
+  // langCode 
 }: { 
   eventDetail: ResponseEventDetailForUserFront | null;
   langCode: (typeof SUPPORT_LANG_CODES)[number];

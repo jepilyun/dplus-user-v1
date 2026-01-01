@@ -4,11 +4,9 @@ export const revalidate = 86400; // 24시간 × 60분 × 60초 = 86400초
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 import { Metadata } from "next";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { reqGetFolderCodeList, reqGetFolderDetail } from "@/actions/action";
 import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { getFolderOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 import { getMetadataByLang } from "@/consts/const-metadata";
@@ -19,13 +17,14 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { folderCode: string } }
+  { params }: { params: Promise<{ folderCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { folderCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
   // API 호출 (에러 대비 안전가드)
-  const response = await reqGetFolderDetail(params.folderCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetFolderDetail(folderCode, langCode, 0, 36).catch(() => null);
   const folderDetail = response?.dbResponse?.folderDetail ?? null;
   const metadata = folderDetail?.metadata ?? null;
   
@@ -68,7 +67,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/folder/${params?.folderCode}`,
+      canonical: `https://www.dplus.app/folder/${folderCode}`,
     },
   };
 }
@@ -95,17 +94,18 @@ export async function generateStaticParams() {
  */
 export default async function FolderDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { folderCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ folderCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { folderCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
     const response = await reqGetFolderDetail(
-      params.folderCode, 
+      folderCode, 
       langCode, 
       0, 
       LIST_LIMIT.default
@@ -125,7 +125,7 @@ export default async function FolderDetailPage({
 
     return (
       <CompFolderDetailPage
-        folderCode={params.folderCode}
+        folderCode={folderCode}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={initialData}

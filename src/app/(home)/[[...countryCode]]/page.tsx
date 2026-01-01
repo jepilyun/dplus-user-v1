@@ -1,4 +1,3 @@
-// app/[[...countryCode]]/page.tsx
 export const revalidate = 14400;
 
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -16,16 +15,17 @@ export async function generateStaticParams() {
 }
 
 type PageProps = {
-  params: { countryCode?: string[] };
+  params: Promise<{ countryCode?: string }>;
 };
 
 export default async function DplusHomeDetail({ params }: PageProps) {
-  const { fullLocale, langCode } = getRequestLocale();
-  const countryCode = params.countryCode?.[0] ?? "KR";
+  const { countryCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
+  const resolvedCountryCode = countryCode ?? "KR";
 
   // API 호출
   const response = await reqGetCountryDetail(
-    countryCode,
+    resolvedCountryCode,
     langCode,
     0,
     LIST_LIMIT.default
@@ -50,7 +50,7 @@ export default async function DplusHomeDetail({ params }: PageProps) {
 
   return (
     <CompCountryDetailPage
-      countryCode={countryCode}
+      countryCode={resolvedCountryCode}
       fullLocale={fullLocale}
       langCode={langCode}
       initialData={response.dbResponse}

@@ -4,11 +4,9 @@ export const revalidate = 14400;
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompStagDetailPage from "@/components/comp-stag/comp-stag-detail-page";
 import { Metadata } from "next";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { reqGetStagDetail } from "@/actions/action";
 import { buildKeywords, pick } from "@/utils/metadata-helper";
 import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { getStagOgImageUrl } from "@/utils/set-image-urls";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 import { getMetadataByLang } from "@/consts/const-metadata";
@@ -19,13 +17,14 @@ import { getMetadataByLang } from "@/consts/const-metadata";
  * @returns 
  */
 export async function generateMetadata(
-  { params }: { params: { stagCode: string } }
+  { params }: { params: Promise<{ stagCode: string }> }
 ): Promise<Metadata> {
-  const { langCode } = getRequestLocale();
+  const { stagCode } = await params;
+  const { langCode } = await getRequestLocale();
   const defaultMetadata = getMetadataByLang(langCode);
 
   // API 호출 (에러 대비 안전가드)
-  const response = await reqGetStagDetail(params.stagCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetStagDetail(stagCode, langCode, 0, 36).catch(() => null);
   const stagDetail = response?.dbResponse?.stagDetail ?? null;
   const metadata = stagDetail?.metadata ?? null;
   
@@ -68,7 +67,7 @@ export async function generateMetadata(
       images: [ogImage ?? ""],
     },
     alternates: {
-      canonical: `https://www.dplus.app/stag/${params?.stagCode}`,
+      canonical: `https://www.dplus.app/stag/${stagCode}`,
     },
   };
 }
@@ -81,17 +80,18 @@ export async function generateMetadata(
  */
 export default async function StagDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { stagCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ stagCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { stagCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
     const response = await reqGetStagDetail(
-      params.stagCode,
+      stagCode,
       langCode,
       0,
       LIST_LIMIT.default
@@ -111,7 +111,7 @@ export default async function StagDetailPage({
 
     return (
       <CompStagDetailPage
-        stagCode={params.stagCode}
+        stagCode={stagCode}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={initialData}

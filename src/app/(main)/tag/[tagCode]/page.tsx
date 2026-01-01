@@ -10,19 +10,20 @@ import CompTagDetailPage from "@/components/comp-tag/comp-tag-detail-page";
  */
 export default async function TagDetailPage({
   params,
-  searchParams,
+  // searchParams,
 }: {
-  params: { tagCode: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ tagCode: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { fullLocale, langCode } = getRequestLocale();
+  const { tagCode } = await params;
+  const { fullLocale, langCode } = await getRequestLocale();
 
   // 여기에 서버 전용 로직(데이터 fetch 등) 수행
   // const data = await fetch(...);
 
   return (
     <CompTagDetailPage
-      tagCode={params.tagCode}
+      tagCode={tagCode}
       fullLocale={fullLocale}
       langCode={langCode}
     />

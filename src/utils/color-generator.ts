@@ -310,7 +310,7 @@ function daysBetween(a: Date, b: Date) {
   return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-type BadgeColors = { bg: string; fg: string };
+// type BadgeColors = { bg: string; fg: string };
 
 /**
  * Compute the badge colors for a given date

@@ -6,7 +6,13 @@ import clsx from "clsx";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { SUPPORT_LANG_CODES, TGroupDetail } from "dplus_common_v1";
 
-export function HeroImageBackgroundCarouselGroup({ bucket, imageUrls = [], interval = 5000, groupDetail, langCode }: {
+export function HeroImageBackgroundCarouselGroup({ 
+  bucket, 
+  imageUrls = [], 
+  interval = 5000, 
+  groupDetail, 
+  // langCode 
+}: {
   bucket: string;
   imageUrls: string[];
   interval?: number;

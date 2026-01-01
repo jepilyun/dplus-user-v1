@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import TopNavMain from "@/components/comp-top-nav/top-nav-main";
 import CompFooter from "@/components/comp-common/comp-footer";
 import { getMetadataByLang } from "@/consts/const-metadata";

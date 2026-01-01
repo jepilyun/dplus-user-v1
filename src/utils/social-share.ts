@@ -10,10 +10,14 @@ interface ShareData {
  * 소셜 미디어 공유 URL 생성
  */
 export const generateSocialShareUrl = (platform: SocialPlatform, data: ShareData): string => {
-  const { title, text, url } = data;
+  const { 
+    title, 
+    // text, 
+    url 
+  } = data;
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
-  const encodedText = encodeURIComponent(text || '');
+  // const encodedText = encodeURIComponent(text || '');
 
   switch (platform) {
     case 'twitter':

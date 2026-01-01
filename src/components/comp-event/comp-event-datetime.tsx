@@ -1,5 +1,4 @@
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
@@ -15,7 +14,7 @@ export function CompEventDatetime({
   datetime, 
   fullLocale, 
   time, 
-  isRepeatAnnually 
+  // isRepeatAnnually 
 }: { 
   datetime: Date | null | undefined, 
   fullLocale: string, 

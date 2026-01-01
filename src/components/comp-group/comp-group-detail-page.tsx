@@ -14,7 +14,7 @@ import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import { HeroImageBackgroundCarouselGroup } from "../comp-image/hero-background-carousel-group";
 import { useGroupPageRestoration } from "@/contexts/scroll-restoration-context";
-import { incrementGroupSharedCount, incrementGroupViewCount } from "@/utils/increment-count";
+import { incrementGroupViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 
@@ -193,32 +193,32 @@ export default function CompGroupDetailPage({
     }
   };
 
-  const handleShareClick = async () => {
-    const shareData = {
-      title: groupDetail?.groupDetail?.groupInfo?.name || "이벤트 세트 공유",
-      text: groupDetail?.groupDetail?.groupInfo?.name_native || "이벤트 세트 정보를 확인해보세요!",
-      url: window.location.href,
-    };
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: groupDetail?.groupDetail?.groupInfo?.name || "이벤트 세트 공유",
+  //     text: groupDetail?.groupDetail?.groupInfo?.name_native || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        console.log('공유 성공');
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //       console.log('공유 성공');
         
-        const newCount = await incrementGroupSharedCount(groupCode);
-        if (newCount !== null) {
-          setSharedCount(newCount);
-        }
-      } catch (error) {
-        console.error("공유 실패:", error);
-      }
-    } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareData.text
-      )}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
-    }
-  };
+  //       const newCount = await incrementGroupSharedCount(groupCode);
+  //       if (newCount !== null) {
+  //         setSharedCount(newCount);
+  //       }
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
@@ -417,7 +417,7 @@ export default function CompGroupDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-4" data-view-count={viewCount} data-shared-count={sharedCount}>
       <HeroImageBackgroundCarouselGroup
         bucket="groups"
         imageUrls={imageUrls}

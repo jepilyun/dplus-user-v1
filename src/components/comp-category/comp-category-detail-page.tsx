@@ -198,9 +198,10 @@ export default function CompCategoryDetailPage({
   useEffect(() => {
     if (!viewCountIncrementedRef.current && categoryCode) {
       viewCountIncrementedRef.current = true;
-      incrementCategoryViewCount(categoryCode).then(newCount => {
-        if (newCount !== null) setViewCount(newCount);
-      });
+      incrementCategoryViewCount(categoryCode)
+        .then(newCount => {
+          if (newCount !== null) setViewCount(newCount);
+        });
     }
   }, [categoryCode]);
 
@@ -361,7 +362,7 @@ export default function CompCategoryDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
       <div>
         {categoryDetail?.categoryDetail?.i18n?.items?.[0]?.name ? (
           <div className="text-center font-extrabold">

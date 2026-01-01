@@ -52,7 +52,7 @@ export default function CompTagDetailPage({
   const hydratedFromRestoreRef = useRef(false);
 
   // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
-  const [viewCount, setViewCount] = useState(0);
+  const [viewCount, setViewCount] = useState(tagDetail?.tag?.view_count ?? 0);
 
   const fetchTagDetail = async (restoredEvents?: TMapTagEventWithEventInfo[]) => {
     try {
@@ -153,26 +153,26 @@ export default function CompTagDetailPage({
     }
   };
   
-  const handleShareClick = async () => {
-    const shareData = {
-      title: tagDetail?.tag.tag || "이벤트 세트 공유",
-      text: tagDetail?.tag.tag || "이벤트 세트 정보를 확인해보세요!",
-      url: window.location.href,
-    };
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: tagDetail?.tag.tag || "이벤트 세트 공유",
+  //     text: tagDetail?.tag.tag || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (error) {
-        console.error("공유 실패:", error);
-      }
-    } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareData.text
-      )}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
-    }
-  };
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
@@ -331,7 +331,7 @@ export default function CompTagDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-4">
+    <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
       <div id="tag-title" className="text-center font-extrabold text-3xl" data-tag-code={tagDetail?.tag.tag_code}>
         {tagDetail?.tag.tag}
       </div>
