@@ -16,11 +16,11 @@ export async function generateStaticParams() {
   ];
 }
 
-type PageProps = {
-  params: Promise<{ countryCode?: string }>;
+type Params = {
+  countryCode?: string;
 };
 
-export default async function DplusHomeDetail({ params }: PageProps) {
+export default async function DplusHomeDetail({ params }: { params: Promise<Params> }) {
   const { countryCode } = await params;
   const { fullLocale, langCode } = await getRequestLocale();
   const resolvedCountryCode = countryCode ?? "KR";
