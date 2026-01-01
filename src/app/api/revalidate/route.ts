@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/event/${eventCode}`);
-      revalidateTag(`event-${eventCode}`);
+      revalidateTag(`event-${eventCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/city/${cityCode}`);
-      revalidateTag(`city-${cityCode}`);
-      revalidateTag(`city-events-${cityCode}`);
+      revalidateTag(`city-${cityCode}`, "page");
+      revalidateTag(`city-events-${cityCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -115,8 +115,8 @@ export async function POST(request: NextRequest) {
       
       revalidatePath(`/country/${countryCode}`);
       revalidatePath(`/${countryCode}`);
-      revalidateTag(`country-${countryCode}`);
-      revalidateTag(`country-events-${countryCode}`);
+      revalidateTag(`country-${countryCode}`, "page");
+      revalidateTag(`country-events-${countryCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -135,8 +135,8 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/category/${categoryCode}/${countryCode}`);
-      revalidateTag(`category-${countryCode}-${categoryCode}`);
-      revalidateTag(`category-events-${countryCode}-${categoryCode}`);
+      revalidateTag(`category-${countryCode}-${categoryCode}`, "page");
+      revalidateTag(`category-events-${countryCode}-${categoryCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -156,8 +156,8 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/stag/${stagCode}`);
-      revalidateTag(`stag-${stagCode}`);
-      revalidateTag(`stag-events-${stagCode}`);
+      revalidateTag(`stag-${stagCode}`, "page");
+      revalidateTag(`stag-events-${stagCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -177,8 +177,8 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/group/${groupCode}`);
-      revalidateTag(`group-${groupCode}`);
-      revalidateTag(`group-events-${groupCode}`);
+      revalidateTag(`group-${groupCode}`, "page");
+      revalidateTag(`group-events-${groupCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -198,8 +198,8 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/folder/${folderCode}`);
-      revalidateTag(`folder-${folderCode}`);
-      revalidateTag(`folder-events-${folderCode}`);
+      revalidateTag(`folder-${folderCode}`, "page");
+      revalidateTag(`folder-events-${folderCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -218,8 +218,8 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/tag/${tagCode}`);
-      revalidateTag(`tag-${tagCode}`);
-      revalidateTag(`tag-events-${tagId}`);
+      revalidateTag(`tag-${tagCode}`, "page");
+      revalidateTag(`tag-events-${tagId}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -238,7 +238,7 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/date/${date}/${countryCode}`);
-      revalidateTag(`date-${date}-${countryCode}`);
+      revalidateTag(`date-${date}-${countryCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
       }
       
       revalidatePath(`/today/${countryCode}`);
-      revalidateTag(`today-${countryCode}`);
+      revalidateTag(`today-${countryCode}`, "page");
       
       return NextResponse.json({ 
         revalidated: true, 

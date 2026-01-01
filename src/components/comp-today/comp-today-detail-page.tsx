@@ -2,7 +2,7 @@
 
 import { reqGetTodayList } from "@/actions/action";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../comp-common/comp-load-more";
 import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
@@ -471,7 +471,7 @@ export default function CompTodayDetailPage({
         <div className="mx-auto w-full max-w-[1024px] flex flex-col gap-0 gap-4 md:px-4 lg:px-6">
           {(() => {
             let lastKey = "";
-            const blocks: JSX.Element[] = [];
+            const blocks: React.ReactElement[] = [];
 
             for (const item of eventsWithSections) {
               if (item.section.key !== lastKey) {
