@@ -47,7 +47,7 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
               title={eventDetail?.eventDetail?.eventInfo?.title}
               zoom={15}
               className="w-full h-full"
-              clickHintText={eventDetail?.eventDetail?.eventInfo?.address_native ?? ''}
+              // clickHintText={eventDetail?.eventDetail?.eventInfo?.address_native ?? ''}
             />
             {/* ✅ 주소 오버레이 */}
             <div className="absolute top-4 right-4 text-white bg-black/70 backdrop-blur-sm px-3 py-2 rounded-lg max-w-[calc(100%-2rem)] z-10">

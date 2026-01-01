@@ -25,7 +25,7 @@ function getCountryCode(request: NextRequest): string {
   return "AA";
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
