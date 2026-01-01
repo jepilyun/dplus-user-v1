@@ -1,5 +1,7 @@
 // 이 라우트 기본 재생성 주기: 24시간
 export const revalidate = 86400; // 24시간 × 60분 × 60초 = 86400초
+export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
+
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";

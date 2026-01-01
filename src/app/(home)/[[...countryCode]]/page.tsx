@@ -1,4 +1,6 @@
 export const revalidate = 14400;
+export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
+
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
