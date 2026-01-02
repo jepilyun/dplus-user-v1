@@ -68,7 +68,7 @@ export default function CompCommonDdayItemCardBase({
 
   return (
     <div 
-      className="group w-full cursor-pointer" 
+      className="group w-full cursor-pointer group" 
       data-event-code={eventCode}
       onClick={handleCardClick}
     >
@@ -154,7 +154,7 @@ export default function CompCommonDdayItemCardBase({
             ) : (
               <div />
             )}
-            <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-black'}`} />
+            <ArrowRight className={`flex-shrink-0 w-6 h-6 ${hasImage ? 'text-white' : 'text-gray-300 group-hover:text-gray-900'}`} />
           </div>
         </div>
       </div>

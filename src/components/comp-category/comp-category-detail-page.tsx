@@ -365,13 +365,13 @@ export default function CompCategoryDetailPage({
     <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
       <div>
         {categoryDetail?.categoryDetail?.i18n?.items?.[0]?.name ? (
-          <div className="text-center font-extrabold">
-            <div className="text-3xl">{categoryDetail?.categoryDetail?.i18n?.items?.[0]?.name}</div>
+          <div className="my-4 text-center font-extrabold">
+            <div className="text-4xl">{categoryDetail?.categoryDetail?.i18n?.items?.[0]?.name}</div>
             <div className="text-gray-400 text-lg font-thin">{categoryDetail?.categoryDetail?.categoryInfo?.name}</div>
           </div>
         ) : (
-          <div className="text-center font-extrabold">
-            <div className="text-3xl">{categoryDetail?.categoryDetail?.categoryInfo?.name}</div>
+          <div className="my-4 text-center font-extrabold">
+            <div className="text-4xl">{categoryDetail?.categoryDetail?.categoryInfo?.name}</div>
           </div>
         )}
       </div>
