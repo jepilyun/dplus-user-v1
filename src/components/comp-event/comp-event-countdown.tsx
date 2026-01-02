@@ -8,7 +8,7 @@ interface CompEventCountdownProps {
 
 export function CompEventCountdown({ ddayLabel, fgColor = '#EAEAEA', bgColor = '#EAEAEA' }: CompEventCountdownProps) {
   return (
-    <div className="px-4 py-1 flex items-center justify-center rounded-full font-rubik font-bold text-base sm:text-lg" style={{ color: fgColor, backgroundColor: bgColor }}>
+    <div className="flex items-center justify-center rounded-full font-rubik font-bold text-4xl sm:text-5xl" style={{ color: bgColor }}>
       {ddayLabel}
     </div>
   );

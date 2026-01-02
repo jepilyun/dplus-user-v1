@@ -48,8 +48,6 @@ export function CompEventTimer({ startAtUtc }: CompEventTimerProps) {
       return;
     }
 
-    console.log('100시간 미만 남음 - interval 시작:', totalHours);
-
     // 100시간 미만일 때만 1초마다 업데이트
     const interval = setInterval(() => {
       const newCountdown = calculateCountdown(startAtUtc);

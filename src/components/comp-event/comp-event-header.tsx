@@ -100,7 +100,7 @@ export const CompEventHeader = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative overflow-hidden rounded-4xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_1px_3px_0_rgba(0,0,0,0.1)]">
+      <div className="relative overflow-hidden rounded-4xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_1px_1px_0px_rgba(0,0,0,0.15)]">
         <div 
           ref={scrollContainerRef}
           className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
@@ -140,7 +140,7 @@ export const CompEventHeader = ({
               
               <div className="w-full flex flex-col gap-3 justify-center items-start">
                 <CompEventDatetime 
-                  datetime={eventDetail?.eventDetail?.eventInfo?.date ? new Date(eventDetail?.eventDetail?.eventInfo?.date) : null}
+                  eventDetail={eventDetail}
                   fullLocale={fullLocale}
                   time={eventDetail?.eventDetail?.eventInfo?.time ?? null}
                   isRepeatAnnually={eventDetail?.eventDetail?.eventInfo?.is_repeat_annually ?? false}

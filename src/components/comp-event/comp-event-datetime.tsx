@@ -1,27 +1,28 @@
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
+import { ResponseEventDetailForUserFront } from "dplus_common_v1";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 
 /**
  * 이벤트 상세화면에서 날짜와 시간을 표시하는 컴포넌트
- * @param datetime - 날짜
+ * @param eventDetail - 이벤트 상세 데이터
  * @param fullLocale - 전체 로케일
  * @param time - 시간
  * @param isRepeatAnnually - 반복 여부
  */
 export function CompEventDatetime({ 
-  datetime, 
+  eventDetail, 
   fullLocale, 
   time, 
   // isRepeatAnnually 
 }: { 
-  datetime: Date | null | undefined, 
+  eventDetail: ResponseEventDetailForUserFront | null, 
   fullLocale: string, 
   time: string | null | undefined, 
   isRepeatAnnually: boolean 
 }) {
-  if (!datetime) {
+  if (!eventDetail || !eventDetail.eventDetail?.eventInfo?.date) {
     return null;
   }
 
@@ -31,17 +32,17 @@ export function CompEventDatetime({
   };
 
   // 날짜와 시간 합치기
-  const combinedDate = new Date(datetime);
+  const combinedDate = new Date(eventDetail.eventDetail?.eventInfo?.date);
   if (time) {
     parseAndSetTime(combinedDate, time);
   }
 
   return (
-    <Link href={`/date/${datetime}`}>
+    <Link href={`/date/${eventDetail.eventDetail?.eventInfo?.date}`}>
       <div className="flex flex-wrap gap-1 justify-start items-center font-bold text-lg sm:text-2xl opacity-70 hover:opacity-100 transition-all duration-300">
         <div>
           {formatDateTime(
-            new Date(datetime),
+            new Date(eventDetail.eventDetail?.eventInfo?.date),
             fullLocale,
             null,
             null,

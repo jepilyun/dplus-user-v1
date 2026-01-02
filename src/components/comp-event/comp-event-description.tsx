@@ -15,8 +15,10 @@ export const CompEventDescription = ({
 }) => {
   if (!eventDetail) return null;
 
-  // ✅ 렌더링할 콘텐츠가 있는지 체크
-  const hasDescription = !!eventDetail.eventDetail?.description;
+  // ✅ description 내용이 실제로 있는지 엄격하게 체크
+  const descriptionText = eventDetail.eventDetail?.description?.description;
+  const hasDescription = !!descriptionText && descriptionText.trim().length > 0;
+  
   const hasStags = eventDetail.mapStagEvent?.items && eventDetail.mapStagEvent.items.length > 0;
   const hasTags = eventDetail.mapTagEvent?.items && eventDetail.mapTagEvent.items.length > 0;
 
@@ -29,7 +31,7 @@ export const CompEventDescription = ({
     <div className="p-4 flex flex-col gap-4 rounded-4xl bg-white border border-white text-gray-700">
       {hasDescription && (
         <div className="m-auto p-4 w-full text-base sm:text-lg max-w-[840px] whitespace-pre-line leading-relaxed">
-          {eventDetail.eventDetail?.description?.description ?? ""}
+          {descriptionText}
         </div>
       )}
       {hasStags && eventDetail.mapStagEvent?.items.map(item => (

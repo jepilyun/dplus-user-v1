@@ -37,7 +37,7 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
   };
   
   return (
-    <div className="flex flex-col m-auto w-full border border-white rounded-4xl overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_3px_0_rgba(0,0,0,0.15)]">
+    <div className="flex flex-col m-auto w-full border border-white rounded-4xl overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_1px_0px_rgba(0,0,0,0.15)]">
       <div className="rounded-xl">
         {eventDetail?.eventDetail?.eventInfo?.latitude && eventDetail?.eventDetail?.eventInfo?.longitude && (
           <div className="w-full overflow-hidden relative h-48 md:h-60">
@@ -61,16 +61,20 @@ export const CompEventDetailMap = ({ eventDetail, langCode }: { eventDetail: Res
           </div>
         )}
         <div className="px-4 py-1 flex flex-wrap font-bold text-sm md:text-base items-center justify-between text-gray-600 bg-white">
-          <button 
-            onClick={handleOpenGoogleMap}
-            className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
-          >
-            <Map className="w-5 h-5 flex-shrink-0" />
-            <span>{getDplusI18n(langCode).detail.open_in_maps}</span>
-          </button>
+          {eventDetail?.eventDetail?.eventInfo?.google_map_url ? (
+            <button 
+              onClick={handleOpenGoogleMap}
+              className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 duration-300 transition-all"
+            >
+              <Map className="w-5 h-5 flex-shrink-0" />
+              <span>{getDplusI18n(langCode).detail.open_in_maps}</span>
+            </button>
+          ) : (
+            <div />
+          )}
           <button 
             onClick={handleOpenDirections}
-            className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 hover:scale-105 duration-300 transition-all"
+            className="flex items-center justify-center gap-2 px-2 py-4 cursor-pointer hover:text-gray-900 duration-300 transition-all"
           >
             <Navigation className="w-5 h-5 flex-shrink-0" />
             <span>{getDplusI18n(langCode).detail.directions}</span>

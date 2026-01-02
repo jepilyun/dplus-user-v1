@@ -13,8 +13,8 @@ export const CompCountryCityItem = ({ city }: { city: TCityInfoForCountryDetail 
         "h-full min-h-[120px] w-full rounded-3xl overflow-hidden group",
         "transition-all duration-300",
         bg 
-          ? "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_1px_5px_0_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_16px_16px_rgba(0,0,0,0.2)]" 
-          : "border border-gray-200 bg-gray-50 hover:bg-gray-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_5px_0_rgba(0,0,0,0.15)]",
+          ? "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_1px_1px_0px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_6px_8px_-5px_rgba(0,0,0,0.2)] active:translate-y-0" 
+          : "border border-gray-200 bg-gray-50 hover:bg-gray-100 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_1px_0px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_6px_8px_-5px_rgba(0,0,0,0.2)] active:translate-y-0",
       ].join(" ")}
     >
       {bg && (

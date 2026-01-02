@@ -72,7 +72,12 @@ export default function CompCommonDdayItemCardBase({
       data-event-code={eventCode}
       onClick={handleCardClick}
     >
-      <div className="relative overflow-hidden rounded-4xl shadow-[0_1px_3px_0_rgba(0,0,0,0.15)] hover:shadow-[0_10px_10px_rgba(0,0,0,0.1)] transition-all duration-300 h-full">
+      <div className={[
+        "relative overflow-hidden rounded-4xl transition-all duration-300 h-full",
+        hasImage 
+          ? "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_1px_1px_0px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.4),0_16px_16px_rgba(0,0,0,0.1)]"
+          : "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8),0_1px_1px_0px_rgba(0,0,0,0.15)] hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.9),0_16px_16px_rgba(0,0,0,0.1)]"
+      ].join(" ")}>
         {/* 배경 레이어 */}
         {hasImage ? (
           <>
