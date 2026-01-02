@@ -35,7 +35,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dplus_common_v1": "^0.2.25",
+    "dplus_common_v1": "^0.2.41",
     "lucide-react": "^0.536.0",
     "negotiator": "^1.0.0",
     "next": "^16.1.1",

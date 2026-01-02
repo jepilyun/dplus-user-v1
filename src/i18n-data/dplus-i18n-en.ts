@@ -30,5 +30,5 @@ export const dplusI18nEN = {
     directions: "Directions",
     move_to_home: "Move to Home Menu",
     more_events: "More Events",
-  }
+  },
 };

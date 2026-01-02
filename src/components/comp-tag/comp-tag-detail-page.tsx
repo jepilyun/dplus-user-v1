@@ -179,13 +179,13 @@ export default function CompTagDetailPage({
     setEventsLoading(true);
 
     try {
-      const tagId = tagDetail?.tag.id;
-      if (!tagId) {
-        console.warn("tagDetail?.tag.id is not defined");
+      const tagCode = tagDetail?.tag.tag_code;
+      if (!tagCode) {
+        console.warn("tagDetail?.tag.tag_code is not defined");
         return;
       }
 
-      const res = await reqGetTagEvents(tagId, eventsStart, LIST_LIMIT.default);
+      const res = await reqGetTagEvents(tagCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       const newItems = fetchedItems.filter((it: TMapTagEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

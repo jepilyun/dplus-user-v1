@@ -30,5 +30,5 @@ export const dplusI18nTH = {
     directions: "การนำทาง",
     move_to_home: "เลื่อนไปหน้าหลัก",
     more_events: "เหตุการณ์อื่นๆ",
-  }
+  },
 };

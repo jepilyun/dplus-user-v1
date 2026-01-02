@@ -8,6 +8,7 @@ import {
   TGroupDetail,
   TStagDetail,
 } from "dplus_common_v1";
+
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 
 /* ========================================
@@ -15,7 +16,10 @@ import { generateStorageImageUrl } from "@/utils/generate-image-url";
  * ======================================== */
 
 /** 썸네일 이미지 키 */
-type ThumbnailKeys = 'thumbnail_square' | 'thumbnail_horizontal' | 'thumbnail_vertical';
+type ThumbnailKeys =
+  | "thumbnail_square"
+  | "thumbnail_horizontal"
+  | "thumbnail_vertical";
 
 /** Hero 이미지 키 */
 type HeroImageKeys = `hero_image_0${1 | 2 | 3 | 4 | 5}`;
@@ -27,7 +31,11 @@ type ThumbnailMainKeys = `thumbnail_main_0${1 | 2 | 3 | 4 | 5}`;
 type ThumbnailVerticalKeys = `thumbnail_vertical_0${1 | 2 | 3 | 4 | 5}`;
 
 /** 모든 이미지 키 */
-type AllImageKeys = ThumbnailKeys | HeroImageKeys | ThumbnailMainKeys | ThumbnailVerticalKeys;
+type AllImageKeys =
+  | ThumbnailKeys
+  | HeroImageKeys
+  | ThumbnailMainKeys
+  | ThumbnailVerticalKeys;
 
 /** 공통 이미지 필드를 가진 타입 */
 type WithImageFields = Partial<Record<AllImageKeys, string | null | undefined>>;
@@ -38,51 +46,47 @@ type WithImageFields = Partial<Record<AllImageKeys, string | null | undefined>>;
 
 /** 썸네일 우선순위 */
 const THUMBNAIL_KEYS: Readonly<ThumbnailKeys[]> = [
-  'thumbnail_square',
-  'thumbnail_horizontal',
-  'thumbnail_vertical',
+  "thumbnail_square",
+  "thumbnail_horizontal",
+  "thumbnail_vertical",
 ] as const;
 
 /** Hero 이미지 우선순위 */
 const HERO_KEYS: Readonly<HeroImageKeys[]> = [
-  'hero_image_01',
-  'hero_image_02',
-  'hero_image_03',
-  'hero_image_04',
-  'hero_image_05',
+  "hero_image_01",
+  "hero_image_02",
+  "hero_image_03",
+  "hero_image_04",
+  "hero_image_05",
 ] as const;
 
 /** 메인 썸네일 우선순위 */
 const THUMBNAIL_MAIN_KEYS: Readonly<ThumbnailMainKeys[]> = [
-  'thumbnail_main_01',
-  'thumbnail_main_02',
-  'thumbnail_main_03',
-  'thumbnail_main_04',
-  'thumbnail_main_05',
+  "thumbnail_main_01",
+  "thumbnail_main_02",
+  "thumbnail_main_03",
+  "thumbnail_main_04",
+  "thumbnail_main_05",
 ] as const;
 
 /** OG 이미지 우선순위 (Thumbnail → Hero → Main) */
-const OG_IMAGE_KEYS: Readonly<(ThumbnailKeys | HeroImageKeys | ThumbnailMainKeys)[]> = [
-  ...THUMBNAIL_KEYS,
-  ...HERO_KEYS,
-  ...THUMBNAIL_MAIN_KEYS,
-] as const;
+const OG_IMAGE_KEYS: Readonly<
+  (ThumbnailKeys | HeroImageKeys | ThumbnailMainKeys)[]
+> = [...THUMBNAIL_KEYS, ...HERO_KEYS, ...THUMBNAIL_MAIN_KEYS] as const;
 
 /** 수직 썸네일 우선순위 */
 const THUMBNAIL_VERTICAL_KEYS: Readonly<ThumbnailVerticalKeys[]> = [
-  'thumbnail_vertical_01',
-  'thumbnail_vertical_02',
-  'thumbnail_vertical_03',
-  'thumbnail_vertical_04',
-  'thumbnail_vertical_05',
+  "thumbnail_vertical_01",
+  "thumbnail_vertical_02",
+  "thumbnail_vertical_03",
+  "thumbnail_vertical_04",
+  "thumbnail_vertical_05",
 ] as const;
 
 /** 상세 페이지용 이미지 우선순위 (Hero → Main → Vertical) */
-const DETAIL_IMAGE_KEYS: Readonly<(HeroImageKeys | ThumbnailMainKeys | ThumbnailVerticalKeys)[]> = [
-  ...HERO_KEYS,
-  ...THUMBNAIL_MAIN_KEYS,
-  ...THUMBNAIL_VERTICAL_KEYS,
-] as const;
+const DETAIL_IMAGE_KEYS: Readonly<
+  (HeroImageKeys | ThumbnailMainKeys | ThumbnailVerticalKeys)[]
+> = [...HERO_KEYS, ...THUMBNAIL_MAIN_KEYS, ...THUMBNAIL_VERTICAL_KEYS] as const;
 
 /* ========================================
  * 헬퍼 함수
@@ -96,7 +100,7 @@ const DETAIL_IMAGE_KEYS: Readonly<(HeroImageKeys | ThumbnailMainKeys | Thumbnail
  */
 function toAbsoluteUrl(imagePath: string, bucket: string): string | null {
   // 이미 절대 URL이면 그대로 반환
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
     return imagePath;
   }
   // 상대 경로면 Supabase Storage URL로 변환 (null 가능)
@@ -113,20 +117,20 @@ function toAbsoluteUrl(imagePath: string, bucket: string): string | null {
 function extractImageUrls<T extends WithImageFields>(
   entity: T | null | undefined,
   keys: readonly string[],
-  bucket: string
+  bucket: string,
 ): string[] {
   if (!entity) return [];
-  
+
   const validPaths: string[] = [];
-  
+
   // 1단계: 유효한 문자열 경로만 추출
   for (const key of keys) {
     const value = entity[key as keyof T];
-    if (typeof value === 'string' && value.length > 0) {
+    if (typeof value === "string" && value.length > 0) {
       validPaths.push(value);
     }
   }
-  
+
   // 2단계: 절대 URL로 변환 (null 제거)
   const urls: string[] = [];
   for (const path of validPaths) {
@@ -135,7 +139,7 @@ function extractImageUrls<T extends WithImageFields>(
       urls.push(url);
     }
   }
-  
+
   return urls;
 }
 
@@ -149,7 +153,7 @@ function extractImageUrls<T extends WithImageFields>(
  */
 export function getThumbnailImageUrls<T extends WithImageFields>(
   entity: T | null | undefined,
-  bucket: string
+  bucket: string,
 ): string[] {
   return extractImageUrls(entity, THUMBNAIL_KEYS, bucket);
 }
@@ -160,7 +164,7 @@ export function getThumbnailImageUrls<T extends WithImageFields>(
  */
 export function getHeroImageUrls<T extends WithImageFields>(
   entity: T | null | undefined,
-  bucket: string
+  bucket: string,
 ): string[] {
   return extractImageUrls(entity, HERO_KEYS, bucket);
 }
@@ -171,7 +175,7 @@ export function getHeroImageUrls<T extends WithImageFields>(
  */
 export function getDetailImageUrls<T extends WithImageFields>(
   entity: T | null | undefined,
-  bucket: string
+  bucket: string,
 ): string[] {
   return extractImageUrls(entity, DETAIL_IMAGE_KEYS, bucket);
 }
@@ -182,7 +186,7 @@ export function getDetailImageUrls<T extends WithImageFields>(
  */
 export function getDetailVerticalImageUrls<T extends WithImageFields>(
   entity: T | null | undefined,
-  bucket: string
+  bucket: string,
 ): string[] {
   return extractImageUrls(entity, THUMBNAIL_VERTICAL_KEYS, bucket);
 }
@@ -194,20 +198,20 @@ export function getDetailVerticalImageUrls<T extends WithImageFields>(
  */
 export function getOgImageUrl<T extends WithImageFields>(
   entity: T | null | undefined,
-  bucket: string
+  bucket: string,
 ): string | null {
   if (!entity) return null;
-  
+
   for (const key of OG_IMAGE_KEYS) {
     const value = entity[key as keyof T];
-    if (typeof value === 'string' && value.length > 0) {
+    if (typeof value === "string" && value.length > 0) {
       const url = toAbsoluteUrl(value, bucket);
       if (url !== null) {
         return url;
       }
     }
   }
-  
+
   return null;
 }
 
@@ -217,106 +221,109 @@ export function getOgImageUrl<T extends WithImageFields>(
 
 // ===== EVENT =====
 export const getEventThumbnailImageUrls = (entity?: TEventDetail | null) =>
-  getThumbnailImageUrls(entity, 'events');
+  getThumbnailImageUrls(entity, "events");
 
 export const getEventHeroImageUrls = (entity?: TEventDetail | null) =>
-  getHeroImageUrls(entity, 'events');
+  getHeroImageUrls(entity, "events");
 
 export const getEventDetailImageUrls = (entity?: TEventDetail | null) =>
-  getDetailImageUrls(entity, 'events');
+  getDetailImageUrls(entity, "events");
 
 export const getEventDetailVerticalImageUrls = (entity?: TEventDetail | null) =>
-  getDetailVerticalImageUrls(entity, 'events');
+  getDetailVerticalImageUrls(entity, "events");
 
 export const getEventOgImageUrl = (entity?: TEventDetail | null) =>
-  getOgImageUrl(entity, 'events');
+  getOgImageUrl(entity, "events");
 
 // ===== CITY =====
 export const getCityThumbnailImageUrls = (entity?: TCityDetail | null) =>
-  getThumbnailImageUrls(entity, 'cities');
+  getThumbnailImageUrls(entity, "cities");
 
 export const getCityHeroImageUrls = (entity?: TCityDetail | null) =>
-  getHeroImageUrls(entity, 'cities');
+  getHeroImageUrls(entity, "cities");
 
 export const getCityDetailImageUrls = (entity?: TCityDetail | null) =>
-  getDetailImageUrls(entity, 'cities');
+  getDetailImageUrls(entity, "cities");
 
 export const getCityDetailVerticalImageUrls = (entity?: TCityDetail | null) =>
-  getDetailVerticalImageUrls(entity, 'cities');
+  getDetailVerticalImageUrls(entity, "cities");
 
 export const getCityOgImageUrl = (entity?: TCityDetail | null) =>
-  getOgImageUrl(entity, 'cities');
+  getOgImageUrl(entity, "cities");
 
 // ===== CATEGORY =====
-export const getCategoryThumbnailImageUrls = (entity?: TCategoryDetail | null) =>
-  getThumbnailImageUrls(entity, 'categories');
+export const getCategoryThumbnailImageUrls = (
+  entity?: TCategoryDetail | null,
+) => getThumbnailImageUrls(entity, "categories");
 
 export const getCategoryHeroImageUrls = (entity?: TCategoryDetail | null) =>
-  getHeroImageUrls(entity, 'categories');
+  getHeroImageUrls(entity, "categories");
 
 export const getCategoryDetailImageUrls = (entity?: TCategoryDetail | null) =>
-  getDetailImageUrls(entity, 'categories');
+  getDetailImageUrls(entity, "categories");
 
-export const getCategoryDetailVerticalImageUrls = (entity?: TCategoryDetail | null) =>
-  getDetailVerticalImageUrls(entity, 'categories');
+export const getCategoryDetailVerticalImageUrls = (
+  entity?: TCategoryDetail | null,
+) => getDetailVerticalImageUrls(entity, "categories");
 
 export const getCategoryOgImageUrl = (entity?: TCategoryDetail | null) =>
-  getOgImageUrl(entity, 'categories');
+  getOgImageUrl(entity, "categories");
 
 // ===== STAG =====
 export const getStagThumbnailImageUrls = (entity?: TStagDetail | null) =>
-  getThumbnailImageUrls(entity, 'stags');
+  getThumbnailImageUrls(entity, "stags");
 
 export const getStagHeroImageUrls = (entity?: TStagDetail | null) =>
-  getHeroImageUrls(entity, 'stags');
+  getHeroImageUrls(entity, "stags");
 
 export const getStagDetailImageUrls = (entity?: TStagDetail | null) =>
-  getDetailImageUrls(entity, 'stags');
+  getDetailImageUrls(entity, "stags");
 
 export const getStagDetailVerticalImageUrls = (entity?: TStagDetail | null) =>
-  getDetailVerticalImageUrls(entity, 'stags');
+  getDetailVerticalImageUrls(entity, "stags");
 
 export const getStagOgImageUrl = (entity?: TStagDetail | null) =>
-  getOgImageUrl(entity, 'stags');
+  getOgImageUrl(entity, "stags");
 
 // ===== FOLDER =====
 export const getFolderThumbnailImageUrls = (entity?: TFolderDetail | null) =>
-  getThumbnailImageUrls(entity, 'folders');
+  getThumbnailImageUrls(entity, "folders");
 
 export const getFolderHeroImageUrls = (entity?: TFolderDetail | null) =>
-  getHeroImageUrls(entity, 'folders');
+  getHeroImageUrls(entity, "folders");
 
 export const getFolderDetailImageUrls = (entity?: TFolderDetail | null) =>
-  getDetailImageUrls(entity, 'folders');
+  getDetailImageUrls(entity, "folders");
 
-export const getFolderDetailVerticalImageUrls = (entity?: TFolderDetail | null) =>
-  getDetailVerticalImageUrls(entity, 'folders');
+export const getFolderDetailVerticalImageUrls = (
+  entity?: TFolderDetail | null,
+) => getDetailVerticalImageUrls(entity, "folders");
 
 export const getFolderOgImageUrl = (entity?: TFolderDetail | null) =>
-  getOgImageUrl(entity, 'folders');
+  getOgImageUrl(entity, "folders");
 
 // ===== GROUP =====
 export const getGroupThumbnailImageUrls = (entity?: TGroupDetail | null) =>
-  getThumbnailImageUrls(entity, 'groups');
+  getThumbnailImageUrls(entity, "groups");
 
 export const getGroupHeroImageUrls = (entity?: TGroupDetail | null) =>
-  getHeroImageUrls(entity, 'groups');
+  getHeroImageUrls(entity, "groups");
 
 export const getGroupDetailImageUrls = (entity?: TGroupDetail | null) =>
-  getDetailImageUrls(entity, 'groups');
+  getDetailImageUrls(entity, "groups");
 
 export const getGroupDetailVerticalImageUrls = (entity?: TGroupDetail | null) =>
-  getDetailVerticalImageUrls(entity, 'groups');
+  getDetailVerticalImageUrls(entity, "groups");
 
 export const getGroupOgImageUrl = (entity?: TGroupDetail | null) =>
-  getOgImageUrl(entity, 'groups');
+  getOgImageUrl(entity, "groups");
 
 // ===== COUNTRY (Hero만 있음) =====
 export const getCountryHeroImageUrls = (entity?: TCountryDetail | null) =>
-  getHeroImageUrls(entity, 'countries');
+  getHeroImageUrls(entity, "countries");
 
 export const getCountryOgImageUrl = (entity?: TCountryDetail | null) =>
-  getOgImageUrl(entity, 'countries');
+  getOgImageUrl(entity, "countries");
 
 /* ========================================
  * 레거시 호환성 (기존 코드와의 호환)

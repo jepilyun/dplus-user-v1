@@ -30,5 +30,5 @@ export const dplusI18nZH = {
     directions: "路线",
     move_to_home: "移动到首页",
     more_events: "其他活动",
-  }
+  },
 };

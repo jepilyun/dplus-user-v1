@@ -1,12 +1,15 @@
 // utils/generate-image-url.ts
-import { SUPABASE_URL } from '@/lib/supabase-config';
+import { SUPABASE_URL } from "@/lib/supabase-config";
 
 /**
  * 이미지 경로를 절대 URL로 변환 (헬퍼)
  */
-export function ensureAbsoluteUrl(path: string | null | undefined, bucket: string): string | null {
+export function ensureAbsoluteUrl(
+  path: string | null | undefined,
+  bucket: string,
+): string | null {
   if (!path) return null;
-  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
   return generateStorageImageUrl(bucket, path);
 }
 
@@ -21,6 +24,6 @@ export const generateStorageImageUrl = (
   path: string | null,
 ): string | null => {
   if (!path) return null;
-  
+
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
 };

@@ -8,7 +8,7 @@ export const dplusI18nID = {
     youtube: "Youtube",
     instagram: "Instagram",
     facebook: "Facebook",
-    twitter: "Twitter",  
+    twitter: "Twitter",
     tiktok: "Tiktok",
     ticket_purchase: "Pembelian tiket",
     url: "URL",
@@ -30,5 +30,5 @@ export const dplusI18nID = {
     directions: "Rute",
     move_to_home: "Pindah ke Menu Utama",
     more_events: "Acara Lainnya",
-  }
+  },
 };

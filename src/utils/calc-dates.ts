@@ -10,7 +10,7 @@ export const calculateDaysFromToday = (
 ): number => {
   // 현재 시각 (사용자의 로컬 타임존)
   const now = new Date();
-  
+
   // 입력받은 날짜를 Date 객체로 변환
   const target = new Date(targetDate);
 
@@ -37,21 +37,23 @@ export const calculateDaysFromToday = (
  * @param utcDateString - UTC 시간 문자열 (ISO 8601 형식)
  * @returns 로컬 시간 문자열 (HH:MM 형식), 00:00이면 undefined
  */
-export const getLocalTimeFromUTC = (utcDateString: string): string | undefined => {
+export const getLocalTimeFromUTC = (
+  utcDateString: string,
+): string | undefined => {
   if (!utcDateString) return undefined;
-  
+
   const date = new Date(utcDateString);
   if (isNaN(date.getTime())) return undefined;
-  
+
   const hours = date.getHours();
   const minutes = date.getMinutes();
-  
+
   // ✅ 00:00이면 시간 정보 없음으로 처리
   if (hours === 0 && minutes === 0) {
     return undefined;
   }
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 };
 
 /**
@@ -61,15 +63,15 @@ export const getLocalTimeFromUTC = (utcDateString: string): string | undefined =
  */
 export const getDdayFromUTC = (utcDateString: string): number => {
   if (!utcDateString) return 0;
-  
+
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  
+
   const target = new Date(utcDateString);
   target.setHours(0, 0, 0, 0);
-  
+
   const diffInMilliseconds = target.getTime() - now.getTime();
   const diffInDays = Math.round(diffInMilliseconds / (1000 * 60 * 60 * 24));
-  
+
   return diffInDays;
 };

@@ -9,7 +9,6 @@ export type APIUrlOptionalParams = {
   cityCode?: string | null;
   stagCode?: string | null;
   groupCode?: string | null;
-  tagId?: number | null;
   tagCode?: string | null;
   eventCode?: string | null;
   folderCode?: string | null;
@@ -462,7 +461,7 @@ export const apiUrlGroup = (
 /**
  * API Routes: Tag Detail 경로 생성
  * @param type 경로 타입
- * @param optionalParams { tagId, start, limit }
+ * @param optionalParams { tagCode, start, limit }
  * @returns 경로
  */
 export const apiUrlTag = (
@@ -487,14 +486,14 @@ export const apiUrlTag = (
       break;
     case "eventsGet":
       if (
-        typeof optionalParams?.tagId === "number" &&
+        optionalParams?.tagCode &&
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/tag/events/get/${optionalParams?.tagId}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/tag/events/get/${encodeURIComponent(optionalParams?.tagCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
-          `Invalid optional params: [optionalParams?.tagId] ${optionalParams?.tagId}`,
+          `Invalid optional params: [optionalParams?.tagCode] ${optionalParams?.tagCode}`,
         );
       }
       break;

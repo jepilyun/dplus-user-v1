@@ -30,5 +30,5 @@ export const dplusI18nJA = {
     directions: "ルート",
     move_to_home: "ホームメニューに移動",
     more_events: "他のイベントを見る",
-  }
+  },
 };

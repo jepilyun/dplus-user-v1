@@ -30,5 +30,5 @@ export const dplusI18nTW = {
     directions: "路線",
     move_to_home: "移動到首頁",
     more_events: "其他活動",
-  }
+  },
 };

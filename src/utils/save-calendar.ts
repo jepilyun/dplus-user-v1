@@ -1,13 +1,13 @@
 import { ICalendarEvent, ISODateInput } from "@/types";
 import { TEventDescription, TEventDetail } from "dplus_common_v1";
+
 import {
   addDaysToDate,
   addMinutes,
   formatDateAllDay,
   toDate,
 } from "./date-utils";
-import { detectDevice, DeviceType } from "./device-detector";
-
+import { DeviceType, detectDevice } from "./device-detector";
 
 /**
  * 날짜를 Google Calendar 형식으로 변환 (YYYYMMDD 또는 YYYYMMDDTHHMMSSZ)
@@ -28,7 +28,6 @@ const toGoogleDate = (date: ISODateInput, allDay = false): string => {
   // YYYYMMDDTHHMMSSZ (UTC)
   return d.toISOString().replace(/-|:|\.\d+/g, "");
 };
-
 
 /**
  * TEventDetail 객체로부터 Calendar Event 형식의 객체를 생성합니다.
@@ -59,30 +58,29 @@ export const generateCalendarEvent = (
   if (eventDetail.duration) {
     event.endDate = addMinutes(toDate(event.startDate), eventDetail.duration);
   }
-  
+
   if (eventDetail.event_code) {
     const dplusUrl = `https://dplus.app/event/${eventDetail.event_code}`;
-    const dplusLink = description 
+    const dplusLink = description
       ? `${description}\n\n━━━━━━━━━━━━━━━━\n📱 View on DPlus: ${dplusUrl}`
       : `📱 View on DPlus: ${dplusUrl}`;
     event.description = dplusLink;
   } else if (description) {
-    event.description = description.description ?? '';
+    event.description = description.description ?? "";
   }
-  
+
   if (eventDetail.address_native) event.location = eventDetail.address_native;
   if (eventDetail.tz) event.timezone = eventDetail.tz;
-  
+
   if (description?.url) {
-    event.website = { 
-      name: description.url_label ?? "Event Website", 
-      url: description.url 
+    event.website = {
+      name: description.url_label ?? "Event Website",
+      url: description.url,
     };
   }
-  
+
   return event;
 };
-
 
 /**
  * Google Calendar 이벤트 추가 URL을 생성합니다.
@@ -350,35 +348,43 @@ export const generateAppleCalendarEvent = (
 export const addToAndroidCalendar = (event: ICalendarEvent) => {
   // Android Google Calendar 앱 딥링크
   const url = createGoogleCalendarUrl(event);
-  
+
   // intent:// 스킴으로 변경하여 앱으로 직접 연결
-  const intentUrl = url.replace(
-    'https://www.google.com/calendar',
-    'intent://www.google.com/calendar'
-  ) + '#Intent;scheme=https;package=com.google.android.calendar;end';
-  
+  const intentUrl =
+    url.replace(
+      "https://www.google.com/calendar",
+      "intent://www.google.com/calendar",
+    ) + "#Intent;scheme=https;package=com.google.android.calendar;end";
+
   window.location.href = intentUrl;
 };
 
-
-export const addToCalendar = (detail: TEventDetail | null, description: TEventDescription | null, platform?: DeviceType) => {
+export const addToCalendar = (
+  detail: TEventDetail | null,
+  description: TEventDescription | null,
+  platform?: DeviceType,
+) => {
   if (!detail) return;
 
   const detectedPlatform = platform || detectDevice();
-  const { icsText, filename } = generateAppleCalendarEvent(detail, description, {
-    useTZID: true,
-  });
+  const { icsText, filename } = generateAppleCalendarEvent(
+    detail,
+    description,
+    {
+      useTZID: true,
+    },
+  );
 
   const blob = new Blob([icsText], { type: "text/calendar;charset=utf-8" });
   const url = URL.createObjectURL(blob);
 
   switch (detectedPlatform) {
-    case 'ios':
+    case "ios":
       // iOS: 새 탭에서 열기
       window.open(url, "_blank");
       break;
-      
-    case 'android':
+
+    case "android":
       try {
         // 먼저 Google Calendar 앱으로 시도
         addToAndroidCalendar(generateCalendarEvent(detail, description));
@@ -392,8 +398,8 @@ export const addToCalendar = (detail: TEventDetail | null, description: TEventDe
         document.body.removeChild(a);
       }
       break;
-      
-    case 'desktop':
+
+    case "desktop":
 
     default:
       // Desktop: ICS 파일 다운로드

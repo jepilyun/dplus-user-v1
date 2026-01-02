@@ -45,10 +45,10 @@ export const reqGetEventDetail = async (
   const res = await fetch(apiUrlEvent("detailGet", { eventCode, langCode }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 14400, // ✅ 4시간 캐시
-      tags: [`event-${eventCode}`] // ✅ 필요시 특정 이벤트만 revalidate
-    }
+      tags: [`event-${eventCode}`], // ✅ 필요시 특정 이벤트만 revalidate
+    },
   });
 
   return res.json();
@@ -96,10 +96,10 @@ export const reqGetEventMetadata = async (
   const res = await fetch(apiUrlEvent("metadataGet", { eventCode, langCode }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 86400, // ✅ 24시간 캐시
-      tags: [`event-metadata-${eventCode}-${langCode}`] // ✅ 필요시 특정 이벤트만 revalidate
-    }
+      tags: [`event-metadata-${eventCode}-${langCode}`], // ✅ 필요시 특정 이벤트만 revalidate
+    },
   });
 
   return res.json();
@@ -124,10 +124,10 @@ export const reqGetFolderDetail = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`folder-${folderCode}`] // ✅ 특정 폴더만 revalidate 가능
-      }
+        tags: [`folder-${folderCode}`], // ✅ 특정 폴더만 revalidate 가능
+      },
     },
   );
 
@@ -151,10 +151,10 @@ export const reqGetFolderCodeList = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 3600, // ✅ 1시간 캐시
-        tags: [`folder-code-list-${countryCode}-${cityCode}`]
-      }
+        tags: [`folder-code-list-${countryCode}-${cityCode}`],
+      },
     },
   );
 
@@ -180,10 +180,10 @@ export const reqGetFolderEvents = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`folder-events-${folderCode}`]
-      }
+        tags: [`folder-events-${folderCode}`],
+      },
     },
   );
 
@@ -205,10 +205,10 @@ export const reqGetFolderMetadata = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 86400, // ✅ 24시간 캐시
-        tags: [`folder-metadata-${folderCode}-${langCode}`]
-      }
+        tags: [`folder-metadata-${folderCode}-${langCode}`],
+      },
     },
   );
   return res.json();
@@ -227,21 +227,22 @@ export const reqGetDateList = async (
   dateString: string,
   start: number,
   limit: number,
-): Promise<ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>> => {
+): Promise<
+  ResponseDplusAPI<DplusGetListDataResponse<TEventCardForDateDetail>>
+> => {
   const res = await fetch(
     apiUrlDate("detailGet", { countryCode, dateString, start, limit }),
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시 (날짜별 데이터는 자주 변경)
-        tags: [`date-${dateString}-${countryCode}`]
-      }
+        tags: [`date-${dateString}-${countryCode}`],
+      },
     },
   );
   return res.json();
 };
-
 
 /**
  * City 상세 화면 조회 for User Front
@@ -257,14 +258,17 @@ export const reqGetCityDetail = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseCityDetailForUserFront>> => {
-  const res = await fetch(apiUrlCity("detailGet", { cityCode, langCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-    next: { 
-      revalidate: 7200, // ✅ 2시간 캐시
-      tags: [`city-${cityCode}-${langCode}`]
-    }
-  });
+  const res = await fetch(
+    apiUrlCity("detailGet", { cityCode, langCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+      next: {
+        revalidate: 7200, // ✅ 2시간 캐시
+        tags: [`city-${cityCode}-${langCode}`],
+      },
+    },
+  );
   return res.json();
 };
 
@@ -284,14 +288,17 @@ export const reqGetCityEvents = async (
 ): Promise<
   ResponseDplusAPI<DplusGetListDataResponse<TMapCityEventWithEventInfo>>
 > => {
-  const res = await fetch(apiUrlCity("eventsGet", { cityCode, start, limit, langCode }), {
-    method: "GET",
-    credentials: "include",
-    next: { 
-      revalidate: 7200, // ✅ 2시간 캐시
-      tags: [`city-events-${cityCode}`]
-    }
-  });
+  const res = await fetch(
+    apiUrlCity("eventsGet", { cityCode, start, limit, langCode }),
+    {
+      method: "GET",
+      credentials: "include",
+      next: {
+        revalidate: 7200, // ✅ 2시간 캐시
+        tags: [`city-events-${cityCode}`],
+      },
+    },
+  );
   return res.json();
 };
 
@@ -305,10 +312,10 @@ export const reqGetCityCodes = async (
   const res = await fetch(apiUrlCity("getCityCodes", { limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 3600, // ✅ 1시간 캐시
-      tags: [`city-code-list`]
-    }
+      tags: [`city-code-list`],
+    },
   });
 
   return res.json();
@@ -327,10 +334,10 @@ export const reqGetCityMetadata = async (
   const res = await fetch(apiUrlCity("metadataGet", { cityCode, langCode }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 86400, // ✅ 24시간 캐시
-      tags: [`city-metadata-${cityCode}-${langCode}`]
-    }
+      tags: [`city-metadata-${cityCode}-${langCode}`],
+    },
   });
   return res.json();
 };
@@ -349,14 +356,17 @@ export const reqGetStagDetail = async (
   start: number,
   limit: number,
 ): Promise<ResponseDplusAPI<ResponseStagDetailForUserFront>> => {
-  const res = await fetch(apiUrlStag("detailGet", { stagCode, langCode, start, limit }), {
-    method: "GET",
-    credentials: "include",
-    next: { 
-      revalidate: 7200, // ✅ 2시간 캐시
-      tags: [`stag-${stagCode}-${langCode}`]
-    }
-  });
+  const res = await fetch(
+    apiUrlStag("detailGet", { stagCode, langCode, start, limit }),
+    {
+      method: "GET",
+      credentials: "include",
+      next: {
+        revalidate: 7200, // ✅ 2시간 캐시
+        tags: [`stag-${stagCode}-${langCode}`],
+      },
+    },
+  );
   return res.json();
 };
 
@@ -370,10 +380,10 @@ export const reqGetStagCodes = async (
   const res = await fetch(apiUrlStag("getStagCodes", { limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 3600, // ✅ 1시간 캐시
-      tags: [`stag-code-list`]
-    }
+      tags: [`stag-code-list`],
+    },
   });
   return res.json();
 };
@@ -395,10 +405,10 @@ export const reqGetStagEvents = async (
   const res = await fetch(apiUrlStag("eventsGet", { stagCode, start, limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 7200, // ✅ 2시간 캐시
-      tags: [`stag-events-${stagCode}`]
-    }
+      tags: [`stag-events-${stagCode}`],
+    },
   });
   return res.json();
 };
@@ -416,10 +426,10 @@ export const reqGetStagMetadata = async (
   const res = await fetch(apiUrlStag("metadataGet", { stagCode, langCode }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 86400, // ✅ 24시간 캐시
-      tags: [`stag-metadata-${stagCode}-${langCode}`]
-    }
+      tags: [`stag-metadata-${stagCode}-${langCode}`],
+    },
   });
   return res.json();
 };
@@ -443,10 +453,10 @@ export const reqGetGroupDetail = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`group-${groupCode}`]
-      }
+        tags: [`group-${groupCode}`],
+      },
     },
   );
   return res.json();
@@ -471,10 +481,10 @@ export const reqGetGroupEvents = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시 (더보기는 짧게)
-        tags: [`group-events-${groupCode}`]
-      }
+        tags: [`group-events-${groupCode}`],
+      },
     },
   );
   return res.json();
@@ -490,10 +500,10 @@ export const reqGetGroupCodes = async (
   const res = await fetch(apiUrlGroup("getGroupCodes", { limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 3600, // ✅ 1시간 캐시
-      tags: [`group-code-list`]
-    }
+      tags: [`group-code-list`],
+    },
   });
 
   return res.json();
@@ -512,10 +522,10 @@ export const reqGetGroupMetadata = async (
   const res = await fetch(apiUrlGroup("metadataGet", { groupCode, langCode }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 86400, // ✅ 24시간 캐시
-      tags: [`group-metadata-${groupCode}-${langCode}`]
-    }
+      tags: [`group-metadata-${groupCode}-${langCode}`],
+    },
   });
   return res.json();
 };
@@ -535,10 +545,10 @@ export const reqGetTagDetail = async (
   const res = await fetch(apiUrlTag("detailGet", { tagCode, start, limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 7200, // ✅ 2시간 캐시
-      tags: [`tag-${tagCode}`]
-    }
+      tags: [`tag-${tagCode}`],
+    },
   });
 
   return res.json();
@@ -546,25 +556,25 @@ export const reqGetTagDetail = async (
 
 /**
  * Tag 상세 화면 Events 더보기 조회 for User Front
- * @param tagId
+ * @param tagCode
  * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetTagEvents = async (
-  tagId: number,
+  tagCode: string,
   start: number,
   limit: number,
 ): Promise<
   ResponseDplusAPI<DplusGetListDataResponse<TMapTagEventWithEventInfo>>
 > => {
-  const res = await fetch(apiUrlTag("eventsGet", { tagId, start, limit }), {
+  const res = await fetch(apiUrlTag("eventsGet", { tagCode, start, limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 7200, // ✅ 2시간 캐시
-      tags: [`tag-events-${tagId}`]
-    }
+      tags: [`tag-events-${tagCode}`],
+    },
   });
   return res.json();
 };
@@ -596,10 +606,10 @@ export const reqGetCategoryDetail = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`category-${countryCode}-${categoryCode}`]
-      }
+        tags: [`category-${countryCode}-${categoryCode}`],
+      },
     },
   );
 
@@ -627,10 +637,10 @@ export const reqGetCategoryEvents = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`category-events-${countryCode}-${categoryCode}`]
-      }
+        tags: [`category-events-${countryCode}-${categoryCode}`],
+      },
     },
   );
   return res.json();
@@ -646,10 +656,10 @@ export const reqGetCategoryCodes = async (
   const res = await fetch(apiUrlCategory("getCategoryCodes", { limit }), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 3600, // ✅ 1시간 캐시
-      tags: [`category-code-list`]
-    }
+      tags: [`category-code-list`],
+    },
   });
 
   return res.json();
@@ -670,10 +680,10 @@ export const reqGetCategoryMetadata = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 86400, // ✅ 24시간 캐시
-        tags: [`category-metadata-${categoryCode}-${langCode}`]
-      }
+        tags: [`category-metadata-${categoryCode}-${langCode}`],
+      },
     },
   );
 
@@ -699,10 +709,10 @@ export const reqGetTodayList = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`today-${countryCode}`]
-      }
+        tags: [`today-${countryCode}`],
+      },
     },
   );
   return res.json();
@@ -728,10 +738,10 @@ export const reqGetCountryDetail = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`country-${countryCode}`]
-      }
+        tags: [`country-${countryCode}`],
+      },
     },
   );
   return res.json();
@@ -758,10 +768,10 @@ export const reqGetCountryEvents = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 7200, // ✅ 2시간 캐시
-        tags: [`country-events-${countryCode}`]
-      }
+        tags: [`country-events-${countryCode}`],
+      },
     },
   );
   return res.json();
@@ -777,10 +787,10 @@ export const reqGetCountryCodes = async (): Promise<
   const res = await fetch(apiUrlCountry("getCountryCodes"), {
     method: "GET",
     credentials: "include",
-    next: { 
+    next: {
       revalidate: 3600, // ✅ 1시간 캐시
-      tags: [`country-code-list`]
-    }
+      tags: [`country-code-list`],
+    },
   });
 
   return res.json();
@@ -801,10 +811,10 @@ export const reqGetCountryMetadata = async (
     {
       method: "GET",
       credentials: "include",
-      next: { 
+      next: {
         revalidate: 86400, // ✅ 24시간 캐시
-        tags: [`country-metadata-${countryCode}-${langCode}`]
-      }
+        tags: [`country-metadata-${countryCode}-${langCode}`],
+      },
     },
   );
   return res.json();

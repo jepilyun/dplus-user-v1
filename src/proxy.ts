@@ -131,14 +131,14 @@ export function proxy(request: NextRequest) {
   // ✅ 첫 세그먼트가 1개일 때 (루트 레벨 경로)
   if (segs.length === 1) {
     const lowerFirst = firstSeg.toLowerCase();
-    
+
     // ✅ 지원되는 경로면 통과 (date, event, folder 등)
     if (SUPPORTED_PATH_PREFIXES.has(lowerFirst)) {
       return NextResponse.next();
     }
-    
+
     const isTwoLetters = /^[A-Za-z]{2}$/.test(firstSeg);
-    
+
     // ✅ 2글자 영문이면서 지원되는 prefix가 아닌 경우 → 국가 코드로 간주
     if (isTwoLetters) {
       const code = firstSeg.toUpperCase();
@@ -148,7 +148,7 @@ export function proxy(request: NextRequest) {
       }
       return NextResponse.next();
     }
-    
+
     // ✅ 2글자 영문도 아니고 지원되는 경로도 아님 → AA로 리다이렉트
     return NextResponse.redirect(new URL(`/AA`, request.url));
   }

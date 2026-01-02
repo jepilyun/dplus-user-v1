@@ -30,5 +30,5 @@ export const dplusI18nVI = {
     directions: "Hướng dẫn",
     move_to_home: "Di chuyển đến Trang chủ",
     more_events: "Sự kiện khác",
-  }
+  },
 };

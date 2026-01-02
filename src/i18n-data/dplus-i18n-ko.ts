@@ -29,5 +29,5 @@ export const dplusI18nKO = {
     directions: "길찾기",
     move_to_home: "홈 메뉴로 이동",
     more_events: "다른 일정 더 보기",
-  }
+  },
 };
