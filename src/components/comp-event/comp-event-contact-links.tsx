@@ -7,6 +7,7 @@ import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { Phone, Home, Mail, Ticket, Globe, ShoppingBag, Info, Tv, BadgeCheck } from "lucide-react";
 import { IconYoutube } from "@/icons/icon-youtube";
 import { IconInstagram } from "@/icons/icon-instagram";
+import { TEventDescription } from "dplus_common_v1";
 
 type TEventMinimal = {
   phone?: string | null;
@@ -49,120 +50,120 @@ const cleanUrl = (url: string): string => {
 };
 
 export default function CompEventContactLinks({ 
-  event, 
+  eventDescription, 
   langCode 
 }: { 
-  event: TEventMinimal | null | undefined;
+  eventDescription: TEventDescription | null;
   langCode: string;
 }) {
   const links = useMemo(() => {
-    if (!event) return [];
+    if (!eventDescription) return [];
 
     const items: TLinkItem[] = [];
     const i18n = getDplusI18n(langCode);
 
-    if (event.phone) {
-      const phoneText = `${event.phone_country_code ? `+${event.phone_country_code} ` : ""}${event.phone}`;
+    if (eventDescription.phone) {
+      const phoneText = `${eventDescription.phone_country_code ? `+${eventDescription.phone_country_code} ` : ""}${eventDescription.phone}`;
       items.push({
         key: "phone",
         icon: <Phone className="h-5 w-5" />,
         text: phoneText,
-        href: toTelUrl(event.phone),
+        href: toTelUrl(eventDescription.phone),
       });
     }
 
-    if (event.email) {
+    if (eventDescription.email) {
       items.push({
         key: "email",
         icon: <Mail className="h-5 w-5" />,
-        text: event.email,
-        href: toMailUrl(event.email),
+        text: eventDescription.email,
+        href: toMailUrl(eventDescription.email),
       });
     }
 
-    if (event.homepage) {
+    if (eventDescription.homepage) {
       items.push({
         key: "homepage",
         icon: <Home className="h-5 w-5" />,
-        text: cleanUrl(event.homepage),
-        href: toAbsoluteUrl(event.homepage),
+        text: cleanUrl(eventDescription.homepage),
+        href: toAbsoluteUrl(eventDescription.homepage),
       });
     }
 
-    if (event.youtube_ch_id) {
+    if (eventDescription.youtube_ch_id) {
       items.push({
         key: "youtube",
         icon: <IconYoutube className="h-5 w-5" />,
         text: i18n.labels.youtube,
-        href: toYoutubeChannelUrl(event.youtube_ch_id),
+        href: toYoutubeChannelUrl(eventDescription.youtube_ch_id),
       });
     }
 
-    if (event.instagram_id) {
+    if (eventDescription.instagram_id) {
       items.push({
         key: "instagram",
         icon: <IconInstagram className="h-5 w-5" />,
-        text: event.instagram_id,
-        href: toInstagramUrl(event.instagram_id),
+        text: eventDescription.instagram_id,
+        href: toInstagramUrl(eventDescription.instagram_id),
       });
     }
 
-    if (event.ticket_purchase) {
+    if (eventDescription.ticket_purchase) {
       items.push({
         key: "ticket_purchase",
         icon: <Ticket className="h-5 w-5" />,
-        text: cleanUrl(event.ticket_purchase),
-        href: toAbsoluteUrl(event.ticket_purchase),
+        text: cleanUrl(eventDescription.ticket_purchase),
+        href: toAbsoluteUrl(eventDescription.ticket_purchase),
       });
     }
 
-    if (event.url) {
+    if (eventDescription.url) {
       items.push({
         key: "url",
         icon: <Globe className="h-5 w-5" />,
-        text: cleanUrl(event.url),
-        href: event.url,
+        text: cleanUrl(eventDescription.url),
+        href: eventDescription.url,
       });
     }
 
-    if (event.product_purchase) {
+    if (eventDescription.product_purchase) {
       items.push({
         key: "product_purchase",
         icon: <ShoppingBag className="h-5 w-5" />,
-        text: cleanUrl(event.product_purchase),
-        href: toAbsoluteUrl(event.product_purchase),
+        text: cleanUrl(eventDescription.product_purchase),
+        href: toAbsoluteUrl(eventDescription.product_purchase),
       });
     }
 
-    if (event.detail_info_url) {
+    if (eventDescription.detail_info_url) {
       items.push({
         key: "detail_info_url",
         icon: <Info className="h-5 w-5" />,
-        text: cleanUrl(event.detail_info_url),
-        href: toAbsoluteUrl(event.detail_info_url),
+        text: cleanUrl(eventDescription.detail_info_url),
+        href: toAbsoluteUrl(eventDescription.detail_info_url),
       });
     }
 
-    if (event.watch_url) {
+    if (eventDescription.watch_url) {
       items.push({
         key: "watch_url",
         icon: <Tv className="h-5 w-5" />,
-        text: cleanUrl(event.watch_url),
-        href: toAbsoluteUrl(event.watch_url),
+        text: cleanUrl(eventDescription.watch_url),
+        href: toAbsoluteUrl(eventDescription.watch_url),
       });
     }
 
-    if (event.apply_url) {
+    if (eventDescription.apply_url) {
       items.push({
         key: "apply_url",
         icon: <BadgeCheck className="h-5 w-5" />,
-        text: cleanUrl(event.apply_url),
-        href: toAbsoluteUrl(event.apply_url),
+        text: cleanUrl(eventDescription.apply_url),
+        href: toAbsoluteUrl(eventDescription.apply_url),
       });
     }
 
     return items;
-  }, [event, langCode]);
+  }, [eventDescription, langCode]);
 
   if (links.length === 0) return null;
 

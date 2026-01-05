@@ -238,7 +238,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
 
         <CompEventDescription eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 
-        <CompEventContactLinks event={eventDetail?.eventDetail.description ?? null} langCode={langCode} />
+        <CompEventContactLinks eventDescription={eventDetail?.eventDetail.description ?? null} langCode={langCode} />
 
         <CompEventDetailMap eventDetail={eventDetail ?? null} langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]} />
 
