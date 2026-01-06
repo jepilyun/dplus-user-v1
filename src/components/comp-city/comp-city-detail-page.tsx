@@ -11,12 +11,15 @@ import { useEffect, useRef, useState } from "react";
 import { getCityDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { CompLoadMore } from "../comp-common/comp-load-more";
+import { CompLoadMore } from "../comp-button/comp-load-more";
 import { HeroImageBackgroundCarouselCity } from "../comp-image/hero-background-carousel-city";
 import { useCityPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCityViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
+import { CompLoading } from "../comp-common/comp-loading";
+import { CompNotFound } from "../comp-common/comp-not-found";
+import { CompNetworkError } from "../comp-common/comp-network-error";
 
 type CityPageState = {
   events: TMapCityEventWithEventInfo[];
@@ -369,43 +372,29 @@ export default function CompCityDetailPage({
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <div>Loading...</div>
-      </div>
+      <CompLoading message="Loading..." />
     );
   }
 
   if (error === "not-found") {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">City Not Found</h2>
-          <p className="text-gray-600 mb-6">해당 도시는 존재하지 않습니다.</p>
-          <button
-            onClick={() => router.push(`/${langCode}`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            홈 화면으로 이동
-          </button>
-        </div>
-      </div>
+      <CompNotFound
+        title="City Not Found"
+        message="해당 도시는 존재하지 않습니다."
+        returnPath={`/${langCode}`}
+        returnLabel="홈 화면으로 이동"
+      />
     );
   }
 
   if (error === "network") {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
-          <p className="text-gray-600 mb-6">Failed to load city details. Please try again.</p>
-          <button
-            onClick={() => fetchAndMergeData()}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <CompNetworkError
+        title="ERROR"
+        message="Failed to load city details. Please try again."
+        onRetry={() => fetchAndMergeData()}
+        retryLabel="Retry"
+      />
     );
   }
 

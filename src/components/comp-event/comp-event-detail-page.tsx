@@ -18,8 +18,11 @@ import { CompEventDescription } from "./comp-event-description";
 import { SupportedLocale } from "@/consts/const-config";
 import CompEventContactLinks from "./comp-event-contact-links";
 import { ArrowRight } from "lucide-react";
-import { CompLinkButton } from "../comp-common/comp-link-button";
+import { CompLinkButton } from "../comp-button/comp-link-button";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
+import { CompLoading } from "../comp-common/comp-loading";
+import { CompNotFound } from "../comp-common/comp-not-found";
+import { CompNetworkError } from "../comp-common/comp-network-error";
 
 
 /**
@@ -170,49 +173,31 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
     // 로딩 중
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <div>Loading...</div>
-      </div>
+      <CompLoading message="Loading..." />
     );
   }
 
   // 이벤트를 찾을 수 없는 경우 - 인라인 에러 표시
   if (error === 'not-found') {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Event Not Found</h2>
-          <p className="text-gray-600 mb-6">
-            해당 이벤트는 존재하지 않습니다.
-          </p>
-          <button
-            onClick={() => router.push(`/${langCode}`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            홈 화면으로 이동
-          </button>
-        </div>
-      </div>
+      <CompNotFound
+        title="Event Not Found"
+        message="해당 이벤트는 존재하지 않습니다."
+        returnPath={`/${langCode}`}
+        returnLabel="홈 화면으로 이동"
+      />
     );
   }
 
   // 네트워크 에러 - 재시도 옵션 제공
   if (error === 'network') {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
-          <p className="text-gray-600 mb-6">
-            Failed to load event details. Please try again.
-          </p>
-          <button
-            onClick={() => fetchEventDetail()}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <CompNetworkError
+        title="ERROR"
+        message="Failed to load event details. Please try again."
+        onRetry={() => fetchEventDetail()}
+        retryLabel="Retry"
+      />
     );
   }
 

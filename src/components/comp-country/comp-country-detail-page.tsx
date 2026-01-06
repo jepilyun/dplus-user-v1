@@ -8,7 +8,7 @@ import {
 } from "dplus_common_v1";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CompLoadMore } from "../comp-common/comp-load-more";
+import { CompLoadMore } from "../comp-button/comp-load-more";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCountryViewCount } from "@/utils/increment-count";
 import { NavigationSaveContext } from "@/contexts/navigation-save-context";
@@ -16,6 +16,9 @@ import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import { CompCountryCategoryItem } from "./comp-country-category-item";
 import { CompCountryCityItem } from "./comp-country-city-item";
 import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
+import { CompLoading } from "../comp-common/comp-loading";
+import { CompNotFound } from "../comp-common/comp-not-found";
+import { CompNetworkError } from "../comp-common/comp-network-error";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];
@@ -372,43 +375,29 @@ export default function CompCountryDetailPage({
   // 나머지 렌더링 로직은 동일...
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-20">
-        <div>Loading...</div>
-      </div>
+      <CompLoading message="Loading..." />
     );
   }
 
   if (error === 'not-found') {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Country Not Found</h2>
-          <p className="text-gray-600 mb-6">해당 국가는 존재하지 않습니다.</p>
-          <button
-            onClick={() => router.push(`/${langCode}`)}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            홈 화면으로 이동
-          </button>
-        </div>
-      </div>
+      <CompNotFound
+        title="Country Not Found"
+        message="해당 국가는 존재하지 않습니다."
+        returnPath={`/${langCode}`}
+        returnLabel="홈 화면으로 이동"
+      />
     );
   }
 
   if (error === 'network') {
     return (
-      <div className="mx-auto w-full max-w-[1024px] px-4 py-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">ERROR</h2>
-          <p className="text-gray-600 mb-6">Failed to load country details. Please try again.</p>
-          <button
-            onClick={() => fetchAndMergeData()}
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
+      <CompNetworkError
+        title="ERROR"
+        message="Failed to load country details. Please try again."
+        onRetry={() => fetchAndMergeData()}
+        retryLabel="Retry"
+      />
     );
   }
 

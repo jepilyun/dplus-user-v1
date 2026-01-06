@@ -5,7 +5,7 @@ import { IconGoogle } from "@/icons/icon-google"
 import { SUPPORT_LANG_CODES } from "dplus_common_v1"
 import { CalendarDays, Share2 } from "lucide-react"
 import { DeviceType } from "@/utils/device-detector"
-import { CompActionButton } from "@/components/comp-common/comp-action-button"
+import { CompActionButton } from "@/components/comp-button/comp-action-button"
 
 export const CompEventActionButtons = ({
   langCode,
