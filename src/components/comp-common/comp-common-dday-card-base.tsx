@@ -104,7 +104,7 @@ export default function CompCommonDdayItemCardBase({
           style={{ color: hasImage ? '#FFFFFF' : '#222222' }}
         >
           {/* 상단: D-Day Badge + 날짜/시간 */}
-          <div className="flex justify-end items-end gap-4">
+          <div className="w-full flex justify-end items-end gap-4">
             <div 
               className="inline-flex items-center justify-center rounded-full font-rubik font-bold text-lg flex-shrink-0 aspect-square w-20"
               style={{ 
@@ -114,8 +114,8 @@ export default function CompCommonDdayItemCardBase({
             >
               {ddayLabel}
             </div>
-            <div className="flex flex-grow flex-wrap items-center gap-1 text-base">
-              <span suppressHydrationWarning className={`truncate ${textColor} ${hasImage ? 'opacity-90' : ''}`}>
+            <div className="w-full flex flex-wrap items-center gap-1 text-base">
+              <span suppressHydrationWarning className={`break-words whitespace-normal ${textColor} ${hasImage ? 'opacity-90' : ''}`}>
                 {date
                   ? formatDateTime(
                       new Date(date),
