@@ -12,16 +12,16 @@ import { useEffect, useRef, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
 import { getFolderDetailImageUrls } from "@/utils/set-image-urls";
-import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
 import { CompLoadMore } from "../comp-button/comp-load-more";
 import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context";
-import { incrementFolderViewCount } from "@/utils/increment-count";
+import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 import { CompLoading } from "../comp-common/comp-loading";
 import { CompNotFound } from "../comp-common/comp-not-found";
 import { CompNetworkError } from "../comp-common/comp-network-error";
+import { CompFolderActionButtons } from "./comp-folder-action-buttons";
 
 type FolderPageState = {
   events: TMapFolderEventWithEventInfo[];
@@ -41,7 +41,7 @@ export default function CompFolderDetailPage({
   fullLocale: string;
   initialData: ResponseFolderDetailForUserFront | null;
 }) {
-  const router = useRouter();
+  // const router = useRouter();
   const { save, restore } = useFolderPageRestoration(folderCode);
 
   const viewCountIncrementedRef = useRef(false);
@@ -115,11 +115,11 @@ export default function CompFolderDetailPage({
       const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
-      console.log('[Folder Merge] 📊 Data versions:', {
-        new: newVersion,
-        old: dataVersion,
-        changed: newVersion !== dataVersion
-      });
+      // console.log('[Folder Merge] 📊 Data versions:', {
+      //   new: newVersion,
+      //   old: dataVersion,
+      //   changed: newVersion !== dataVersion
+      // });
       
       // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
@@ -159,11 +159,11 @@ export default function CompFolderDetailPage({
         
         const finalEvents = [...serverEvents, ...futureEvents];
         
-        console.log('[Folder Merge] ✅ Final merged:', {
-          server: serverEvents.length,
-          additional: futureEvents.length,
-          total: finalEvents.length
-        });
+        // console.log('[Folder Merge] ✅ Final merged:', {
+        //   server: serverEvents.length,
+        //   additional: futureEvents.length,
+        //   total: finalEvents.length
+        // });
         
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
@@ -195,32 +195,32 @@ export default function CompFolderDetailPage({
     }
   };
 
-  // const handleShareClick = async () => {
-  //   const shareData = {
-  //     title: folderDetail?.folderDetail?.folderInfo?.title || "이벤트 세트 공유",
-  //     text: folderDetail?.folderDetail?.description?.description || "이벤트 세트 정보를 확인해보세요!",
-  //     url: window.location.href,
-  //   };
+  const handleShareClick = async () => {
+    const shareData = {
+      title: folderDetail?.folderDetail?.folderInfo?.title || "이벤트 목록 공유",
+      text: folderDetail?.folderDetail?.description?.description || "이벤트 목록 정보를 확인해보세요!",
+      url: window.location.href,
+    };
 
-  //   if (navigator.share) {
-  //     try {
-  //       await navigator.share(shareData);
-  //       console.log('공유 성공');
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        console.log('공유 성공');
         
-  //       const newCount = await incrementFolderSharedCount(folderCode);
-  //       if (newCount !== null) {
-  //         setSharedCount(newCount);
-  //       }
-  //     } catch (error) {
-  //       console.error("공유 실패:", error);
-  //     }
-  //   } else {
-  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-  //       shareData.text
-  //     )}&url=${encodeURIComponent(shareData.url)}`;
-  //     window.open(twitterUrl, "_blank", "width=600,height=400");
-  //   }
-  // };
+        const newCount = await incrementFolderSharedCount(folderCode);
+        if (newCount !== null) {
+          setSharedCount(newCount);
+        }
+      } catch (error) {
+        console.error("공유 실패:", error);
+      }
+    } else {
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        shareData.text
+      )}&url=${encodeURIComponent(shareData.url)}`;
+      window.open(twitterUrl, "_blank", "width=600,height=400");
+    }
+  };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
@@ -303,11 +303,11 @@ export default function CompFolderDetailPage({
         return;
       }
       
-      console.log('[Folder Save] 💾 현재 상태 저장:', {
-        scrollY: currentScrollY,
-        eventsCount: events.length,
-        dataVersion,
-      });
+      // console.log('[Folder Save] 💾 현재 상태 저장:', {
+      //   scrollY: currentScrollY,
+      //   eventsCount: events.length,
+      //   dataVersion,
+      // });
 
       const state: FolderPageState = {
         events,
@@ -335,7 +335,6 @@ export default function CompFolderDetailPage({
           }
         }
         
-        console.log('[Folder Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
         saveCurrentState();
       }
     };
@@ -415,7 +414,7 @@ export default function CompFolderDetailPage({
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
 
-      <div id="folder-title" className="text-center font-extrabold text-3xl" data-folder-code={folderDetail?.folderDetail?.folderInfo?.folder_code}>
+      <div id="folder-title" className="text-center font-extrabold text-3xl md:text-4xl" data-folder-code={folderDetail?.folderDetail?.folderInfo?.folder_code}>
         {folderDetail?.folderDetail?.folderInfo?.title}
       </div>
 
@@ -427,9 +426,8 @@ export default function CompFolderDetailPage({
         </div>
       )}
 
-      <div className="flex gap-4 justify-center">
-        <CompLabelCount01 label="Views" count={viewCount} />
-        <CompLabelCount01 label="Shared" count={sharedCount} />
+      <div className="my-4 flex w-full justify-center">
+        <CompFolderActionButtons langCode={langCode} handleShareClick={handleShareClick} />
       </div>
 
       {events?.length ? (
@@ -453,6 +451,11 @@ export default function CompFolderDetailPage({
           </div>
         </>
       ) : null}
+
+      <div className="flex gap-4 justify-center mt-4">
+        <CompLabelCount01 label="Views" count={viewCount} />
+        <CompLabelCount01 label="Shared" count={sharedCount} />
+      </div>
     </div>
   );
 }
