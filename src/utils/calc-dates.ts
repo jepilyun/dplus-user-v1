@@ -55,23 +55,3 @@ export const getLocalTimeFromUTC = (
 
   return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 };
-
-/**
- * UTC 시간이 오늘인지 내일인지 판단
- * @param utcDateString - UTC 시간 문자열
- * @returns D-Day 숫자 (0: 오늘, 1: 내일, 2+: 그 이후)
- */
-export const getDdayFromUTC = (utcDateString: string): number => {
-  if (!utcDateString) return 0;
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const target = new Date(utcDateString);
-  target.setHours(0, 0, 0, 0);
-
-  const diffInMilliseconds = target.getTime() - now.getTime();
-  const diffInDays = Math.round(diffInMilliseconds / (1000 * 60 * 60 * 24));
-
-  return diffInDays;
-};

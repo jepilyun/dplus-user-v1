@@ -2,7 +2,7 @@
 
 import { getDdayLabel } from "@/utils/dday-label"
 import { CompEventCountdown } from "./comp-event-countdown"
-import { getDdayFromUTC, getLocalTimeFromUTC } from "@/utils/calc-dates"
+import { calculateDaysFromToday, getLocalTimeFromUTC } from "@/utils/calc-dates"
 import { ResponseEventDetailForUserFront } from "dplus_common_v1"
 import { computeBadgeColors } from "@/utils/color-generator"
 import { CompEventTimer } from "./comp-event-timer"
@@ -88,9 +88,15 @@ export const CompEventHeader = ({
   // ✅ early return은 모든 hooks 호출 후에
   if (!eventDetail) return null;
 
-  // UTC 시간을 사용자 타임존으로 변환
+  // ✅ date 필드 사용 (리스트와 동일)
+  const eventDate = eventDetail?.eventDetail?.eventInfo?.date;
+  const eventTime = eventDetail?.eventDetail?.eventInfo?.time;
   const startAtUtc = eventDetail?.eventDetail?.eventInfo?.start_at_utc;
-  const dday = startAtUtc ? getDdayFromUTC(startAtUtc) : 0;
+  
+  // ✅ calculateDaysFromToday 사용
+  const dday = eventDate ? calculateDaysFromToday(eventDate) : 0;
+  
+  // ✅ 시간 정보는 UTC에서 추출 (시간만 필요할 때)
   const localTime = startAtUtc ? getLocalTimeFromUTC(startAtUtc) : undefined;
   
   // D-Day 라벨 생성 (시간 포함)
