@@ -22,6 +22,7 @@ import { CompLoading } from "../comp-common/comp-loading";
 import { CompNotFound } from "../comp-common/comp-not-found";
 import { CompNetworkError } from "../comp-common/comp-network-error";
 import { CompFolderActionButtons } from "./comp-folder-action-buttons";
+import ShareModal from "../comp-share/comp-share-modal";
 
 type FolderPageState = {
   events: TMapFolderEventWithEventInfo[];
@@ -49,6 +50,8 @@ export default function CompFolderDetailPage({
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState<string>('');
 
   const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(
     initialData ?? null
@@ -123,9 +126,9 @@ export default function CompFolderDetailPage({
       
       // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        console.log('[Folder Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
-        console.log('[Folder Merge] Server events:', serverEvents.length);
-        console.log('[Folder Merge] Restored total:', restoredEvents.length);
+        // console.log('[Folder Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        // console.log('[Folder Merge] Server events:', serverEvents.length);
+        // console.log('[Folder Merge] Restored total:', restoredEvents.length);
         
         const serverCodes = new Set(
           serverEvents.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
@@ -137,9 +140,7 @@ export default function CompFolderDetailPage({
             const code = item?.event_info?.event_code ?? item?.event_code;
             return code && !serverCodes.has(code);
           });
-        
-        console.log('[Folder Merge] Additional events from restore:', additionalEvents.length);
-        
+
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -197,28 +198,30 @@ export default function CompFolderDetailPage({
 
   const handleShareClick = async () => {
     const shareData = {
-      title: folderDetail?.folderDetail?.folderInfo?.title || "이벤트 목록 공유",
-      text: folderDetail?.folderDetail?.description?.description || "이벤트 목록 정보를 확인해보세요!",
+      title: folderDetail?.folderDetail?.folderInfo?.title || 'Events List',
+      text: folderDetail?.folderDetail?.description?.description || 'Check out the events list!',
       url: window.location.href,
     };
 
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        console.log('공유 성공');
-        
         const newCount = await incrementFolderSharedCount(folderCode);
         if (newCount !== null) {
           setSharedCount(newCount);
         }
       } catch (error) {
-        console.error("공유 실패:", error);
+        console.error('공유 실패:', error);
       }
     } else {
-      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        shareData.text
-      )}&url=${encodeURIComponent(shareData.url)}`;
-      window.open(twitterUrl, "_blank", "width=600,height=400");
+      setShowShareModal(true);
+    }
+  };
+
+  const handleSocialShare = async (platform: string) => {
+    const newCount = await incrementFolderSharedCount(folderCode);
+    if (newCount !== null) {
+      setSharedCount(newCount);
     }
   };
 
@@ -245,7 +248,12 @@ export default function CompFolderDetailPage({
     }
   };
 
-  // ✅ 조회수 증가 (한 번만)
+  // ✅ URL 설정
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
+
+    // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
     if (!viewCountIncrementedRef.current && folderCode) {
       viewCountIncrementedRef.current = true;
@@ -456,6 +464,15 @@ export default function CompFolderDetailPage({
         <CompLabelCount01 label="Views" count={viewCount} />
         <CompLabelCount01 label="Shared" count={sharedCount} />
       </div>
+      <ShareModal
+        open={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        title={folderDetail?.folderDetail?.folderInfo?.title || "이벤트 목록 공유"}
+        text={folderDetail?.folderDetail?.description?.description || "이벤트 목록 정보를 확인해보세요!"}
+        url={currentUrl}
+        onShare={handleSocialShare}
+        langCode={langCode}
+      />
     </div>
   );
 }
