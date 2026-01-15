@@ -151,10 +151,11 @@ export const apiUrlFolder = (
     case "eventsGet":
       if (
         optionalParams?.folderCode &&
+        optionalParams?.langCode &&
         typeof optionalParams?.start === "number" &&
         typeof optionalParams?.limit === "number"
       ) {
-        path = `/api/folder/events/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.start}/${optionalParams?.limit}`;
+        path = `/api/folder/events/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
       } else {
         console.error(
           `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,

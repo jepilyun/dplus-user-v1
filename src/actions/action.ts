@@ -164,19 +164,21 @@ export const reqGetFolderCodeList = async (
 /**
  * Folder 상세 화면 조회 for User Front
  * @param folderCode
+ * @param langCode
  * @param start
  * @param limit
  * @returns ResponseDplusAPI<ResponseFolderDetailForUserFront>
  */
 export const reqGetFolderEvents = async (
   folderCode: string,
+  langCode: string,
   start: number,
   limit: number,
 ): Promise<
   ResponseDplusAPI<DplusGetListDataResponse<TMapFolderEventWithEventInfo>>
 > => {
   const res = await fetch(
-    apiUrlFolder("eventsGet", { folderCode, start, limit }),
+    apiUrlFolder("eventsGet", { folderCode, langCode, start, limit }),
     {
       method: "GET",
       credentials: "include",

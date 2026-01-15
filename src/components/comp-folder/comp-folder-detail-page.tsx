@@ -227,7 +227,7 @@ export default function CompFolderDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetFolderEvents(folderCode, eventsStart, LIST_LIMIT.default);
+      const res = await reqGetFolderEvents(folderCode, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapFolderEventWithEventInfo) => {
