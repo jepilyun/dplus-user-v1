@@ -12,6 +12,7 @@ import { CompEventDatetime } from "./comp-event-datetime"
 import { useEffect, useRef, useState, useMemo } from "react"
 import Image from "next/image"
 import { generateStorageImageUrl } from "@/utils/generate-image-url"
+import { calculateUtcMinutes } from "@/utils/timezone/calculate-utc-minutes";
 
 /*
  * 이벤트 상세 헤더
