@@ -3,89 +3,38 @@ export const revalidate = 14400; // 4시간 캐시
 export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
 
 
-import { getRequestLocale } from "@/utils/get-request-locale";
-import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page"; // 클라이언트 컴포넌트
 import { Metadata } from "next";
-import { reqGetEventCodeList, reqGetEventDetail } from "@/actions/action";
-import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
 import { notFound } from "next/navigation";
-import { getMetadataByLang } from "@/consts/const-metadata";
 
+import { reqGetEventCodeList, reqGetEventDetail } from "@/actions/action";
+import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page";
+import { generateDetailMetadata } from "@/utils/generate-metadata";
+import { getRequestLocale } from "@/utils/get-request-locale";
 
 /**
  * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
  */
-export async function generateMetadata(
-  { params }: { params: Promise<{ eventCode: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ eventCode: string }>;
+}): Promise<Metadata> {
   const { eventCode } = await params;
   const { langCode } = await getRequestLocale();
-  const defaultMetadata = getMetadataByLang(langCode);
 
-  const response = await reqGetEventDetail(eventCode, langCode).catch(() => null);
+  const response = await reqGetEventDetail(eventCode, langCode).catch(
+    () => null
+  );
   const eventDetail = response?.dbResponse?.eventDetail ?? null;
-  const metadata = eventDetail?.metadata ?? null;
-  
-  const title = pick(
-    metadata?.title, 
-    metadata?.title ? (eventDetail?.eventInfo?.title + " - " + metadata?.title) : eventDetail?.eventInfo?.title, 
-    defaultMetadata.title
-  );
-  const description = pick(
-    metadata?.description,
-    defaultMetadata.description
-  );
-  const ogTitle = pick(
-    metadata?.og_title, 
-    metadata?.title ? (eventDetail?.eventInfo?.title + " - " + metadata?.title) : eventDetail?.eventInfo?.title,
-    defaultMetadata.og_title
-  );
 
-  const ogDesc = pick(
-    metadata?.og_description,
-    defaultMetadata.og_description
-  );
-
-  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadata?.og_image, "events");
-  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-
-  // ✅ 우선순위: 커스텀 OG 이미지 > 첫 번째 이벤트 이미지 > 디폴트
-  const ogImage = pick(
-    ogImageFromI18n,
-    defaultOgImage
-  );
-
-  const keywords = buildKeywords(
-    metadata?.tag_set as string[] | null | undefined,
-    defaultMetadata.keywords
-  );
-
-  const pageTitle = `${title} | dplus.app`;
-
-  return {
-    title: pageTitle,
-    description,
-    keywords,
-    openGraph: {
-      title: `${ogTitle ?? pageTitle} | dplus.app`,
-      description: ogDesc,
-      images: ogImage,
-    },
-    // ✅ 트위터 카드 메타데이터 추가
-    twitter: {
-      card: "summary_large_image",
-      title: pageTitle,
-      description: ogDesc,
-      images: [ogImage ?? ""],
-    },
-    alternates: {
-      canonical: `https://www.dplus.app/event/${eventCode}`,
-    },
-  };
+  return generateDetailMetadata({
+    langCode,
+    routePath: "event",
+    code: eventCode,
+    detailName: eventDetail?.eventInfo?.title,
+    metadata: eventDetail?.metadata,
+    imageBucket: "events",
+  });
 }
 
 // ✅ 항상 배열을 반환하도록 방어 코딩

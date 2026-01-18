@@ -3,83 +3,40 @@ export const revalidate = 14400;
 export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
 
 
-import { getRequestLocale } from "@/utils/get-request-locale";
-import CompCityDetailPage from "@/components/comp-city/comp-city-detail-page";
-import { reqGetCityCodes, reqGetCityDetail } from "@/actions/action";
 import { Metadata } from "next";
-import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
-import { getMetadataByLang } from "@/consts/const-metadata";
+
+import { reqGetCityCodes, reqGetCityDetail } from "@/actions/action";
+import CompCityDetailPage from "@/components/comp-city/comp-city-detail-page";
+import { generateDetailMetadata } from "@/utils/generate-metadata";
+import { getRequestLocale } from "@/utils/get-request-locale";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 /**
  * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
  */
-export async function generateMetadata(
-  { params }: { params: Promise<{ cityCode: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ cityCode: string }>;
+}): Promise<Metadata> {
   const { cityCode } = await params;
   const { langCode } = await getRequestLocale();
-  const defaultMetadata = getMetadataByLang(langCode);
 
-  // API 호출 (에러 대비 안전가드)
-  const response = await reqGetCityDetail(cityCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetCityDetail(cityCode, langCode, 0, 36).catch(
+    () => null
+  );
   const cityDetail = response?.dbResponse?.cityDetail ?? null;
-  const metadataI18n = cityDetail?.metadataI18n?.items?.[0] ?? null;
-  
-  const title = pick(
-    metadataI18n?.title, 
-    cityDetail?.i18n?.items?.[0]?.name ? (cityDetail?.cityInfo?.name + " - " + cityDetail?.i18n?.items?.[0]?.name) : cityDetail?.cityInfo?.name, 
-    defaultMetadata.title
-  );
-  const description = pick(metadataI18n?.description, defaultMetadata.description);
-  const ogTitle = pick(
-    metadataI18n?.og_title, 
-    cityDetail?.i18n?.items?.[0]?.name ? (cityDetail?.cityInfo?.name + " - " + cityDetail?.i18n?.items?.[0]?.name) : cityDetail?.cityInfo?.name, 
-    defaultMetadata.og_title
-  );
-  const ogDesc = pick(metadataI18n?.og_description, defaultMetadata.og_description);
 
-  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "cities");
-  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-
-  const ogImage = pick(
-    ogImageFromI18n,
-    defaultOgImage
-  );
-
-  const keywords = buildKeywords(
-    metadataI18n?.tag_set as string[] | null | undefined,
-    defaultMetadata.keywords
-  );
-
-  const pageTitle = `${title} | dplus.app`;
-  const ogPageTitle = `${ogTitle} | dplus.app`;
-
-  return {
-    title: pageTitle,
-    description,
-    keywords,
-    openGraph: {
-      title: ogPageTitle,
-      description: ogDesc,
-      images: ogImage,
-    },
-    // ✅ 트위터 카드 메타데이터 추가
-    twitter: {
-      card: "summary_large_image",
-      title: ogPageTitle,
-      description: ogDesc,
-      images: [ogImage ?? ""],
-    },
-    alternates: {
-      canonical: `https://www.dplus.app/city/${cityCode}`,
-    },
-  };
+  return generateDetailMetadata({
+    langCode,
+    routePath: "city",
+    code: cityCode,
+    detailName:
+      cityDetail?.i18n?.items?.[0]?.name ?? cityDetail?.cityInfo?.name,
+    metadata: cityDetail?.metadataI18n?.items?.[0],
+    imageBucket: "cities",
+  });
 }
 
 // ✅ 항상 배열을 반환하도록 방어 코딩

@@ -4,92 +4,49 @@ export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
 
 
 import { Metadata } from "next";
-import { getRequestLocale } from "@/utils/get-request-locale";
-import CompCategoryDetailPage from "@/components/comp-category/comp-category-detail-page";
-import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/actions/action";
-import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
-import { getMetadataByLang } from "@/consts/const-metadata";
+
+import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/actions/action";
+import CompCategoryDetailPage from "@/components/comp-category/comp-category-detail-page";
+import { generateDetailMetadata } from "@/utils/generate-metadata";
+import { getRequestLocale } from "@/utils/get-request-locale";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 /**
  * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
  */
-export async function generateMetadata(
-  { params }: { params: Promise<{ categoryCode: string; countryCode?: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ categoryCode: string; countryCode?: string }>;
+}): Promise<Metadata> {
   const resolvedParams = await params;
   const categoryCode = resolvedParams.categoryCode;
   const countryCode = resolvedParams.countryCode ?? "AA";
 
   const { langCode } = await getRequestLocale();
-  const defaultMetadata = getMetadataByLang(langCode);
 
-  // API 호출 (에러 대비 안전가드)
-  const response = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetCategoryDetail(
+    countryCode,
+    categoryCode,
+    langCode,
+    0,
+    36
+  ).catch(() => null);
   const categoryDetail = response?.dbResponse?.categoryDetail ?? null;
   const i18n = categoryDetail?.i18n ?? null;
-  const metadataI18n = categoryDetail?.metadataI18n?.items?.[0] ?? null;
-  
-  const title = pick(
-    metadataI18n?.title, 
-    i18n?.items?.[0]?.name ? (categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name) : categoryDetail?.categoryInfo?.name, 
-    defaultMetadata.title
-  );
-  const description = pick(
-    metadataI18n?.description,
-    defaultMetadata.description
-  );
-  const ogTitle = pick(
-    metadataI18n?.og_title, 
-    i18n?.items?.[0]?.name ? (categoryDetail?.categoryInfo?.name + " - " + i18n?.items?.[0]?.name) : categoryDetail?.categoryInfo?.name, 
-    defaultMetadata.og_title
-  );
-  const ogDesc = pick(
-    metadataI18n?.og_description,
-    defaultMetadata.og_description
-  );
 
-  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "categories");
-  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-
-  const ogImage = pick(
-    ogImageFromI18n,
-    defaultOgImage
-  );
-
-  const keywords = buildKeywords(
-    metadataI18n?.tag_set as string[] | null | undefined,
-    defaultMetadata.keywords
-  );
-
-  const pageTitle = `${title} | dplus.app`;
-  const ogPageTitle = `${ogTitle} | dplus.app`;
-
-  return {
-    title: pageTitle,
-    description,
-    keywords,
-    openGraph: {
-      title: ogPageTitle,
-      description: ogDesc,
-      images: ogImage,
-    },
-    // ✅ 트위터 카드 메타데이터 추가
-    twitter: {
-      card: "summary_large_image",
-      title: ogPageTitle,
-      description: ogDesc,
-      images: [ogImage ?? ""],
-    },
-    alternates: {
-      canonical: `https://www.dplus.app/category/${categoryCode}/${countryCode ?? 'AA'}`,
-    },
-  };
+  return generateDetailMetadata({
+    langCode,
+    routePath: "category",
+    code: categoryCode,
+    subCode: countryCode,
+    detailName:
+      i18n?.items?.[0]?.name ??
+      categoryDetail?.categoryInfo?.name,
+    metadata: categoryDetail?.metadataI18n?.items?.[0],
+    imageBucket: "categories",
+  });
 }
 
 // ✅ 항상 배열을 반환하도록 방어 코딩

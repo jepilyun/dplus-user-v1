@@ -3,83 +3,39 @@ export const revalidate = 86400; // 24시간 × 60분 × 60초 = 86400초
 export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
 
 
-import { getRequestLocale } from "@/utils/get-request-locale";
-import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 import { Metadata } from "next";
-import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { reqGetFolderCodeList, reqGetFolderDetail } from "@/actions/action";
-import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
-import { getMetadataByLang } from "@/consts/const-metadata";
+
+import { reqGetFolderCodeList, reqGetFolderDetail } from "@/actions/action";
+import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
+import { generateDetailMetadata } from "@/utils/generate-metadata";
+import { getRequestLocale } from "@/utils/get-request-locale";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 /**
  * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
  */
-export async function generateMetadata(
-  { params }: { params: Promise<{ folderCode: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ folderCode: string }>;
+}): Promise<Metadata> {
   const { folderCode } = await params;
   const { langCode } = await getRequestLocale();
-  const defaultMetadata = getMetadataByLang(langCode);
 
-  // API 호출 (에러 대비 안전가드)
-  const response = await reqGetFolderDetail(folderCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetFolderDetail(folderCode, langCode, 0, 36).catch(
+    () => null
+  );
   const folderDetail = response?.dbResponse?.folderDetail ?? null;
-  const metadata = folderDetail?.metadata ?? null;
-  
-  const title = pick(
-    metadata?.title, 
-    metadata?.title ? (folderDetail?.folderInfo?.title + " - " + metadata?.title) : folderDetail?.folderInfo?.title, 
-    defaultMetadata.title
-  );
-  const description = pick(metadata?.description, defaultMetadata.description);
-  const ogTitle = pick(
-    metadata?.og_title, 
-    metadata?.title ? (folderDetail?.folderInfo?.title + " - " + metadata?.title) : folderDetail?.folderInfo?.title, 
-    defaultMetadata.og_title
-  );
-  const ogDesc = pick(metadata?.og_description, defaultMetadata.og_description);
 
-  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadata?.og_image, "folders");
-  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-
-  const ogImage = pick(
-    ogImageFromI18n,
-    defaultOgImage
-  );
-
-  const keywords = buildKeywords(
-    metadata?.tag_set as string[] | null | undefined,
-    defaultMetadata.keywords
-  );
-
-  const pageTitle = `${title} | dplus.app`;
-  const ogPageTitle = `${ogTitle} | dplus.app`;
-
-  return {
-    title: pageTitle,
-    description,
-    keywords,
-    openGraph: {
-      title: ogPageTitle,
-      description: ogDesc,
-      images: ogImage,
-    },
-    // ✅ 트위터 카드 메타데이터 추가
-    twitter: {
-      card: "summary_large_image",
-      title: ogPageTitle,
-      description: ogDesc,
-      images: [ogImage ?? ""],
-    },
-    alternates: {
-      canonical: `https://www.dplus.app/folder/${folderCode}`,
-    },
-  };
+  return generateDetailMetadata({
+    langCode,
+    routePath: "folder",
+    code: folderCode,
+    detailName: folderDetail?.folderInfo?.title,
+    metadata: folderDetail?.metadata,
+    imageBucket: "folders",
+  });
 }
 
 // ✅ 항상 배열을 반환하도록 방어 코딩

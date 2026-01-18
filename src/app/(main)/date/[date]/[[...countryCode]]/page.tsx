@@ -1,48 +1,30 @@
-import { getRequestLocale } from "@/utils/get-request-locale";
-import CompDateDetailPage from "@/components/comp-date/comp-date-detail-page";
 import { Metadata } from "next";
-import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
+
 import { reqGetDateList } from "@/actions/action";
+import CompDateDetailPage from "@/components/comp-date/comp-date-detail-page";
+import { generateSimpleMetadata } from "@/utils/generate-metadata";
+import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";
-import { getMetadataByLang } from "@/consts/const-metadata";
 
 /**
  * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
  */
-export async function generateMetadata(
-  { params }: { params: Promise<{ date: string, countryCode: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ date: string; countryCode: string }>;
+}): Promise<Metadata> {
   const { date, countryCode } = await params;
   const { langCode } = await getRequestLocale();
-  const defaultMetadata = getMetadataByLang(langCode);
 
-  const title = pick(date + " - " + defaultMetadata.title, defaultMetadata.title);
-  const description = pick(defaultMetadata.description);
-  const ogTitle = pick(date + " - " + countryCode, defaultMetadata.og_title);
-  const ogDesc = pick(defaultMetadata.og_description);
-  
-  // ✅ 디폴트 OG 이미지 (절대 URL)
-  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-  const ogImage = pick(defaultOgImage, defaultMetadata.og_image);
-
-  const keywords = buildKeywords(null, defaultMetadata.keywords);
-
-  return {
-    title: `${date} - ${title} | dplus.app`,
-    description,
-    keywords,
-    openGraph: {
-      title: `${date} - ${ogTitle} | dplus.app`,
-      description: ogDesc,
-      images: ogImage,
-    },
-    alternates: {
-      canonical: `https://www.dplus.app/date/${date}/${countryCode}`,
-    },
-  };
+  return generateSimpleMetadata({
+    langCode,
+    routePath: "date",
+    code: date,
+    titlePrefix: date,
+    subCode: countryCode,
+    includeTwitterCard: false,
+  });
 }
 
 /**

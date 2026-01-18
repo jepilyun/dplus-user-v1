@@ -3,80 +3,39 @@ export const revalidate = 14400;
 export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
 
 
-import { getRequestLocale } from "@/utils/get-request-locale";
-import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
 import { Metadata } from "next";
-import { reqGetCountryCodes, reqGetCountryDetail } from "@/actions/action";
-import { buildKeywords, pick } from "@/utils/metadata-helper";
-import { ensureAbsoluteUrl, generateStorageImageUrl } from "@/utils/generate-image-url";
-import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
-import { getMetadataByLang } from "@/consts/const-metadata";
+
+import { reqGetCountryCodes, reqGetCountryDetail } from "@/actions/action";
+import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
+import { generateDetailMetadata } from "@/utils/generate-metadata";
+import { getRequestLocale } from "@/utils/get-request-locale";
+import { LIST_LIMIT } from "dplus_common_v1";
 
 /**
  * Generate metadata for the page
- * @param params - The parameters of the page
- * @returns 
  */
-export async function generateMetadata(
-  { params }: { params: Promise<{ countryCode: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ countryCode: string }>;
+}): Promise<Metadata> {
   const { countryCode } = await params;
   const { langCode } = await getRequestLocale();
-  const defaultMetadata = getMetadataByLang(langCode);
 
-  // API 호출 (에러 대비 안전가드)
-  const response = await reqGetCountryDetail(countryCode, langCode, 0, 36).catch(() => null);
+  const response = await reqGetCountryDetail(countryCode, langCode, 0, 36).catch(
+    () => null
+  );
   const countryDetail = response?.dbResponse?.countryDetail ?? null;
-  const metadataI18n = countryDetail?.metadataI18n?.items?.[0] ?? null;
-  
-  const title = pick(
-    metadataI18n?.title, 
-    metadataI18n?.title ? (countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title) : countryDetail?.countryInfo?.country_name, 
-    defaultMetadata.title
-  );
-  const description = pick(metadataI18n?.description, defaultMetadata.description);
-  const ogTitle = pick(
-    metadataI18n?.og_title, 
-    metadataI18n?.title ? (countryDetail?.countryInfo?.country_name + " - " + metadataI18n?.title) : countryDetail?.countryInfo?.country_name, 
-    defaultMetadata.og_title
-  );
-  const ogDesc = pick(metadataI18n?.og_description, defaultMetadata.og_description);
 
-  // ✅ OG 이미지: 모든 경로를 절대 URL로 변환
-  const ogImageFromI18n = ensureAbsoluteUrl(metadataI18n?.og_image, "countries");
-  const defaultOgImage = generateStorageImageUrl("service", "og_dplus_1200x630.jpg");
-
-  const ogImage = pick(
-    ogImageFromI18n,
-    defaultOgImage
-  );
-
-  const keywords = buildKeywords(
-    metadataI18n?.tag_set as string[] | null | undefined,
-    defaultMetadata.keywords
-  );
-
-  return {
-    title: `${title} | dplus.app`,
-    description,
-    keywords,
-    openGraph: {
-      title: `${ogTitle ?? title} | dplus.app`,
-      description: ogDesc,
-      images: ogImage,
-    },
-    // ✅ 트위터 카드 메타데이터 추가
-    twitter: {
-      card: "summary_large_image",
-      title: `${title} | dplus.app`,
-      description: ogDesc,
-      images: [ogImage ?? ""],
-    },
-    alternates: {
-      canonical: `https://www.dplus.app/country/${countryCode}`,
-    },
-  };
+  return generateDetailMetadata({
+    langCode,
+    routePath: "country",
+    code: countryCode,
+    detailName: countryDetail?.countryInfo?.country_name,
+    metadata: countryDetail?.metadataI18n?.items?.[0],
+    imageBucket: "countries",
+  });
 }
 
 // ✅ 항상 배열을 반환하도록 방어 코딩
