@@ -73,23 +73,54 @@ export const formatDateTime = (
     targetDate = new Date(targetDate.getTime() + utcMinutes * 60 * 1000);
   }
 
-  // 날짜 파트 (locale 유지)
-  const dateOptsLong: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  };
-  const dateOptsShort: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  };
-  const dateFmt = new Intl.DateTimeFormat(locale, {
-    ...(style === "short" ? dateOptsShort : dateOptsLong),
-    ...(tz ? { timeZone: tz } : {}),
-  });
-  const dateStr = dateFmt.format(targetDate);
+  // 언어 코드 추출
+  const langCode = locale.toLowerCase().split('-')[0];
+
+  // 날짜 파트
+  let dateStr: string;
+
+  if (style === "short") {
+    // short 스타일: 숫자 형식
+    const dateOptsShort: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    };
+    const dateFmt = new Intl.DateTimeFormat(locale, {
+      ...dateOptsShort,
+      ...(tz ? { timeZone: tz } : {}),
+    });
+    dateStr = dateFmt.format(targetDate);
+  } else {
+    // long 스타일: 언어별 최적화
+    // 한국어, 일본어, 중국어는 긴 형식 유지 (가독성 좋음)
+    if (["ko", "ja", "zh", "cn", "tw"].includes(langCode)) {
+      const dateOptsLong: Intl.DateTimeFormatOptions = {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      };
+      const dateFmt = new Intl.DateTimeFormat(locale, {
+        ...dateOptsLong,
+        ...(tz ? { timeZone: tz } : {}),
+      });
+      dateStr = dateFmt.format(targetDate);
+    } else {
+      // 영어 및 기타 언어: 축약형 (Thu., Jan. 22, 2026)
+      const dateOptsCompact: Intl.DateTimeFormatOptions = {
+        weekday: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      };
+      const dateFmt = new Intl.DateTimeFormat(locale, {
+        ...dateOptsCompact,
+        ...(tz ? { timeZone: tz } : {}),
+      });
+      dateStr = dateFmt.format(targetDate);
+    }
+  }
 
   if (!includeTime) return dateStr;
 
@@ -131,6 +162,12 @@ export const formatDateTime = (
 
 /**
  * 시간만 포맷팅 (날짜 제외)
+ * 각 언어별로 자연스러운 형식으로 표시:
+ * - 한국어: "오후 5시", "오후 5:30", "오전 4시", "오전 7:20"
+ * - 일본어: "午後5時", "午後5時30分", "午前4時", "午前7時20分"
+ * - 중국어: "下午5时", "下午5:30", "上午4时", "上午7:20"
+ * - 스페인어: "5:00 PM", "5:30 PM", "4:00 AM", "7:20 AM"
+ * - 영어: "5 PM", "5:30 PM", "4 AM", "7:20 AM"
  */
 export const formatTimeOnly = (
   date: Date,
@@ -140,13 +177,11 @@ export const formatTimeOnly = (
   opts?: {
     timeFormat?: "locale" | "12h";
     compactTime?: boolean;
-    hideMinutesIfZero?: boolean; // ★ 새 옵션 추가
   },
 ): string => {
   const {
     timeFormat = "locale",
     compactTime = true,
-    hideMinutesIfZero = false, // 기본값: 항상 분 표시
   } = opts ?? {};
 
   let targetDate = new Date(date);
@@ -154,31 +189,65 @@ export const formatTimeOnly = (
     targetDate = new Date(targetDate.getTime() + utcMinutes * 60 * 1000);
   }
 
-  if (timeFormat === "12h") {
-    const t = new Intl.DateTimeFormat("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-      ...(tz ? { timeZone: tz } : {}),
-    }).format(targetDate);
+  // 시간 값 추출
+  const hours = targetDate.getHours();
+  const minutes = targetDate.getMinutes();
 
-    if (compactTime) {
-      const [hm, ap] = t.split(" ");
-      const [h, m] = hm.split(":");
-      const hour = String(Number(h));
+  // 언어 코드 추출 (ko-KR -> ko)
+  const langCode = locale.toLowerCase().split('-')[0];
 
-      // hideMinutesIfZero가 true이고 분이 00이면 분 숨김
-      if (hideMinutesIfZero && m === "00") {
-        return `${ap} ${hour}`;
+  if (timeFormat === "12h" || compactTime) {
+    // 12시간 형식으로 변환
+    const hour12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
+    const isPM = hours >= 12;
+
+    // 언어별 포맷
+    switch (langCode) {
+      case "ko": {
+        // 한국어: "오후 5시", "오후 5:30"
+        const period = isPM ? "오후" : "오전";
+        if (minutes === 0) {
+          return `${period} ${hour12}시`;
+        }
+        return `${period} ${hour12}:${minutes.toString().padStart(2, "0")}`;
       }
 
-      // 기본: 항상 분 표시
-      return `${ap} ${hour}:${m}`;
+      case "ja": {
+        // 일본어: "午後5時", "午後5時30分"
+        const period = isPM ? "午後" : "午前";
+        if (minutes === 0) {
+          return `${period}${hour12}時`;
+        }
+        return `${period}${hour12}時${minutes}分`;
+      }
+
+      case "zh": {
+        // 중국어: "下午5时", "下午5:30"
+        const period = isPM ? "下午" : "上午";
+        if (minutes === 0) {
+          return `${period}${hour12}时`;
+        }
+        return `${period}${hour12}:${minutes.toString().padStart(2, "0")}`;
+      }
+
+      case "es": {
+        // 스페인어: "5:00 PM", "5:30 PM"
+        const period = isPM ? "PM" : "AM";
+        return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
+      }
+
+      default: {
+        // 영어 및 기타: "5 PM", "5:30 PM"
+        const period = isPM ? "PM" : "AM";
+        if (minutes === 0) {
+          return `${hour12} ${period}`;
+        }
+        return `${hour12}:${minutes.toString().padStart(2, "0")} ${period}`;
+      }
     }
-    return t;
   }
 
-  // locale 기반 시간 (한국어면 24시간제)
+  // locale 기반 시간 (fallback)
   const use24h = locale.toLowerCase().startsWith("ko");
   return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",

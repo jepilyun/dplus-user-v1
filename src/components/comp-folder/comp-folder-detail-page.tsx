@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetFolderDetail, reqGetFolderEvents } from "@/actions/action";
+import { reqGetFolderDetail, reqGetFolderEvents } from "@/actions/req-folder";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import {
   LIST_LIMIT,
@@ -443,7 +443,12 @@ export default function CompFolderDetailPage({
           {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCard key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCard 
+                key={item.event_code} 
+                event={item} 
+                fullLocale={fullLocale} 
+                langCode={langCode}
+              />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

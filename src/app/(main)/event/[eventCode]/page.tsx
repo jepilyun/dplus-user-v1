@@ -1,12 +1,10 @@
-// 이 라우트 기본 재생성 주기: 24시간
-export const revalidate = 14400; // 4시간 캐시
-export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
-
+// 이 라우트 기본 재생성 주기: 4시간
+export const revalidate = 14400;
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetEventCodeList, reqGetEventDetail } from "@/actions/action";
+import { reqGetEventCodeList, reqGetEventDetail } from "@/actions/req-event";
 import CompEventDetailPage from "@/components/comp-event/comp-event-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

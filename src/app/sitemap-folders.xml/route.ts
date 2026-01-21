@@ -1,7 +1,7 @@
 // app/sitemap-folders.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetFolderCodeList } from "@/actions/action";
+import { reqGetFolderCodeList } from "@/actions/req-folder";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
@@ -32,5 +32,4 @@ export async function GET() {
   });
 }
 
-export const dynamic = "force-dynamic";
 export const revalidate = 86400;

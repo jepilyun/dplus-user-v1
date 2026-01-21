@@ -1,7 +1,7 @@
 // app/sitemap-groups.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetGroupCodes } from "@/actions/action";
+import { reqGetGroupCodes } from "@/actions/req-group";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
@@ -32,5 +32,4 @@ export async function GET() {
   });
 }
 
-export const dynamic = "force-dynamic";
 export const revalidate = 86400;

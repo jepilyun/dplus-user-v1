@@ -1,7 +1,7 @@
 // app/sitemap-stags.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetStagCodes } from "@/actions/action";
+import { reqGetStagCodes } from "@/actions/req-stag";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
@@ -32,5 +32,4 @@ export async function GET() {
   });
 }
 
-export const dynamic = "force-dynamic";
 export const revalidate = 86400;

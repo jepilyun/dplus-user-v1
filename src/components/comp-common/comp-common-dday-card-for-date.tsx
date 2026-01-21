@@ -6,9 +6,11 @@ import CompCommonDdayCardBase from "./comp-common-dday-card-base";
 export default function CompCommonDdayCardForDate({
   event,
   fullLocale,
+  langCode,
 }: { 
   event: TEventCardForDateDetail; 
   fullLocale: string;
+  langCode: string;
 }) {
   const code = event?.event_code ?? "default";
   const thumbnailUrl = getThumbnailUrl(event);
@@ -23,6 +25,7 @@ export default function CompCommonDdayCardForDate({
       fgColor={event?.fg_color ?? undefined}
       thumbnailUrl={thumbnailUrl ?? null}
       fullLocale={fullLocale}
+      langCode={langCode}
       // tags prop 생략 (태그 없음)
     />
   );

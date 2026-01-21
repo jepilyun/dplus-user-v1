@@ -1,4 +1,4 @@
-type SupportedLocale =
+export type SupportedLocale =
   | "en"
   | "id"
   | "ja"

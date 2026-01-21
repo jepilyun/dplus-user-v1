@@ -1,7 +1,7 @@
 "use client";
 
 import { calculateDaysFromToday } from "@/utils/calc-dates";
-import { getDdayLabel } from "@/utils/dday-label";
+import { getDdayLabel, type SupportedLocale } from "@/utils/dday-label";
 import { computeBadgeColors } from "@/utils/color-generator";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,15 +11,119 @@ import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-ut
 import { useNavigationSave } from "@/contexts/navigation-save-context";
 import { ArrowRight } from "lucide-react";
 
+// ✅ 다국어 종료 라벨
+const END_DATE_LABELS: Record<string, string> = {
+  en: "End",
+  ko: "종료",
+  ja: "終了",
+  es: "Fin",
+  zh: "结束",
+};
+
+// ✅ 짧은 날짜 포맷 (년도 없이, 요일 포함)
+// 한국어: 1월 20일(화), 영어: Jan. 19 (Mon)
+function formatShortDate(date: Date, langCode: string): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const weekday = date.getDay();
+
+  const weekdays: Record<string, string[]> = {
+    en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    ko: ["일", "월", "화", "수", "목", "금", "토"],
+    ja: ["日", "月", "火", "水", "木", "金", "土"],
+    es: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
+    zh: ["日", "一", "二", "三", "四", "五", "六"],
+  };
+
+  const monthNames: Record<string, string[]> = {
+    en: ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."],
+    es: ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sep.", "oct.", "nov.", "dic."],
+  };
+
+  const wd = (weekdays[langCode] || weekdays.en)[weekday];
+
+  switch (langCode) {
+    case "ko":
+      return `${month}월 ${day}일(${wd})`;
+    case "ja":
+      return `${month}月${day}日(${wd})`;
+    case "zh":
+      return `${month}月${day}日(${wd})`;
+    case "en": {
+      const monthName = monthNames.en[date.getMonth()];
+      return `${monthName} ${day} (${wd})`;
+    }
+    case "es": {
+      const monthName = monthNames.es[date.getMonth()];
+      return `${day} ${monthName} (${wd})`;
+    }
+    default:
+      return `${month}/${day} (${wd})`;
+  }
+}
+
+// ✅ 시작 시간이 지났는지 확인 (UTC 기준)
+function isAfterStartUtc(startAtUtc: string | null | undefined): boolean {
+  if (!startAtUtc) return false;
+  const now = new Date();
+  const start = new Date(startAtUtc);
+  return now > start;
+}
+
+// ✅ D-Day 계산용 날짜 결정 (UTC 기준으로 비교, 표시용 로컬 날짜 반환)
+function getEffectiveDateForDday(
+  startDate: Date | null,
+  endDate: Date | null,
+  startAtUtc: string | null | undefined,
+  endAtUtc: string | null | undefined
+): Date | null {
+  if (!startDate) return null;
+
+  const now = new Date();
+
+  // UTC 시작 시간이 있으면 UTC로 비교
+  if (startAtUtc) {
+    const startUtc = new Date(startAtUtc);
+    // 아직 시작 전이면 시작일 기준
+    if (now <= startUtc) {
+      return startDate;
+    }
+    // 시작 후이고 종료일이 있으면 종료일 기준
+    if (endDate) {
+      return endDate;
+    }
+    return startDate;
+  }
+
+  // UTC 시작 시간이 없으면 로컬 날짜로 비교 (기존 로직)
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+
+  if (start >= today) {
+    return startDate;
+  }
+
+  if (endDate) {
+    return endDate;
+  }
+
+  return startDate;
+}
+
 interface DdayItemCardBaseProps {
   eventCode: string;
   date: string | null;
   time: string | null | undefined;
+  endDate?: string | null;
+  endTime?: string | null;
+  startAtUtc?: string | null;     // ✅ UTC 시작 시간 (비교용)
+  endAtUtc?: string | null;       // ✅ UTC 종료 시간 (비교용)
   title: string;
   bgColor?: string;
   fgColor?: string;
   thumbnailUrl: string | null;
   fullLocale: string;
+  langCode: string;
   tags?: React.ReactNode;
 }
 
@@ -27,11 +131,16 @@ export default function CompCommonDdayItemCardBase({
   eventCode,
   date,
   time,
+  endDate,
+  endTime,
+  startAtUtc,
+  endAtUtc,
   title,
   bgColor,
   fgColor,
   thumbnailUrl,
   fullLocale,
+  langCode,
   tags,
 }: DdayItemCardBaseProps) {
   const router = useRouter();
@@ -42,7 +151,23 @@ export default function CompCommonDdayItemCardBase({
     setMounted(true);
   }, []);
 
-  const { bg, bgBrighter, fg } = computeBadgeColors(date, bgColor, fgColor);
+  // ✅ 날짜 파싱
+  const startDateObj = date ? new Date(date) : null;
+  const endDateObj = endDate ? new Date(endDate) : null;
+  
+  // ✅ D-Day 계산용 날짜 (UTC 기준으로 비교, 시작일이 지났으면 종료일 사용)
+  const effectiveDate = getEffectiveDateForDday(startDateObj, endDateObj, startAtUtc, endAtUtc);
+  const effectiveDateStr = effectiveDate?.toISOString().split("T")[0] ?? null;
+
+  // ✅ 기간 이벤트 여부
+  const isMultiDayEvent = !!endDate && date !== endDate;
+
+  // ✅ 시작 시간이 지났는지 (종료일 라벨 표시용) - UTC 기준
+  const showEndDateLabel = isMultiDayEvent && isAfterStartUtc(startAtUtc);
+  const endDateLabel = END_DATE_LABELS[langCode] || END_DATE_LABELS.en;
+
+  // ✅ 뱃지 색상 계산 (effectiveDate 기준)
+  const { bg, bgBrighter, fg } = computeBadgeColors(effectiveDateStr, bgColor, fgColor);
 
   const combinedDate = new Date(date ?? "");
   if (time) {
@@ -53,7 +178,21 @@ export default function CompCommonDdayItemCardBase({
     return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
   };
 
-  const ddayLabel = date ? getDdayLabel(calculateDaysFromToday(date)) : "";
+  // ✅ D-Day 라벨 (effectiveDate 기준)
+  const supportedLangCode = (["en", "id", "ja", "ko", "th", "tw", "vi", "zh", "cn"].includes(langCode)
+    ? langCode
+    : "en") as SupportedLocale;
+  const ddayLabel = effectiveDateStr ? getDdayLabel(calculateDaysFromToday(effectiveDateStr), supportedLangCode) : "";
+
+  // ✅ D-Day 뱃지 텍스트 길이에 따른 폰트 크기 결정
+  const getBadgeFontSize = (label: string): string => {
+    const length = label.length;
+    if (length <= 3) return 'text-lg'; // "D-1", "오늘" 등
+    if (length <= 5) return 'text-base'; // "D-10", "내일" 등
+    if (length <= 7) return 'text-sm'; // "Today" 등
+    return 'text-xs'; // "Tomorrow" 등 긴 텍스트
+  };
+  const badgeFontSize = getBadgeFontSize(ddayLabel);
 
   const hasImage = !!thumbnailUrl;
   const textColor = hasImage ? 'text-white' : 'text-gray-500';
@@ -65,6 +204,23 @@ export default function CompCommonDdayItemCardBase({
     saveBeforeNav?.();
     router.push(`/event/${eventCode}`);
   };
+
+  // ✅ 보조 날짜 텍스트 (제목 위에 표시)
+  // 한국어: 1월 20일(화) ~ 1월 22일(목)
+  // 영어: Jan. 19 (Mon) – Jan. 23 (Fri)
+  const getSecondaryDateText = (): string => {
+    if (!isMultiDayEvent || !startDateObj || !endDateObj) return "";
+
+    const startStr = formatShortDate(startDateObj, langCode);
+    const endStr = formatShortDate(endDateObj, langCode);
+
+    // 언어별 구분자: 한국어/일본어/중국어는 ~, 영어/기타는 –
+    const separator = ["ko", "ja", "zh", "cn", "tw"].includes(langCode) ? " ~ " : " – ";
+
+    return `${startStr}${separator}${endStr}`;
+  };
+
+  const secondaryDateText = getSecondaryDateText();
 
   return (
     <div 
@@ -105,44 +261,87 @@ export default function CompCommonDdayItemCardBase({
         >
           {/* 상단: D-Day Badge + 날짜/시간 */}
           <div className="w-full flex justify-end items-end gap-4">
-            <div 
-              className="inline-flex items-center justify-center rounded-full font-rubik font-bold text-lg flex-shrink-0 aspect-square w-20"
-              style={{ 
+            <div
+              className={`inline-flex items-center justify-center rounded-full font-rubik font-bold ${badgeFontSize} flex-shrink-0 aspect-square w-20 px-1`}
+              style={{
                 background: `linear-gradient(20deg, ${bg} 0%, ${bgBrighter} 100%)`,
                 color: fg
               }}
             >
               {ddayLabel}
             </div>
-            <div className="w-full flex flex-wrap items-center gap-1 text-base">
-              <span suppressHydrationWarning className={`break-words whitespace-normal ${textColor} ${hasImage ? 'opacity-90' : ''}`}>
-                {date
-                  ? formatDateTime(
-                      new Date(date),
-                      fullLocale,
-                      null,
-                      null,
-                      { includeTime: false, style: 'long' }
-                    )
-                  : ""}
-              </span>
-              {mounted && hasValidTime(time) && (
-                <span className="inline-flex items-center whitespace-nowrap text-base flex-shrink-0">
-                  {formatTimeOnly(combinedDate, fullLocale, null, null, {
-                    timeFormat: "12h",
-                    compactTime: true
-                  })}
+            <div className="w-full flex flex-col gap-1">
+              {/* ✅ 종료일 라벨 (기간 이벤트이고 시작일이 지난 경우에만 표시) */}
+              {showEndDateLabel && (
+                <span className="inline-flex items-center self-start px-2 py-1 rounded-full text-xs font-medium bg-dplus-red text-white">
+                  {endDateLabel}
                 </span>
               )}
+              {/* 기준 날짜 표시 (기간 이벤트: effectiveDate / 단일 이벤트: date) */}
+              <div className="flex flex-col items-start gap-0 text-base">
+                <span
+                  suppressHydrationWarning
+                  className={`break-words whitespace-normal ${textColor} ${hasImage ? 'opacity-90' : ''}`}
+                >
+                  {effectiveDate
+                    ? formatDateTime(
+                        effectiveDate,
+                        fullLocale,
+                        null,
+                        null,
+                        { includeTime: false, style: 'long' }
+                      )
+                    : ""}
+                </span>
+                {/* 시간 표시 (기간 이벤트: endTime 사용 가능 시 / 단일 이벤트: time) */}
+                {mounted && (
+                  showEndDateLabel && hasValidTime(endTime)
+                    ? (
+                      <span className="inline-flex items-center whitespace-nowrap text-lg text-gray-500 flex-shrink-0">
+                        {formatTimeOnly((() => {
+                          const d = new Date(endDate ?? "");
+                          if (endTime) parseAndSetTime(d, endTime);
+                          return d;
+                        })(), fullLocale, null, null, {
+                          timeFormat: "12h",
+                          compactTime: true
+                        })}
+                      </span>
+                    )
+                    : hasValidTime(time) && (
+                      <span className="inline-flex items-center whitespace-nowrap text-lg text-gray-500 flex-shrink-0">
+                        {formatTimeOnly(combinedDate, fullLocale, null, null, {
+                          timeFormat: "12h",
+                          compactTime: true
+                        })}
+                      </span>
+                    )
+                )}
+              </div>
             </div>
           </div>
           
-          {/* 중간: 제목 */}
-          <div 
-            className="py-6 font-bold text-2xl flex-grow"
-            title={title ?? ""}
-          >
-            {title}
+          {/* 중간: 보조 날짜 + 제목 */}
+          <div className="py-6 flex-grow">
+            {/* ✅ 보조 날짜 텍스트 (기간 이벤트일 때만 표시) - 제목 위 */}
+            <div className="flex flex-col gap-1">
+              <div className="flex flex-row items-center gap-2">
+                {secondaryDateText && (
+                  <div
+                    suppressHydrationWarning
+                    className={`mb-1 text-sm ${hasImage ? 'bg-black opacity-90 text-white' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded-md`}
+                  >
+                    {secondaryDateText}
+                  </div>
+                )}
+              </div>
+              <div
+                className="font-bold text-2xl"
+                title={title ?? ""}
+              >
+                {title}
+              </div>
+            </div>
           </div>
 
           {/* 하단: 태그 + 화살표 */}

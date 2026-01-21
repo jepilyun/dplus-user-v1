@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetDateList } from "@/actions/action";
+import { reqGetDateList } from "@/actions/req-date";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -348,7 +348,12 @@ export default function CompDateDetailPage({
         {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCardForDate key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCardForDate 
+                key={item.event_code} 
+                event={item} 
+                fullLocale={fullLocale} 
+                langCode={langCode}
+              />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

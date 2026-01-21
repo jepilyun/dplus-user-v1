@@ -9,9 +9,11 @@ type EventType = TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMa
 export default function CompCommonDdayCard({
   event,
   fullLocale,
+  langCode,
 }: { 
   event: EventType; 
   fullLocale: string;
+  langCode: string;
 }) {
   const code = event?.event_info?.event_code ?? event?.event_code ?? "default";
   const thumbnailUrl = getThumbnailUrl(event);
@@ -56,11 +58,16 @@ export default function CompCommonDdayCard({
       eventCode={code}
       date={event?.event_info?.date ?? null}
       time={event?.event_info?.time}
+      endDate={event?.event_info?.end_date ?? null}
+      endTime={event?.event_info?.end_time}
+      startAtUtc={event?.event_info?.start_at_utc ?? null}
+      endAtUtc={event?.event_info?.end_at_utc ?? null}
       title={event?.event_info?.title ?? ""}
       bgColor={event?.event_info?.bg_color ?? undefined}
       fgColor={event?.event_info?.fg_color ?? undefined}
       thumbnailUrl={thumbnailUrl ?? null}
       fullLocale={fullLocale}
+      langCode={langCode}
       tags={tags}
     />
   );

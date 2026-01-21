@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCountryDetail, reqGetCountryEvents } from "@/actions/action";
+import { reqGetCountryDetail, reqGetCountryEvents } from "@/actions/req-country";
 import {
   LIST_LIMIT,
   ResponseCountryDetailForUserFront,
@@ -73,9 +73,12 @@ export default function CompCountryDetailPage({
     )
   );
 
+  console.log("folders:::", initialData?.mapCountryFolder?.items)
+
   const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>(
     initialData?.mapCountryEvent?.items ?? []
   );
+  
   const [eventsStart, setEventsStart] = useState(
     initialData?.mapCountryEvent?.items?.length ?? 0
   );
@@ -99,7 +102,7 @@ export default function CompCountryDetailPage({
 
     try {
       const res = await reqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
-      
+
       const isEmptyObj =
         !res?.success ||
         !res?.dbResponse ||
@@ -431,7 +434,8 @@ export default function CompCountryDetailPage({
               <CompCommonDdayCard 
                 key={item.event_info?.event_code} 
                 event={item} 
-                fullLocale={fullLocale} 
+                fullLocale={fullLocale}
+                langCode={langCode}
               />
             ))}
           </div>

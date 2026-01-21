@@ -1,15 +1,13 @@
 // app/sitemap.ts
+import { reqGetCategoryCodes } from "@/actions/req-category";
+import { reqGetCityCodes } from "@/actions/req-city";
+import { reqGetCountryCodes } from "@/actions/req-country";
+import { reqGetEventCodeList } from "@/actions/req-event";
+import { reqGetFolderCodeList } from "@/actions/req-folder";
+import { reqGetGroupCodes } from "@/actions/req-group";
+import { reqGetStagCodes } from "@/actions/req-stag";
 import { MetadataRoute } from "next";
 
-import {
-  reqGetCategoryCodes,
-  reqGetCityCodes,
-  reqGetCountryCodes,
-  reqGetEventCodeList,
-  reqGetFolderCodeList,
-  reqGetGroupCodes,
-  reqGetStagCodes,
-} from "@/actions/action";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.dplus.app";

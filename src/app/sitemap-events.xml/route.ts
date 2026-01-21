@@ -1,7 +1,7 @@
 // app/sitemap-events.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetEventCodeList } from "@/actions/action";
+import { reqGetEventCodeList } from "@/actions/req-event";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
@@ -33,5 +33,4 @@ export async function GET() {
   });
 }
 
-export const dynamic = "force-dynamic";
 export const revalidate = 86400; // 24시간마다 재생성

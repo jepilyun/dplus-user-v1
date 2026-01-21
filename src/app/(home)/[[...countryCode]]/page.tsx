@@ -1,10 +1,8 @@
-export const revalidate = 14400;
-export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
-
+export const revalidate = 14400; // 4 hrs
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
-import { reqGetCountryDetail } from "@/actions/action";
+import { reqGetCountryDetail } from "@/actions/req-country";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 

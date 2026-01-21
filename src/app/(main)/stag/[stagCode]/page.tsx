@@ -1,12 +1,10 @@
 // 이 라우트 기본 재생성 주기: 4시간
 export const revalidate = 14400;
-export const dynamic = 'force-dynamic';  // ✅ 이 한 줄!
-
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetStagDetail } from "@/actions/action";
+import { reqGetStagDetail } from "@/actions/req-stag";
 import CompStagDetailPage from "@/components/comp-stag/comp-stag-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

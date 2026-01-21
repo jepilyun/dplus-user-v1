@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCategoryDetail, reqGetCategoryEvents } from "@/actions/action";
+import { reqGetCategoryDetail, reqGetCategoryEvents } from "@/actions/req-category";
 import {
   LIST_LIMIT,
   ResponseCategoryDetailForUserFront,
@@ -370,7 +370,12 @@ export default function CompCategoryDetailPage({
           {/* 모바일: CompCommonDdayItem */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCard key={item.event_code} event={item} fullLocale={fullLocale} />
+              <CompCommonDdayCard 
+                key={item.event_code} 
+                event={item} 
+                fullLocale={fullLocale} 
+                langCode={langCode}
+              />
             ))}
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>

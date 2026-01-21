@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetTodayList } from "@/actions/action";
+import { reqGetTodayList } from "@/actions/req-today";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -473,7 +473,11 @@ export default function CompTodayDetailPage({
                 <div key={`event-${item.event_code}`}>
                   {/* 모바일: CompCommonDdayItemCardForDate */}
                   <div className="md:hidden">
-                    <CompCommonDdayCardForDate event={item} fullLocale={fullLocale} />
+                    <CompCommonDdayCardForDate 
+                      event={item} 
+                      fullLocale={fullLocale} 
+                      langCode={langCode}
+                    />
                   </div>
 
                   {/* 데스크톱: CompCommonDdayItemForDate */}
