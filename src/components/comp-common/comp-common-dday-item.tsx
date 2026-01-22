@@ -17,7 +17,7 @@ export default function CompCommonDdayItem({
     <Link 
       href={`/city/${event.event_info.city.city_code}`}
       data-tag-link
-      className="text-xs md:text-sm bg-tag-city-for-list hover:opacity-80 transition-opacity"
+      className="text-xs md:text-sm px-2 py-1 rounded-full bg-gray-100 hover:opacity-80 transition-opacity"
     >
       {event.event_info.city.name_native}
     </Link>
@@ -28,7 +28,7 @@ export default function CompCommonDdayItem({
       key={category.category_code}
       href={`/category/${category.category_code}`}
       data-tag-link
-      className="text-xs md:text-sm bg-tag-category-for-list hover:opacity-80 transition-opacity"
+      className="text-xs md:text-sm px-2 py-1 rounded-full bg-gray-100 hover:opacity-80 transition-opacity"
     >
       {category.name_display}
     </Link>

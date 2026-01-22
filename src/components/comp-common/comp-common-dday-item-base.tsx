@@ -10,105 +10,14 @@ import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
-import { MapPin } from "lucide-react";
-
-// ✅ 다국어 종료 라벨
-const END_DATE_LABELS: Record<string, string> = {
-  en: "End Date",
-  ko: "종료일",
-  ja: "終了",
-  es: "Fin",
-  zh: "结束",
-};
-
-// ✅ 짧은 날짜 포맷 (년도 없이, 요일 포함)
-function formatShortDate(date: Date, langCode: string): string {
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const weekday = date.getDay();
-
-  const weekdays: Record<string, string[]> = {
-    en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    ko: ["일", "월", "화", "수", "목", "금", "토"],
-    ja: ["日", "月", "火", "水", "木", "金", "土"],
-    es: ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"],
-    zh: ["日", "一", "二", "三", "四", "五", "六"],
-  };
-
-  const monthNames: Record<string, string[]> = {
-    en: ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."],
-    es: ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sep.", "oct.", "nov.", "dic."],
-  };
-
-  const wd = (weekdays[langCode] || weekdays.en)[weekday];
-
-  switch (langCode) {
-    case "ko":
-      return `${month}월 ${day}일(${wd})`;
-    case "ja":
-      return `${month}月${day}日(${wd})`;
-    case "zh":
-      return `${month}月${day}日(${wd})`;
-    case "en": {
-      const monthName = monthNames.en[date.getMonth()];
-      return `${monthName} ${day} (${wd})`;
-    }
-    case "es": {
-      const monthName = monthNames.es[date.getMonth()];
-      return `${day} ${monthName} (${wd})`;
-    }
-    default:
-      return `${month}/${day} (${wd})`;
-  }
-}
-
-// ✅ 시작 시간이 지났는지 확인 (UTC 기준)
-function isAfterStartUtc(startAtUtc: string | null | undefined): boolean {
-  if (!startAtUtc) return false;
-  const now = new Date();
-  const start = new Date(startAtUtc);
-  return now > start;
-}
-
-// ✅ D-Day 계산용 날짜 결정 (UTC 기준으로 비교, 표시용 로컬 날짜 반환)
-function getEffectiveDateForDday(
-  startDate: Date | null,
-  endDate: Date | null,
-  startAtUtc: string | null | undefined,
-  endAtUtc: string | null | undefined
-): Date | null {
-  if (!startDate) return null;
-
-  const now = new Date();
-
-  // UTC 시작 시간이 있으면 UTC로 비교
-  if (startAtUtc) {
-    const startUtc = new Date(startAtUtc);
-    // 아직 시작 전이면 시작일 기준
-    if (now <= startUtc) {
-      return startDate;
-    }
-    // 시작 후이고 종료일이 있으면 종료일 기준
-    if (endDate) {
-      return endDate;
-    }
-    return startDate;
-  }
-
-  // UTC 시작 시간이 없으면 로컬 날짜로 비교 (기존 로직)
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
-
-  if (start >= today) {
-    return startDate;
-  }
-
-  if (endDate) {
-    return endDate;
-  }
-
-  return startDate;
-}
+import { MapPin, Calendar } from "lucide-react";
+import {
+  END_DATE_LABELS,
+  formatShortDate,
+  isAfterStartUtc,
+  getEffectiveDateForDday,
+  hasValidTime,
+} from "@/utils/dday-card-utils";
 
 interface DdayItemBaseProps {
   eventCode: string;
@@ -181,10 +90,6 @@ export default function CompCommonDdayItemBase({
     parseAndSetTime(combinedDate, time);
   }
 
-  const hasValidTime = (timeStr: string | null | undefined): boolean => {
-    return !!timeStr && timeStr.trim() !== '' && timeStr !== '00:00:00';
-  };
-
   // ✅ D-Day 라벨 (다국어 지원)
   const supportedLangCode = (["en", "id", "ja", "ko", "th", "tw", "vi", "zh", "cn"].includes(langCode)
     ? langCode
@@ -255,25 +160,13 @@ export default function CompCommonDdayItemBase({
 
       {/* Content */}
       <div className="flex flex-col flex-grow gap-0">
-        {/* 종료일 라벨 + 기간 표시 */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Date & Time */}
+        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200">
           {showEndDateLabel && (
             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-dplus-red text-white">
               {endDateLabel}
             </span>
           )}
-          {secondaryDateText && (
-            <span
-              suppressHydrationWarning
-              className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md"
-            >
-              {secondaryDateText}
-            </span>
-          )}
-        </div>
-
-        {/* Date & Time */}
-        <div className="flex items-center gap-2 text-sm md:text-base text-gray-400 transition-all duration-200">
           <span suppressHydrationWarning>
             {effectiveDate
               ? formatDateTime(
@@ -288,7 +181,7 @@ export default function CompCommonDdayItemBase({
           {mounted && (
             showEndDateLabel && hasValidTime(endTime)
               ? (
-                <span className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs sm:text-sm md:text-base">
+                <span className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs sm:text-sm">
                   {formatTimeOnly((() => {
                     const d = new Date(endDate ?? "");
                     if (endTime) parseAndSetTime(d, endTime);
@@ -300,7 +193,7 @@ export default function CompCommonDdayItemBase({
                 </span>
               )
               : hasValidTime(time) && (
-                <span className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs sm:text-sm md:text-base">
+                <span className="inline-flex items-center px-2 py-1 whitespace-nowrap rounded-md text-gray-700 bg-gray-100 text-xs sm:text-sm">
                   {formatTimeOnly(combinedDate, fullLocale, null, null, {
                     timeFormat: "12h",
                     compactTime: true
@@ -315,33 +208,47 @@ export default function CompCommonDdayItemBase({
           <span className="font-bold text-gray-700 group-hover:text-gray-900">{title}</span>
         </div>
 
-        {/* Place */}
-        {placeId && placeName && (
-          useClientWrapper ? (
-            <Link
-              href={`/place/${placeId}`}
-              onClick={handlePlaceClick}
-              data-place-link
-              className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors mt-1 w-fit"
+        <div className="flex items-center gap-1 flex-wrap text-gray-500">
+          <Calendar className="w-4 h-4 flex-shrink-0" />
+          {secondaryDateText && (
+            <span
+              suppressHydrationWarning
+              className="text-xs md:text-sm"
             >
-              <MapPin className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{placeName}</span>
-            </Link>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 mt-1 w-fit">
-              <MapPin className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{placeName}</span>
+              {secondaryDateText}
             </span>
-          )
-        )}
+          )}
+        </div>
 
-        {/* Tags */}
-        {(cityTag || categoryTags) && (
-          <div className="mt-1 flex items-center gap-1 flex-wrap">
-            {cityTag}
-            {categoryTags}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Place */}
+          {placeId && placeName && (
+            useClientWrapper ? (
+              <Link
+                href={`/place/${placeId}`}
+                onClick={handlePlaceClick}
+                data-place-link
+                className="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors mt-1 w-fit"
+              >
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{placeName}</span>
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 mt-1 w-fit">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{placeName}</span>
+              </span>
+            )
+          )}
+
+          {/* Tags */}
+          {(cityTag || categoryTags) && (
+            <div className="mt-1 flex items-center gap-1 flex-wrap">
+              {cityTag}
+              {categoryTags}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Thumbnail */}
