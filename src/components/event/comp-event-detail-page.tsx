@@ -1,16 +1,16 @@
 "use client";
 
 import { reqGetEventDetail } from "@/req/req-event";
-import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
+import { HeroImageSlider } from "@/components/image/hero-image-slider";
 import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
 import { detectDevice, DeviceType } from "@/utils/device-detector";
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
+import CompLabelCount01 from "@/components/common/comp-label-count-01";
 import { getEventDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
 import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
-import ShareModal from "../comp-share/comp-share-modal";
+import ShareModal from "../share/comp-share-modal";
 import { CompEventActionButtons } from "./comp-event-action-buttons";
 import { CompEventHeader } from "./comp-event-header";
 import { CompEventDetailMap } from "./comp-event-map";
@@ -18,11 +18,11 @@ import { CompEventDescription } from "./comp-event-description";
 import { SupportedLocale } from "@/consts/const-config";
 import CompEventContactLinks from "./comp-event-contact-links";
 import { ArrowRight } from "lucide-react";
-import { CompLinkButton } from "../comp-button/comp-link-button";
+import { CompLinkButton } from "../button/comp-link-button";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
 
 /**

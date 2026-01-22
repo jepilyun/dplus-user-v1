@@ -10,16 +10,16 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { getGroupDetailImageUrls } from "@/utils/set-image-urls";
 import { useRouter } from "next/navigation";
-import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { CompLoadMore } from "../comp-button/comp-load-more";
-import { HeroImageBackgroundCarouselGroup } from "../comp-image/hero-background-carousel-group";
+import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
+import { CompLoadMore } from "../button/comp-load-more";
+import { HeroImageBackgroundCarouselGroup } from "../image/hero-background-carousel-group";
 import { useGroupPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementGroupViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
+import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
 type GroupPageState = {
   events: TMapGroupEventWithEventInfo[];

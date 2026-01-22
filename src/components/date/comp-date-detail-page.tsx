@@ -4,15 +4,15 @@ import { reqGetDateList } from "@/req/req-date";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CompLoadMore } from "../comp-button/comp-load-more";
+import { CompLoadMore } from "../button/comp-load-more";
 import DateNavigation from "./comp-date-navigation";
-import CompCommonDdayItemForDate from "../comp-common/comp-common-dday-item-for-date";
+import CompCommonDdayItemForDate from "../dday-card/comp-common-dday-item-for-date";
 import { useDatePageRestoration } from "@/contexts/scroll-restoration-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayCardForDate from "../comp-common/comp-common-dday-card-for-date";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
+import CompCommonDdayCardForDate from "../dday-card/comp-common-dday-card-for-date";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
 type DatePageState = {
   events: TEventCardForDateDetail[];

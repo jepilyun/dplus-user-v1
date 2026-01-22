@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/req/req-category";
-import CompCategoryDetailPage from "@/components/comp-category/comp-category-detail-page";
+import CompCategoryDetailPage from "@/components/category/comp-category-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

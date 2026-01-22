@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { reqGetDateList } from "@/req/req-date";
-import CompDateDetailPage from "@/components/comp-date/comp-date-detail-page";
+import CompDateDetailPage from "@/components/date/comp-date-detail-page";
 import { generateSimpleMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

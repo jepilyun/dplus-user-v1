@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 import "@/app/globals.css";
-import CompFooter from "@/components/comp-common/comp-footer";
-import TopNavMain from "@/components/comp-top-nav/top-nav-main";
+import CompFooter from "@/components/common/comp-footer";
+import TopNavMain from "@/components/top-nav/top-nav-main";
 import { generateLayoutMetadata } from "@/utils/generate-metadata";
 
 /**

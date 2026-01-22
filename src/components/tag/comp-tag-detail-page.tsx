@@ -8,14 +8,14 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { CompLoadMore } from "../comp-button/comp-load-more";
+import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
+import { CompLoadMore } from "../button/comp-load-more";
 import { useTagPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
 import { incrementTagViewCount } from "@/utils/increment-count";
-import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
+import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
 type TagPageState = {
   events: TMapTagEventWithEventInfo[];

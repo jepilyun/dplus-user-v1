@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { reqGetStagDetail } from "@/req/req-stag";
-import CompStagDetailPage from "@/components/comp-stag/comp-stag-detail-page";
+import CompStagDetailPage from "@/components/stag/comp-stag-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

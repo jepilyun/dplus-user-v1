@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { reqGetCountryCodes, reqGetCountryDetail } from "@/req/req-country";
-import CompCountryDetailPage from "@/components/comp-country/comp-country-detail-page";
+import CompCountryDetailPage from "@/components/country/comp-country-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 import { reqGetTodayList } from "@/req/req-today";
-import CompTodayDetailPage from "@/components/comp-today/comp-today-detail-page";
+import CompTodayDetailPage from "@/components/today/comp-today-detail-page";
 import { generateSimpleMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

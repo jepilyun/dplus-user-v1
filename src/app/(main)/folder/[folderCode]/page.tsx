@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { reqGetFolderDetail } from "@/req/req-folder";
-import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
+import CompFolderDetailPage from "@/components/folder/comp-folder-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

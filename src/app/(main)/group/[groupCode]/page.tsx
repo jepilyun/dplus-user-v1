@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { reqGetGroupCodes, reqGetGroupDetail } from "@/req/req-group";
-import CompGroupDetailPage from "@/components/comp-group/comp-group-detail-page";
+import CompGroupDetailPage from "@/components/group/comp-group-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";

@@ -1,136 +1,144 @@
 "use client";
 
-import { reqGetPlaceDetail, reqGetPlaceEvents } from "@/req/req-place";
+import { reqGetStagDetail, reqGetStagEvents } from "@/req/req-stag";
 import {
   LIST_LIMIT,
-  ResponsePlaceDetailForUserFront,
-  TMapPlaceEventWithEventInfo,
+  ResponseStagDetailForUserFront,
+  SUPPORT_LANG_CODES,
+  TMapStagEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { CompLoadMore } from "../comp-button/comp-load-more";
-import { usePlacePageRestoration } from "@/contexts/scroll-restoration-context";
+import { getStagDetailImageUrls } from "@/utils/set-image-urls";
+import { useRouter } from "next/navigation";
+import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
+import { CompLoadMore } from "../button/comp-load-more";
+import { HeroImageBackgroundCarouselStag } from "../image/hero-background-carousel-stag";
+import { useStagPageRestoration } from "@/contexts/scroll-restoration-context";
+import { incrementStagViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
-import dynamic from "next/dynamic";
+import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
-const GoogleMap = dynamic(() => import("../comp-google-map/google-map"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-[300px] bg-gray-200 animate-pulse flex items-center justify-center">
-      <span className="text-gray-500 text-sm">Loading map...</span>
-    </div>
-  ),
-});
-
-type PlacePageState = {
-  events: TMapPlaceEventWithEventInfo[];
+type StagPageState = {
+  events: TMapStagEventWithEventInfo[];
   eventsStart: number;
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
 
-export default function CompPlaceDetailPage({
-  placeId,
+export default function CompStagDetailPage({
+  stagCode,
   langCode,
   fullLocale,
   initialData,
 }: {
-  placeId: string;
+  stagCode: string;
   langCode: string;
   fullLocale: string;
-  initialData: ResponsePlaceDetailForUserFront | null;
+  initialData: ResponseStagDetailForUserFront | null;
 }) {
-  // const router = useRouter();
-  const { save, restore } = usePlacePageRestoration(placeId);
+  const router = useRouter();
+  const { save, restore } = useStagPageRestoration(stagCode);
 
+  const viewCountIncrementedRef = useRef(false);
   const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
-  const [currentUrl, setCurrentUrl] = useState<string>('');
 
-  const [placeDetail, setPlaceDetail] = useState<ResponsePlaceDetailForUserFront | null>(
+  const [stagDetail, setStagDetail] = useState<ResponseStagDetailForUserFront | null>(
     initialData ?? null
   );
   
   // ✅ 데이터 버전: 2시간 블록
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
-  const [events, setEvents] = useState<TMapPlaceEventWithEventInfo[]>(
-    initialData?.placeEvent?.items ?? []
+  const [imageUrls, setImageUrls] = useState<string[]>(
+    initialData ? getStagDetailImageUrls(initialData.stagDetail?.stagInfo) : []
+  );
+
+  const [events, setEvents] = useState<TMapStagEventWithEventInfo[]>(
+    initialData?.mapStagEvent?.items ?? []
   );
   const [eventsStart, setEventsStart] = useState(
-    initialData?.placeEvent?.items?.length ?? 0
+    initialData?.mapStagEvent?.items?.length ?? 0
   );
   const [eventsHasMore, setEventsHasMore] = useState(
-    Boolean(initialData?.placeEvent?.hasMore)
+    Boolean(initialData?.mapStagEvent?.hasMore)
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(
     new Set(
-      initialData?.placeEvent?.items
-        ?.map(item => item?.event_code)
+      initialData?.mapStagEvent?.items
+        ?.map(item => item?.event_info?.event_code ?? item?.event_code)
         .filter(Boolean) ?? []
     )
   );
 
+  const [viewCount, setViewCount] = useState(initialData?.stagDetail?.stagInfo?.view_count ?? 0);
+
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
    */
-  const fetchAndMergeData = async (restoredEvents?: TMapPlaceEventWithEventInfo[]) => {
+  const fetchAndMergeData = async (restoredEvents?: TMapStagEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
     }
 
     try {
-      const res = await reqGetPlaceDetail(placeId, langCode, 0, LIST_LIMIT.default);
-      const db = res?.dbResponse;
-
-      const isEmptyObj = !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
-
-      if (!res?.success || isEmptyObj || !db?.placeDetail) {
+      const res = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
+  
+      const isEmptyObj =
+        !res?.dbResponse ||
+        (typeof res?.dbResponse === "object" &&
+          !Array.isArray(res?.dbResponse) &&
+          Object.keys(res?.dbResponse).length === 0);
+  
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.stagDetail?.stagInfo) {
         setError("not-found");
         setLoading(false);
         return;
       }
-
-      setPlaceDetail(db);
-
-      const serverEvents = db?.placeEvent?.items ?? [];
+  
+      setStagDetail(res.dbResponse);
+      setImageUrls(getStagDetailImageUrls(res.dbResponse.stagDetail?.stagInfo));
+      setViewCount(res.dbResponse?.stagDetail?.stagInfo?.view_count ?? 0);
+  
+      const serverEvents = res?.dbResponse?.mapStagEvent?.items ?? [];
       
       // ✅ 새 데이터 버전 업데이트
       const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
-      // console.log('[Folder Merge] 📊 Data versions:', {
-      //   new: newVersion,
-      //   old: dataVersion,
-      //   changed: newVersion !== dataVersion
-      // });
+      console.log('[Stag Merge] 📊 Data versions:', {
+        new: newVersion,
+        old: dataVersion,
+        changed: newVersion !== dataVersion
+      });
       
       // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        // console.log('[Folder Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
-        // console.log('[Folder Merge] Server events:', serverEvents.length);
-        // console.log('[Folder Merge] Restored total:', restoredEvents.length);
+        console.log('[Stag Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[Stag Merge] Server events:', serverEvents.length);
+        console.log('[Stag Merge] Restored total:', restoredEvents.length);
         
         const serverCodes = new Set(
-          serverEvents.map(item => item?.event_code).filter(Boolean)
+          serverEvents.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
         );
         
         const additionalEvents = restoredEvents
           .slice(LIST_LIMIT.default)
           .filter(item => {
-            const code = item?.event_code;
+            const code = item?.event_info?.event_code ?? item?.event_code;
             return code && !serverCodes.has(code);
           });
-
+        
+        console.log('[Stag Merge] Additional events from restore:', additionalEvents.length);
+        
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -146,56 +154,77 @@ export default function CompPlaceDetailPage({
           return true;
         });
         
-        console.log('[Place Merge] Future events after filter:', futureEvents.length);
+        console.log('[Stag Merge] Future events after filter:', futureEvents.length);
         
         const finalEvents = [...serverEvents, ...futureEvents];
         
-        // console.log('[Folder Merge] ✅ Final merged:', {
-        //   server: serverEvents.length,
-        //   additional: futureEvents.length,
-        //   total: finalEvents.length
-        // });
+        console.log('[Stag Merge] ✅ Final merged:', {
+          server: serverEvents.length,
+          additional: futureEvents.length,
+          total: finalEvents.length
+        });
         
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
-
+        
         seenEventCodesRef.current.clear();
         finalEvents.forEach(item => {
-          const code = item?.event_code;
+          const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        console.log('[Folder Merge] ✅ Using server data only');
+        console.log('[Stag Merge] ✅ Using server data only');
         setEvents(serverEvents);
         setEventsStart(serverEvents.length);
         
         seenEventCodesRef.current.clear();
         serverEvents.forEach(item => {
-          const code = item?.event_code;
+          const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         });
       }
       
-      setEventsHasMore(Boolean(db?.placeEvent?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.mapStagEvent?.hasMore));
       setError(null);
     } catch (e) {
-      console.error("Failed to fetch folder detail:", e);
+      console.error("Failed to fetch stag detail:", e);
       setError("network");
     } finally {
       setLoading(false);
     }
   };
 
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: stagDetail?.stagDetail?.stagInfo?.stag || "이벤트 세트 공유",
+  //     text: stagDetail?.stagDetail?.stagInfo?.stag_native || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
+
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
+
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
 
     try {
-      const res = await reqGetPlaceEvents(placeId, langCode, eventsStart, LIST_LIMIT.default);
+      const res = await reqGetStagEvents(stagCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
-      const newItems = fetchedItems.filter((it: TMapPlaceEventWithEventInfo | null) => {
-        const code = it?.event_code;
+      const newItems = fetchedItems.filter((it: TMapStagEventWithEventInfo) => {
+        const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodesRef.current.has(code)) return false;
         seenEventCodesRef.current.add(code);
         return true;
@@ -209,28 +238,33 @@ export default function CompPlaceDetailPage({
     }
   };
 
-  // ✅ URL 설정
+  // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
-    setCurrentUrl(window.location.href);
-  }, []);
+    if (!viewCountIncrementedRef.current && stagCode) {
+      viewCountIncrementedRef.current = true;
+      incrementStagViewCount(stagCode).then(newCount => {
+        if (newCount !== null) setViewCount(newCount);
+      });
+    }
+  }, [stagCode]);
 
   // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
     if (restorationAttemptedRef.current) return;
     restorationAttemptedRef.current = true;
 
-    console.log('[Place Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[Place Mount] Current data version:', dataVersion);
+    console.log('[Stag Mount] 🚀 Component mounted, attempting restore...');
+    console.log('[Stag Mount] Current data version:', dataVersion);
     
-    const saved = restore<PlacePageState>(dataVersion);
+    const saved = restore<StagPageState>(dataVersion);
     
-    console.log('[Folder Mount] Restored data:', {
+    console.log('[Stag Mount] Restored data:', {
       hasSaved: !!saved,
       eventsCount: saved?.events?.length || 0,
     });
     
     if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Folder Mount] ✅ Restoring state with', saved.events.length, 'events');
+      console.log('[Stag Mount] ✅ Restoring state with', saved.events.length, 'events');
       
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
@@ -240,17 +274,17 @@ export default function CompPlaceDetailPage({
       
       // ✅ 더보기를 했던 경우에만 백그라운드 병합
       if (saved.events.length > LIST_LIMIT.default) {
-        console.log('[Folder Mount] 📡 Fetching server data for merge...');
+        console.log('[Stag Mount] 📡 Fetching server data for merge...');
         fetchAndMergeData(saved.events);
       }
     } else {
-      console.log('[Folder Mount] ⚠️ No valid saved data found');
+      console.log('[Stag Mount] ⚠️ No valid saved data found');
       if (!initialData) {
         fetchAndMergeData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [placeId]);
+  }, [stagCode]);
 
   // ✅ 클릭 이벤트 감지하여 저장
   useEffect(() => {
@@ -258,24 +292,24 @@ export default function CompPlaceDetailPage({
       const currentScrollY = window.scrollY;
       
       if (currentScrollY === 0) {
-        console.log('[Place Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
+        console.log('[Stag Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
         return;
       }
       
-      // console.log('[Folder Save] 💾 현재 상태 저장:', {
-      //   scrollY: currentScrollY,
-      //   eventsCount: events.length,
-      //   dataVersion,
-      // });
+      console.log('[Stag Save] 💾 현재 상태 저장:', {
+        scrollY: currentScrollY,
+        eventsCount: events.length,
+        dataVersion,
+      });
 
-      const state: PlacePageState = {
+      const state: StagPageState = {
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
       };
 
-      save<PlacePageState>(state, dataVersion);
+      save<StagPageState>(state, dataVersion);
     };
 
     // ✅ 모든 네비게이션 요소 클릭 감지
@@ -294,6 +328,7 @@ export default function CompPlaceDetailPage({
           }
         }
         
+        console.log('[Stag Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
         saveCurrentState();
       }
     };
@@ -311,7 +346,7 @@ export default function CompPlaceDetailPage({
       const currentScrollY = window.scrollY;
       if (currentScrollY === 0) return;
       
-      save<PlacePageState>({
+      save<StagPageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -328,7 +363,7 @@ export default function CompPlaceDetailPage({
     
     return () => {
       window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("visibilitychange", onVisibility);
     };
   }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
@@ -343,8 +378,8 @@ export default function CompPlaceDetailPage({
   if (error === "not-found") {
     return (
       <CompNotFound
-        title="Folder Not Found"
-        message="해당 폴더는 존재하지 않습니다."
+        title="Stag Not Found"
+        message="해당 스태그는 존재하지 않습니다."
         returnPath={`/${langCode}`}
         returnLabel="홈 화면으로 이동"
       />
@@ -355,37 +390,22 @@ export default function CompPlaceDetailPage({
     return (
       <CompNetworkError
         title="ERROR"
-        message="Failed to load folder details. Please try again."
+        message="Failed to load stag details. Please try again."
         onRetry={() => fetchAndMergeData()}
         retryLabel="Retry"
       />
     );
   }
 
-  // ✅ Place 위치 정보
-  const latitude = placeDetail?.placeDetail?.latitude;
-  const longitude = placeDetail?.placeDetail?.longitude;
-  const hasLocation = typeof latitude === 'number' && typeof longitude === 'number';
-
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div id="place-title" className="my-4 text-center font-extrabold text-3xl md:text-4xl" data-place-id={placeDetail?.placeDetail?.place_id}>
-        {placeDetail?.placeDetail?.name_native ?? placeDetail?.placeDetail?.name_en}
-      </div>
-
-      {/* ✅ Google Map */}
-      {hasLocation && (
-        <div className="w-full max-w-[1024px] mx-auto">
-          <div className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden">
-            <GoogleMap
-              latitude={latitude!}
-              longitude={longitude!}
-              title={placeDetail?.placeDetail?.name_native ?? placeDetail?.placeDetail?.name_en ?? "Location"}
-              zoom={15}
-            />
-          </div>
-        </div>
-      )}
+    <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
+      <HeroImageBackgroundCarouselStag
+        bucket="stags"
+        imageUrls={imageUrls}
+        interval={5000}
+        stagDetail={stagDetail?.stagDetail?.stagInfo || null}
+        langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
+      />
 
       {events?.length ? (
         <>

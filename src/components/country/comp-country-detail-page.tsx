@@ -8,17 +8,17 @@ import {
 } from "dplus_common_v1";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CompLoadMore } from "../comp-button/comp-load-more";
+import { CompLoadMore } from "../button/comp-load-more";
 import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCountryViewCount } from "@/utils/increment-count";
 import { NavigationSaveContext } from "@/contexts/navigation-save-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import { CompCountryCategoryItem } from "./comp-country-category-item";
 import { CompCountryCityItem } from "./comp-country-city-item";
-import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
+import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
 type CountryPageState = {
   events: TMapCountryEventWithEventInfo[];

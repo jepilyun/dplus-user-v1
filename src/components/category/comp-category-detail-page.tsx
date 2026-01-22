@@ -8,15 +8,15 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CompLoadMore } from "../comp-button/comp-load-more";
-import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
+import { CompLoadMore } from "../button/comp-load-more";
+import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
+import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { useCategoryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCategoryViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
 type CategoryPageState = {
   events: TMapCategoryEventWithEventInfo[];

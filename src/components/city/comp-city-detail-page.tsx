@@ -1,59 +1,54 @@
 "use client";
 
-import { reqGetFolderDetail, reqGetFolderEvents } from "@/req/req-folder";
-import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
+import { reqGetCityDetail, reqGetCityEvents } from "@/req/req-city";
 import {
   LIST_LIMIT,
-  ResponseFolderDetailForUserFront,
+  ResponseCityDetailForUserFront,
   SUPPORT_LANG_CODES,
-  TMapFolderEventWithEventInfo,
+  TMapCityEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
-import CompLabelCount01 from "@/components/comp-common/comp-label-count-01";
-import { getFolderDetailImageUrls } from "@/utils/set-image-urls";
-import CompCommonDdayItem from "../comp-common/comp-common-dday-item";
-import { CompLoadMore } from "../comp-button/comp-load-more";
-import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context";
-import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
+import { getCityDetailImageUrls } from "@/utils/set-image-urls";
+import { useRouter } from "next/navigation";
+import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
+import { CompLoadMore } from "../button/comp-load-more";
+import { HeroImageBackgroundCarouselCity } from "../image/hero-background-carousel-city";
+import { useCityPageRestoration } from "@/contexts/scroll-restoration-context";
+import { incrementCityViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
-import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
-import { CompLoading } from "../comp-common/comp-loading";
-import { CompNotFound } from "../comp-common/comp-not-found";
-import { CompNetworkError } from "../comp-common/comp-network-error";
-import { CompFolderActionButtons } from "./comp-folder-action-buttons";
-import ShareModal from "../comp-share/comp-share-modal";
+import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
+import { CompLoading } from "../common/comp-loading";
+import { CompNotFound } from "../common/comp-not-found";
+import { CompNetworkError } from "../common/comp-network-error";
 
-type FolderPageState = {
-  events: TMapFolderEventWithEventInfo[];
+type CityPageState = {
+  events: TMapCityEventWithEventInfo[];
   eventsStart: number;
   eventsHasMore: boolean;
   seenEventCodes: string[];
 };
 
-export default function CompFolderDetailPage({
-  folderCode,
+export default function CompCityDetailPage({
+  cityCode,
   langCode,
   fullLocale,
   initialData,
 }: {
-  folderCode: string;
+  cityCode: string;
   langCode: string;
   fullLocale: string;
-  initialData: ResponseFolderDetailForUserFront | null;
+  initialData: ResponseCityDetailForUserFront | null;
 }) {
-  // const router = useRouter();
-  const { save, restore } = useFolderPageRestoration(folderCode);
+  const router = useRouter();
+  const { save, restore } = useCityPageRestoration(cityCode);
 
   const viewCountIncrementedRef = useRef(false);
   const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState<string>('');
 
-  const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(
+  const [cityDetail, setCityDetail] = useState<ResponseCityDetailForUserFront | null>(
     initialData ?? null
   );
   
@@ -61,74 +56,75 @@ export default function CompFolderDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getFolderDetailImageUrls(initialData.folderDetail?.folderInfo) : []
+    initialData ? getCityDetailImageUrls(initialData.cityDetail?.cityInfo) : []
   );
 
-  const [events, setEvents] = useState<TMapFolderEventWithEventInfo[]>(
-    initialData?.folderEvent?.items ?? []
+  const [events, setEvents] = useState<TMapCityEventWithEventInfo[]>(
+    initialData?.mapCityEvent?.items ?? []
   );
   const [eventsStart, setEventsStart] = useState(
-    initialData?.folderEvent?.items?.length ?? 0
+    initialData?.mapCityEvent?.items?.length ?? 0
   );
   const [eventsHasMore, setEventsHasMore] = useState(
-    Boolean(initialData?.folderEvent?.hasMore)
+    Boolean(initialData?.mapCityEvent?.hasMore)
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(
     new Set(
-      initialData?.folderEvent?.items
+      initialData?.mapCityEvent?.items
         ?.map(item => item?.event_info?.event_code ?? item?.event_code)
         .filter(Boolean) ?? []
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.folderDetail?.folderInfo?.view_count ?? 0);
-  const [sharedCount, setSharedCount] = useState(initialData?.folderDetail?.folderInfo?.shared_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.cityDetail?.cityInfo?.view_count ?? 0);
 
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
    */
-  const fetchAndMergeData = async (restoredEvents?: TMapFolderEventWithEventInfo[]) => {
+  const fetchAndMergeData = async (restoredEvents?: TMapCityEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
     }
 
     try {
-      const res = await reqGetFolderDetail(folderCode, langCode, 0, LIST_LIMIT.default);
-      const db = res?.dbResponse;
-
-      const isEmptyObj = !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
-
-      if (!res?.success || isEmptyObj || !db?.folderDetail?.folderInfo) {
+      const res = await reqGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
+  
+      const isEmptyObj =
+        !res?.dbResponse ||
+        (typeof res?.dbResponse === "object" &&
+          !Array.isArray(res?.dbResponse) &&
+          Object.keys(res?.dbResponse).length === 0);
+  
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.cityDetail) {
         setError("not-found");
         setLoading(false);
         return;
       }
+  
+      setCityDetail(res.dbResponse);
+      setImageUrls(getCityDetailImageUrls(res.dbResponse.cityDetail?.cityInfo));
+      setViewCount(res.dbResponse?.cityDetail?.cityInfo?.view_count ?? 0);
 
-      setFolderDetail(db);
-      setImageUrls(getFolderDetailImageUrls(db.folderDetail?.folderInfo));
-      setViewCount(db?.folderDetail?.folderInfo?.view_count ?? 0);
-      setSharedCount(db?.folderDetail?.folderInfo?.shared_count ?? 0);
-
-      const serverEvents = db?.folderEvent?.items ?? [];
+      const serverEvents = res?.dbResponse?.mapCityEvent?.items ?? [];
       
       // ✅ 새 데이터 버전 업데이트
       const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
-      // console.log('[Folder Merge] 📊 Data versions:', {
-      //   new: newVersion,
-      //   old: dataVersion,
-      //   changed: newVersion !== dataVersion
-      // });
+      console.log('[City Merge] 📊 Data versions:', {
+        new: newVersion,
+        old: dataVersion,
+        changed: newVersion !== dataVersion
+      });
       
       // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        // console.log('[Folder Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
-        // console.log('[Folder Merge] Server events:', serverEvents.length);
-        // console.log('[Folder Merge] Restored total:', restoredEvents.length);
+        console.log('[City Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[City Merge] Server events:', serverEvents.length);
+        console.log('[City Merge] Restored total:', restoredEvents.length);
         
         const serverCodes = new Set(
           serverEvents.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
@@ -140,7 +136,9 @@ export default function CompFolderDetailPage({
             const code = item?.event_info?.event_code ?? item?.event_code;
             return code && !serverCodes.has(code);
           });
-
+        
+        console.log('[City Merge] Additional events from restore:', additionalEvents.length);
+        
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -156,26 +154,26 @@ export default function CompFolderDetailPage({
           return true;
         });
         
-        console.log('[Folder Merge] Future events after filter:', futureEvents.length);
+        console.log('[City Merge] Future events after filter:', futureEvents.length);
         
         const finalEvents = [...serverEvents, ...futureEvents];
         
-        // console.log('[Folder Merge] ✅ Final merged:', {
-        //   server: serverEvents.length,
-        //   additional: futureEvents.length,
-        //   total: finalEvents.length
-        // });
+        console.log('[City Merge] ✅ Final merged:', {
+          server: serverEvents.length,
+          additional: futureEvents.length,
+          total: finalEvents.length
+        });
         
         setEvents(finalEvents);
         setEventsStart(finalEvents.length);
-
+        
         seenEventCodesRef.current.clear();
         finalEvents.forEach(item => {
           const code = item?.event_info?.event_code ?? item?.event_code;
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        console.log('[Folder Merge] ✅ Using server data only');
+        console.log('[City Merge] ✅ Using server data only');
         setEvents(serverEvents);
         setEventsStart(serverEvents.length);
         
@@ -186,54 +184,46 @@ export default function CompFolderDetailPage({
         });
       }
       
-      setEventsHasMore(Boolean(db?.folderEvent?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.mapCityEvent?.hasMore));
       setError(null);
     } catch (e) {
-      console.error("Failed to fetch folder detail:", e);
+      console.error("Failed to fetch city detail:", e);
       setError("network");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleShareClick = async () => {
-    const shareData = {
-      title: folderDetail?.folderDetail?.folderInfo?.title || 'Events List',
-      text: folderDetail?.folderDetail?.description?.description || 'Check out the events list!',
-      url: window.location.href,
-    };
+  // const handleShareClick = async () => {
+  //   const shareData = {
+  //     title: cityDetail?.cityDetail?.cityInfo?.name || "이벤트 세트 공유",
+  //     text: cityDetail?.cityDetail?.cityInfo?.name || "이벤트 세트 정보를 확인해보세요!",
+  //     url: window.location.href,
+  //   };
 
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-        const newCount = await incrementFolderSharedCount(folderCode);
-        if (newCount !== null) {
-          setSharedCount(newCount);
-        }
-      } catch (error) {
-        console.error('공유 실패:', error);
-      }
-    } else {
-      setShowShareModal(true);
-    }
-  };
-
-  const handleSocialShare = async (platform: string) => {
-    const newCount = await incrementFolderSharedCount(folderCode);
-    if (newCount !== null) {
-      setSharedCount(newCount);
-    }
-  };
+  //   if (navigator.share) {
+  //     try {
+  //       await navigator.share(shareData);
+  //     } catch (error) {
+  //       console.error("공유 실패:", error);
+  //     }
+  //   } else {
+  //     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+  //       shareData.text
+  //     )}&url=${encodeURIComponent(shareData.url)}`;
+  //     window.open(twitterUrl, "_blank", "width=600,height=400");
+  //   }
+  // };
 
   const loadMoreEvents = async () => {
     if (eventsLoading || !eventsHasMore) return;
     setEventsLoading(true);
 
     try {
-      const res = await reqGetFolderEvents(folderCode, langCode, eventsStart, LIST_LIMIT.default);
+      const res = await reqGetCityEvents(cityCode, eventsStart, LIST_LIMIT.default, langCode);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
-      const newItems = fetchedItems.filter((it: TMapFolderEventWithEventInfo) => {
+      const newItems = fetchedItems.filter((it: TMapCityEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodesRef.current.has(code)) return false;
         seenEventCodesRef.current.add(code);
@@ -248,38 +238,34 @@ export default function CompFolderDetailPage({
     }
   };
 
-  // ✅ URL 설정
+  // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
-    setCurrentUrl(window.location.href);
-  }, []);
-
-    // ✅ 조회수 증가 (한 번만)
-  useEffect(() => {
-    if (!viewCountIncrementedRef.current && folderCode) {
+    if (!viewCountIncrementedRef.current && cityCode) {
       viewCountIncrementedRef.current = true;
-      incrementFolderViewCount(folderCode).then(newCount => {
-        if (newCount !== null) setViewCount(newCount);
-      });
+      incrementCityViewCount(cityCode)
+        .then(newCount => {
+          if (newCount !== null) setViewCount(newCount);
+        });
     }
-  }, [folderCode]);
+  }, [cityCode]);
 
   // ✅ 초기 마운트 시 복원 시도
   useEffect(() => {
     if (restorationAttemptedRef.current) return;
     restorationAttemptedRef.current = true;
 
-    console.log('[Folder Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[Folder Mount] Current data version:', dataVersion);
+    console.log('[City Mount] 🚀 Component mounted, attempting restore...');
+    console.log('[City Mount] Current data version:', dataVersion);
     
-    const saved = restore<FolderPageState>(dataVersion);
+    const saved = restore<CityPageState>(dataVersion);
     
-    console.log('[Folder Mount] Restored data:', {
+    console.log('[City Mount] Restored data:', {
       hasSaved: !!saved,
       eventsCount: saved?.events?.length || 0,
     });
     
     if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Folder Mount] ✅ Restoring state with', saved.events.length, 'events');
+      console.log('[City Mount] ✅ Restoring state with', saved.events.length, 'events');
       
       setEvents(saved.events);
       setEventsStart(saved.eventsStart ?? 0);
@@ -289,17 +275,17 @@ export default function CompFolderDetailPage({
       
       // ✅ 더보기를 했던 경우에만 백그라운드 병합
       if (saved.events.length > LIST_LIMIT.default) {
-        console.log('[Folder Mount] 📡 Fetching server data for merge...');
+        console.log('[City Mount] 📡 Fetching server data for merge...');
         fetchAndMergeData(saved.events);
       }
     } else {
-      console.log('[Folder Mount] ⚠️ No valid saved data found');
+      console.log('[City Mount] ⚠️ No valid saved data found');
       if (!initialData) {
         fetchAndMergeData();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folderCode]);
+  }, [cityCode]);
 
   // ✅ 클릭 이벤트 감지하여 저장
   useEffect(() => {
@@ -307,24 +293,24 @@ export default function CompFolderDetailPage({
       const currentScrollY = window.scrollY;
       
       if (currentScrollY === 0) {
-        console.log('[Folder Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
+        console.log('[City Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
         return;
       }
       
-      // console.log('[Folder Save] 💾 현재 상태 저장:', {
-      //   scrollY: currentScrollY,
-      //   eventsCount: events.length,
-      //   dataVersion,
-      // });
+      console.log('[City Save] 💾 현재 상태 저장:', {
+        scrollY: currentScrollY,
+        eventsCount: events.length,
+        dataVersion,
+      });
 
-      const state: FolderPageState = {
+      const state: CityPageState = {
         events,
         eventsStart,
         eventsHasMore,
         seenEventCodes: Array.from(seenEventCodesRef.current),
       };
 
-      save<FolderPageState>(state, dataVersion);
+      save<CityPageState>(state, dataVersion);
     };
 
     // ✅ 모든 네비게이션 요소 클릭 감지
@@ -343,6 +329,7 @@ export default function CompFolderDetailPage({
           }
         }
         
+        console.log('[City Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
         saveCurrentState();
       }
     };
@@ -360,7 +347,7 @@ export default function CompFolderDetailPage({
       const currentScrollY = window.scrollY;
       if (currentScrollY === 0) return;
       
-      save<FolderPageState>({
+      save<CityPageState>({
         events,
         eventsStart,
         eventsHasMore,
@@ -392,8 +379,8 @@ export default function CompFolderDetailPage({
   if (error === "not-found") {
     return (
       <CompNotFound
-        title="Folder Not Found"
-        message="해당 폴더는 존재하지 않습니다."
+        title="City Not Found"
+        message="해당 도시는 존재하지 않습니다."
         returnPath={`/${langCode}`}
         returnLabel="홈 화면으로 이동"
       />
@@ -404,7 +391,7 @@ export default function CompFolderDetailPage({
     return (
       <CompNetworkError
         title="ERROR"
-        message="Failed to load folder details. Please try again."
+        message="Failed to load city details. Please try again."
         onRetry={() => fetchAndMergeData()}
         retryLabel="Retry"
       />
@@ -412,31 +399,14 @@ export default function CompFolderDetailPage({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <HeadlineTagsDetail
-        targetCountryCode={folderDetail?.folderDetail?.folderInfo?.target_country_code || null}
-        targetCountryName={folderDetail?.folderDetail?.folderInfo?.target_country_native || null}
-        targetCityCode={folderDetail?.folderDetail?.folderInfo?.target_city_code || null}
-        targetCityName={folderDetail?.folderDetail?.folderInfo?.target_city_native || null}
-        categories={folderDetail?.mapCategoryFolder?.items ?? null}
+    <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
+      <HeroImageBackgroundCarouselCity
+        bucket="cities"
+        imageUrls={imageUrls}
+        interval={5000}
+        cityDetail={cityDetail?.cityDetail?.cityInfo || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
-
-      <div id="folder-title" className="text-center font-extrabold text-3xl md:text-4xl" data-folder-code={folderDetail?.folderDetail?.folderInfo?.folder_code}>
-        {folderDetail?.folderDetail?.folderInfo?.title}
-      </div>
-
-      <HeroImageSlider bucket="folders" imageUrls={imageUrls} className="m-auto w-full" />
-
-      {folderDetail?.folderDetail?.description?.description && (
-        <div className="m-auto p-4 px-8 w-full text-lg max-w-[1024px] whitespace-pre-line">
-          {folderDetail?.folderDetail?.description?.description}
-        </div>
-      )}
-
-      <div className="my-4 flex w-full justify-center">
-        <CompFolderActionButtons langCode={langCode} handleShareClick={handleShareClick} />
-      </div>
 
       {events?.length ? (
         <>
@@ -464,20 +434,6 @@ export default function CompFolderDetailPage({
           </div>
         </>
       ) : null}
-
-      <div className="flex gap-4 justify-center mt-4">
-        <CompLabelCount01 label="Views" count={viewCount} />
-        <CompLabelCount01 label="Shared" count={sharedCount} />
-      </div>
-      <ShareModal
-        open={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        title={folderDetail?.folderDetail?.folderInfo?.title || "이벤트 목록 공유"}
-        text={folderDetail?.folderDetail?.description?.description || "이벤트 목록 정보를 확인해보세요!"}
-        url={currentUrl}
-        onShare={handleSocialShare}
-        langCode={langCode}
-      />
     </div>
   );
 }

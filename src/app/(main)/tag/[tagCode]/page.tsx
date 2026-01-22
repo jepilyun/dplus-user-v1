@@ -1,5 +1,5 @@
 import { getRequestLocale } from "@/utils/get-request-locale";
-import CompTagDetailPage from "@/components/comp-tag/comp-tag-detail-page";
+import CompTagDetailPage from "@/components/tag/comp-tag-detail-page";
 
 
 /**

@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { reqGetCityCodes, reqGetCityDetail } from "@/req/req-city";
-import CompCityDetailPage from "@/components/comp-city/comp-city-detail-page";
+import CompCityDetailPage from "@/components/city/comp-city-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";
