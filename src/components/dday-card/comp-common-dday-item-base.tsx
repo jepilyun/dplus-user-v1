@@ -209,14 +209,16 @@ export default function CompCommonDdayItemBase({
         </div>
 
         <div className="flex items-center gap-1 flex-wrap text-gray-500">
-          <Calendar className="w-4 h-4 flex-shrink-0" />
           {secondaryDateText && (
-            <span
-              suppressHydrationWarning
-              className="text-xs md:text-sm"
-            >
-              {secondaryDateText}
-            </span>
+            <>
+              <Calendar className="w-4 h-4 flex-shrink-0" />
+              <span
+                suppressHydrationWarning
+                className="text-xs md:text-sm"
+              >
+                {secondaryDateText}
+              </span>
+            </>
           )}
         </div>
 

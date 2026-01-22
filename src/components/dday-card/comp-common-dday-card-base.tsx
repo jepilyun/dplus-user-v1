@@ -9,7 +9,7 @@ import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin } from "lucide-react";
 import Link from "next/link";
 import {
   END_DATE_LABELS,
@@ -246,8 +246,9 @@ export default function CompCommonDdayItemCardBase({
                 {secondaryDateText && (
                   <div
                     suppressHydrationWarning
-                    className={`mb-1 text-sm ${hasImage ? 'bg-black opacity-90 text-white' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded-md`}
+                    className={`mb-1 flex items-center gap-1 text-sm ${hasImage ? 'bg-black opacity-90 text-white' : 'bg-gray-100 text-gray-500'} px-2 py-1 rounded-md`}
                   >
+                    <CalendarDays className="w-4 h-4 flex-shrink-0" />
                     {secondaryDateText}
                   </div>
                 )}
