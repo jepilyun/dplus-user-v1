@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCategoryDetail, reqGetCategoryEvents } from "@/actions/req-category";
+import { reqGetCategoryDetail, reqGetCategoryEvents } from "@/req/req-category";
 import {
   LIST_LIMIT,
   ResponseCategoryDetailForUserFront,

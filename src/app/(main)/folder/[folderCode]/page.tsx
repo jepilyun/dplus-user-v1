@@ -4,7 +4,7 @@ export const revalidate = 86400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetFolderDetail } from "@/actions/req-folder";
+import { reqGetFolderDetail } from "@/req/req-folder";
 import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

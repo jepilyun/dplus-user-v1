@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetFolderDetail, reqGetFolderEvents } from "@/actions/req-folder";
+import { reqGetFolderDetail, reqGetFolderEvents } from "@/req/req-folder";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import {
   LIST_LIMIT,

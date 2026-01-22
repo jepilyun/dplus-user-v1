@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetPlaceDetail, reqGetPlaceEvents } from "@/actions/req-place";
+import { reqGetPlaceDetail, reqGetPlaceEvents } from "@/req/req-place";
 import {
   LIST_LIMIT,
   ResponsePlaceDetailForUserFront,

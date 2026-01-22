@@ -1,11 +1,11 @@
 // app/sitemap.ts
-import { reqGetCategoryCodes } from "@/actions/req-category";
-import { reqGetCityCodes } from "@/actions/req-city";
-import { reqGetCountryCodes } from "@/actions/req-country";
-import { reqGetEventCodeList } from "@/actions/req-event";
-import { reqGetFolderCodeList } from "@/actions/req-folder";
-import { reqGetGroupCodes } from "@/actions/req-group";
-import { reqGetStagCodes } from "@/actions/req-stag";
+import { reqGetCategoryCodes } from "@/req/req-category";
+import { reqGetCityCodes } from "@/req/req-city";
+import { reqGetCountryCodes } from "@/req/req-country";
+import { reqGetEventCodeList } from "@/req/req-event";
+import { reqGetFolderCodeList } from "@/req/req-folder";
+import { reqGetGroupCodes } from "@/req/req-group";
+import { reqGetStagCodes } from "@/req/req-stag";
 import { MetadataRoute } from "next";
 
 

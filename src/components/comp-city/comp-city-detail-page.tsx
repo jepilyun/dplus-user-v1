@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCityDetail, reqGetCityEvents } from "@/actions/req-city";
+import { reqGetCityDetail, reqGetCityEvents } from "@/req/req-city";
 import {
   LIST_LIMIT,
   ResponseCityDetailForUserFront,

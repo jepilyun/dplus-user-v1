@@ -1,7 +1,7 @@
 // app/sitemap-groups.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetGroupCodes } from "@/actions/req-group";
+import { reqGetGroupCodes } from "@/req/req-group";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";

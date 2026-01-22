@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/actions/req-category";
+import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/req/req-category";
 import CompCategoryDetailPage from "@/components/comp-category/comp-category-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

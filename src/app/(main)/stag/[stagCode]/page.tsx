@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetStagDetail } from "@/actions/req-stag";
+import { reqGetStagDetail } from "@/req/req-stag";
 import CompStagDetailPage from "@/components/comp-stag/comp-stag-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

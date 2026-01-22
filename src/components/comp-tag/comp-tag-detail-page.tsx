@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetTagDetail, reqGetTagEvents } from "@/actions/req-tag";
+import { reqGetTagDetail, reqGetTagEvents } from "@/req/req-tag";
 import {
   LIST_LIMIT,
   ResponseTagDetailForUserFront,

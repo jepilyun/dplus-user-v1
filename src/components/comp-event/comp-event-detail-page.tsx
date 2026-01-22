@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetEventDetail } from "@/actions/req-event";
+import { reqGetEventDetail } from "@/req/req-event";
 import { HeroImageSlider } from "@/components/comp-image/hero-image-slider";
 import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
 import { detectDevice, DeviceType } from "@/utils/device-detector";

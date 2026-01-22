@@ -1,7 +1,7 @@
 // app/sitemap-folders.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetFolderCodeList } from "@/actions/req-folder";
+import { reqGetFolderCodeList } from "@/req/req-folder";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";

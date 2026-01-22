@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { reqGetTodayList } from "@/actions/req-today";
+import { reqGetTodayList } from "@/req/req-today";
 import CompTodayDetailPage from "@/components/comp-today/comp-today-detail-page";
 import { generateSimpleMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
