@@ -12,7 +12,9 @@ import { CompEventDatetime } from "./comp-event-datetime"
 import { useEffect, useRef, useState, useMemo } from "react"
 import Image from "next/image"
 import { generateStorageImageUrl } from "@/utils/generate-image-url"
-import { calculateUtcMinutes } from "@/utils/timezone/calculate-utc-minutes";
+import { getEffectiveDateForDday } from "@/utils/dday-card-utils"
+import { MapPin } from "lucide-react"
+import Link from "next/link";
 
 /*
  * 이벤트 상세 헤더
@@ -89,21 +91,36 @@ export const CompEventHeader = ({
   // ✅ early return은 모든 hooks 호출 후에
   if (!eventDetail) return null;
 
-  // ✅ date 필드 사용 (리스트와 동일)
+  // ✅ 날짜 데이터
   const eventDate = eventDetail?.eventDetail?.eventInfo?.date;
   const eventTime = eventDetail?.eventDetail?.eventInfo?.time;
+  const endDate = eventDetail?.eventDetail?.eventInfo?.end_date;
+  const endTime = eventDetail?.eventDetail?.eventInfo?.end_time;
   const startAtUtc = eventDetail?.eventDetail?.eventInfo?.start_at_utc;
-  
-  // ✅ calculateDaysFromToday 사용
-  const dday = eventDate ? calculateDaysFromToday(eventDate) : 0;
-  
+  const endAtUtc = eventDetail?.eventDetail?.eventInfo?.end_at_utc;
+
+  // ✅ Place 데이터
+  const placeId = eventDetail?.eventDetail?.eventInfo?.place_id;
+  const placeName = eventDetail?.eventDetail?.eventInfo?.place_name;
+
+  // ✅ 날짜 파싱
+  const startDateObj = eventDate ? new Date(eventDate) : null;
+  const endDateObj = endDate ? new Date(endDate) : null;
+
+  // ✅ D-Day 계산용 날짜 (UTC 기준으로 비교, 시작일이 지났으면 종료일 사용)
+  const effectiveDate = getEffectiveDateForDday(startDateObj, endDateObj, startAtUtc, endAtUtc);
+  const effectiveDateStr = effectiveDate?.toISOString().split("T")[0] ?? null;
+
+  // ✅ D-Day 계산
+  const dday = effectiveDateStr ? calculateDaysFromToday(effectiveDateStr) : 0;
+
   // ✅ 시간 정보는 UTC에서 추출 (시간만 필요할 때)
   const localTime = startAtUtc ? getLocalTimeFromUTC(startAtUtc) : undefined;
-  
+
   // D-Day 라벨 생성 (시간 포함)
   const ddayLabel = getDdayLabel(dday, langCode, localTime);
 
-  const { bg, bgBrighter, fg } = computeBadgeColors(eventDetail?.eventDetail?.eventInfo?.date?.toString() ?? null);
+  const { bg, bgBrighter, fg } = computeBadgeColors(effectiveDateStr);
 
   return (
     <div className="flex flex-col gap-4">
@@ -137,10 +154,14 @@ export const CompEventHeader = ({
               style={{ color: fg }}
             >
               <div className="w-full flex flex-row flex-wrap gap-4 justify-between items-center">
-                <CompEventCountdown 
+                <CompEventCountdown
                   ddayLabel={ddayLabel}
                   fgColor={bg}
                   bgColor={fg}
+                  startDate={eventDate}
+                  endDate={endDate}
+                  startAtUtc={startAtUtc}
+                  langCode={langCode}
                 />
                 <CompEventTimer startAtUtc={startAtUtc || ''} />
               </div>
@@ -159,6 +180,17 @@ export const CompEventHeader = ({
                 >
                   {eventDetail?.eventDetail?.eventInfo?.title}
                 </div>
+                {/* ✅ Place 정보 (있는 경우 표시) */}
+                {placeId && placeName && (
+                  <Link
+                    href={`/place/${placeId}`}
+                    className="inline-flex items-center gap-1.5 text-base hover:opacity-70 transition-opacity"
+                    style={{ color: fg }}
+                  >
+                    <MapPin className="w-5 h-5 flex-shrink-0" />
+                    <span className="font-medium">{placeName}</span>
+                  </Link>
+                )}
                 <HeadlineTagsDetail
                   targetCountryCode={eventDetail?.eventDetail?.eventInfo?.target_country_code || null}
                   targetCountryName={eventDetail?.eventDetail?.eventInfo?.target_country_native || null}
@@ -167,6 +199,7 @@ export const CompEventHeader = ({
                   categories={eventDetail?.mapCategoryEvent?.items ?? null}
                   langCode={langCode}
                   showCountry={false}
+                  bgColor={bg}
                   fgColor={fg}
                   fgHoverColor={fg}
                 />
@@ -202,10 +235,14 @@ export const CompEventHeader = ({
                 style={{ color: '#FFFFFF' }}
               >
                 <div className="w-full flex flex-row flex-wrap gap-4 justify-between items-center">
-                  <CompEventCountdown 
+                  <CompEventCountdown
                     ddayLabel={ddayLabel}
                     fgColor="#FFFFFF"
                     bgColor={bg}
+                    startDate={eventDate}
+                    endDate={endDate}
+                    startAtUtc={startAtUtc}
+                    langCode={langCode}
                   />
                   {/* <CompEventTimer startAtUtc={startAtUtc || ''} /> */}
                 </div>
