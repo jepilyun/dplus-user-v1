@@ -15,6 +15,16 @@ import CompCommonDdayCard from "../comp-common/comp-common-dday-card";
 import { CompLoading } from "../comp-common/comp-loading";
 import { CompNotFound } from "../comp-common/comp-not-found";
 import { CompNetworkError } from "../comp-common/comp-network-error";
+import dynamic from "next/dynamic";
+
+const GoogleMap = dynamic(() => import("../comp-google-map/google-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[300px] bg-gray-200 animate-pulse flex items-center justify-center">
+      <span className="text-gray-500 text-sm">Loading map...</span>
+    </div>
+  ),
+});
 
 type PlacePageState = {
   events: TMapPlaceEventWithEventInfo[];
@@ -352,11 +362,30 @@ export default function CompPlaceDetailPage({
     );
   }
 
+  // ✅ Place 위치 정보
+  const latitude = placeDetail?.placeDetail?.latitude;
+  const longitude = placeDetail?.placeDetail?.longitude;
+  const hasLocation = typeof latitude === 'number' && typeof longitude === 'number';
+
   return (
     <div className="p-4 flex flex-col gap-4">
-      <div id="place-title" className="text-center font-extrabold text-3xl md:text-4xl" data-place-id={placeDetail?.placeDetail?.place_id}>
+      <div id="place-title" className="my-4 text-center font-extrabold text-3xl md:text-4xl" data-place-id={placeDetail?.placeDetail?.place_id}>
         {placeDetail?.placeDetail?.name_native ?? placeDetail?.placeDetail?.name_en}
       </div>
+
+      {/* ✅ Google Map */}
+      {hasLocation && (
+        <div className="w-full max-w-[1024px] mx-auto">
+          <div className="w-full h-[300px] md:h-[400px] rounded-2xl overflow-hidden">
+            <GoogleMap
+              latitude={latitude!}
+              longitude={longitude!}
+              title={placeDetail?.placeDetail?.name_native ?? placeDetail?.placeDetail?.name_en ?? "Location"}
+              zoom={15}
+            />
+          </div>
+        </div>
+      )}
 
       {events?.length ? (
         <>
