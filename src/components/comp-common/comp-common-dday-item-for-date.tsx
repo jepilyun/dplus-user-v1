@@ -4,7 +4,8 @@ import CompCommonDdayItemBase from "./comp-common-dday-item-base";
 export default function CompCommonDdayItemForDate({
   event,
   fullLocale,
-}: { event: TEventCardForDateDetail; fullLocale: string }) {
+  langCode,
+}: { event: TEventCardForDateDetail; fullLocale: string; langCode: string }) {
   const code = event?.event_code ?? "default";
   const thumbnailUrl = event?.thumbnail_square || event?.thumbnail_vertical || event?.thumbnail_horizontal;
 
@@ -13,11 +14,18 @@ export default function CompCommonDdayItemForDate({
       eventCode={code}
       date={event?.date ?? null}
       time={event?.time}
+      endDate={event?.end_date ?? null}
+      endTime={event?.end_time}
+      startAtUtc={event?.start_at_utc ?? null}
+      endAtUtc={event?.end_at_utc ?? null}
       title={event?.title ?? ""}
       bgColor={event?.bg_color ?? undefined}
       fgColor={event?.fg_color ?? undefined}
       thumbnailUrl={thumbnailUrl || null}
       fullLocale={fullLocale}
+      langCode={langCode}
+      placeId={event?.place_id?.toString() ?? undefined}
+      placeName={event?.place_name ?? undefined}
       useClientWrapper={false}
     />
   );

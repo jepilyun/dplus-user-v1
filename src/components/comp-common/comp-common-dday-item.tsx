@@ -9,7 +9,8 @@ type EventType = TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMa
 export default function CompCommonDdayItem({
   event,
   fullLocale,
-}: { event: EventType; fullLocale: string }) {
+  langCode
+}: { event: EventType, fullLocale: string, langCode: string}) {
   const code = event?.event_info?.event_code ?? event?.event_code ?? "default";
   
   const cityTag = event?.event_info?.city && (
@@ -40,11 +41,18 @@ export default function CompCommonDdayItem({
       eventCode={code}
       date={event?.event_info?.date ?? null}
       time={event?.event_info?.time}
+      endDate={event?.event_info?.end_date ?? null}
+      endTime={event?.event_info?.end_time}
+      startAtUtc={event?.event_info?.start_at_utc ?? null}
+      endAtUtc={event?.event_info?.end_at_utc ?? null}
       title={event?.event_info?.title ?? ""}
       bgColor={event?.event_info?.bg_color ?? undefined}
       fgColor={event?.event_info?.fg_color ?? undefined}
       thumbnailUrl={thumbnailUrl || null}
       fullLocale={fullLocale}
+      langCode={langCode}
+      placeId={event?.event_info?.place_id?.toString() ?? undefined}
+      placeName={event?.event_info?.place_name ?? undefined}
       cityTag={cityTag}
       categoryTags={categoryTags}
       useClientWrapper={true}

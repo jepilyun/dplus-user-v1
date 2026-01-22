@@ -68,6 +68,8 @@ export default function CompCommonDdayCard({
       thumbnailUrl={thumbnailUrl ?? null}
       fullLocale={fullLocale}
       langCode={langCode}
+      placeId={event?.event_info?.place_id?.toString() ?? undefined}
+      placeName={event?.event_info?.place_name ?? undefined}
       tags={tags}
     />
   );

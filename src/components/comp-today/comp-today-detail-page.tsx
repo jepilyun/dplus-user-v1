@@ -482,7 +482,7 @@ export default function CompTodayDetailPage({
 
                   {/* 데스크톱: CompCommonDdayItemForDate */}
                   <div className="hidden md:block">
-                    <CompCommonDdayItemForDate event={item} fullLocale={fullLocale} />
+                    <CompCommonDdayItemForDate event={item} fullLocale={fullLocale} langCode={langCode} />
                   </div>
                 </div>
               );

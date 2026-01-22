@@ -427,7 +427,7 @@ export default function CompCityDetailPage({
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} />
+                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}

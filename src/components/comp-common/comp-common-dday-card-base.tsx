@@ -9,7 +9,8 @@ import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
 import { useNavigationSave } from "@/contexts/navigation-save-context";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
+import Link from "next/link";
 
 // ✅ 다국어 종료 라벨
 const END_DATE_LABELS: Record<string, string> = {
@@ -125,6 +126,8 @@ interface DdayItemCardBaseProps {
   fullLocale: string;
   langCode: string;
   tags?: React.ReactNode;
+  placeId?: string | null;        // ✅ Place ID
+  placeName?: string | null;      // ✅ Place 이름
 }
 
 export default function CompCommonDdayItemCardBase({
@@ -142,6 +145,8 @@ export default function CompCommonDdayItemCardBase({
   fullLocale,
   langCode,
   tags,
+  placeId,
+  placeName,
 }: DdayItemCardBaseProps) {
   const router = useRouter();
   const saveBeforeNav = useNavigationSave();
@@ -201,10 +206,16 @@ export default function CompCommonDdayItemCardBase({
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('a[data-tag-link]')) return;
-    
+    if (target.closest('a[data-tag-link]') || target.closest('a[data-place-link]')) return;
+
     saveBeforeNav?.();
     router.push(`/event/${eventCode}`);
+  };
+
+  const handlePlaceClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    saveBeforeNav?.();
+    router.push(`/place/${placeId}`);
   };
 
   // ✅ 보조 날짜 텍스트 (제목 위에 표시)
@@ -323,7 +334,7 @@ export default function CompCommonDdayItemCardBase({
             </div>
           </div>
           
-          {/* 중간: 보조 날짜 + 제목 */}
+          {/* 중간: 보조 날짜 + 장소 + 제목 */}
           <div className="py-6 flex-grow">
             {/* ✅ 보조 날짜 텍스트 (기간 이벤트일 때만 표시) - 제목 위 */}
             <div className="flex flex-col gap-1">
@@ -340,9 +351,21 @@ export default function CompCommonDdayItemCardBase({
               <div
                 className="font-bold text-2xl"
                 title={title ?? ""}
-              >
+                >
                 {title}
               </div>
+              {/* ✅ Place 정보 (있는 경우 표시) */}
+              {placeId && placeName && (
+                <Link
+                  href={`/place/${placeId}`}
+                  onClick={handlePlaceClick}
+                  data-place-link
+                  className={`inline-flex items-center gap-1.5 text-sm ${hasImage ? 'text-white hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'} transition-colors my-1 w-fit`}
+                >
+                  <MapPin className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">{placeName}</span>
+                </Link>
+              )}
             </div>
           </div>
 

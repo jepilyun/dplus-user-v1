@@ -20,13 +20,18 @@ export default function CompCommonDdayCardForDate({
       eventCode={code}
       date={event?.date ?? null}
       time={event?.time}
+      endDate={event?.end_date ?? null}
+      endTime={event?.end_time}
+      startAtUtc={event?.start_at_utc ?? null}
+      endAtUtc={event?.end_at_utc ?? null}
       title={event?.title ?? ""}
       bgColor={event?.bg_color ?? undefined}
       fgColor={event?.fg_color ?? undefined}
       thumbnailUrl={thumbnailUrl ?? null}
       fullLocale={fullLocale}
       langCode={langCode}
-      // tags prop 생략 (태그 없음)
+      placeId={event?.place_id?.toString() ?? undefined}
+      placeName={event?.place_name ?? undefined}
     />
   );
 }
