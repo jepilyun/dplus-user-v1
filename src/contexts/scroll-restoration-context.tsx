@@ -261,6 +261,17 @@ export function useTagPageRestoration(tagCode: string) {
   };
 }
 
+export function usePlacePageRestoration(placeId: string) {
+  const { savePage, restorePage, clearPage } = useScrollRestoration();
+  const key = `folder-${placeId}`;
+  
+  return {
+    save: <T = unknown>(data: T, version?: string) => savePage(key, data, version),
+    restore: <T = unknown>(currentVersion?: string) => restorePage<T>(key, currentVersion),
+    clear: () => clearPage(key),
+  };
+}
+
 export function useTodayPageRestoration(countryCode?: string) {
   const { savePage, restorePage, clearPage } = useScrollRestoration();
   const key = `today-${countryCode ? `${countryCode}-` : 'no-country-'}`;

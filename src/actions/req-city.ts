@@ -1,5 +1,77 @@
 import { DplusGetListDataResponse, ResponseCityDetailForUserFront, ResponseDplusAPI, ResponseMetadataForUserFront, TMapCityEventWithEventInfo } from "dplus_common_v1";
-import { apiUrlCity } from "./api-url";
+import { APIUrlOptionalParams } from "./api-url";
+
+/**
+ * API Routes: City Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { cityCode, start, limit }
+ * @returns 경로
+ */
+const apiUrlCity = (
+  type: "detailGet" | "eventsGet" | "getCityCodes" | "metadataGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet":
+      if (
+        optionalParams?.cityCode &&
+        optionalParams?.langCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/city/detail/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
+        );
+      }
+      break;
+    case "eventsGet":
+      if (
+        optionalParams?.cityCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/city/events/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
+        );
+      }
+      break;
+    case "getCityCodes":
+      const qp = new URLSearchParams();
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+      const qs = qp.toString();
+      path = `/api/city/get/code/list${qs ? `?${qs}` : ""}`;
+      break;
+    case "metadataGet":
+      if (optionalParams?.cityCode && optionalParams?.langCode) {
+        path = `/api/city/metadata/get/${encodeURIComponent(optionalParams?.cityCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.cityCode] ${optionalParams?.cityCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
 
 /**
  * City 상세 화면 조회 for User Front

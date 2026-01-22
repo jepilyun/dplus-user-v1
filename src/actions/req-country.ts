@@ -1,5 +1,70 @@
 import { DplusGetListDataResponse, ResponseCountryDetailForUserFront, ResponseDplusAPI, ResponseMetadataForUserFront, TMapCountryEventWithEventInfo } from "dplus_common_v1";
-import { apiUrlCountry } from "./api-url";
+import { APIUrlOptionalParams } from "./api-url";
+
+
+/**
+ * API Routes: Country Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { countryCode, start, limit }
+ * @returns 경로
+ */
+const apiUrlCountry = (
+  type: "detailGet" | "eventsGet" | "getCountryCodes" | "metadataGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet":
+      if (
+        optionalParams?.countryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/country/detail/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+      }
+      break;
+    case "eventsGet":
+      if (
+        optionalParams?.countryCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number" &&
+        optionalParams?.langCode
+      ) {
+        path = `/api/country/events/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+      }
+      break;
+    case "getCountryCodes":
+      path = `/api/country/get/code/list`;
+      break;
+    case "metadataGet":
+      if (optionalParams?.countryCode && optionalParams?.langCode) {
+        path = `/api/country/metadata/get/${encodeURIComponent(optionalParams?.countryCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.countryCode] ${optionalParams?.countryCode}`,
+        );
+        console.error(
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
 
 /**
  * Country 상세 화면 조회 for User Front

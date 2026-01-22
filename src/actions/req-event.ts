@@ -1,5 +1,80 @@
 import { ResponseDplusAPI, ResponseEventDetailForUserFront, ResponseMetadataForUserFront } from "dplus_common_v1";
-import { apiUrlEvent } from "./api-url";
+import { APIUrlOptionalParams } from "./api-url";
+
+
+/**
+ * API Routes: Event Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { eventId, langCode }
+ * @returns 경로
+ */
+const apiUrlEvent = (
+  type: "detailGet" | "upcomingCodeListGet" | "metadataGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet":
+      if (optionalParams?.eventCode && optionalParams?.langCode) {
+        path = `/api/event/detail/get/${optionalParams?.eventCode}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`,
+        );
+      }
+      break;
+    case "upcomingCodeListGet":
+      const qp = new URLSearchParams();
+
+      // limit: 숫자면 추가 (원하면 clampInt로 범위 제한)
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
+        qp.set("limit", String(optionalParams.limit));
+      }
+
+      // backDays: 숫자면 추가
+      if (
+        typeof optionalParams?.backDays === "number" &&
+        Number.isFinite(optionalParams.backDays)
+      ) {
+        qp.set("backDays", String(optionalParams.backDays));
+      }
+
+      // countryCode: 문자열이면 2자 대문자만 허용
+      if (typeof optionalParams?.countryCode === "string") {
+        const cc = optionalParams.countryCode.trim().toUpperCase();
+        if (/^[A-Z]{2}$/.test(cc)) qp.set("countryCode", cc);
+      }
+
+      // cityCode: 문자열이면 공백 아닌 경우만
+      if (typeof optionalParams?.cityCode === "string") {
+        const city = optionalParams.cityCode.trim();
+        if (city) qp.set("cityCode", city);
+      }
+
+      const qs = qp.toString();
+      path = `/api/event/get/codes/upcoming${qs ? `?${qs}` : ""}`;
+      break;
+    case "metadataGet":
+      if (optionalParams?.eventCode && optionalParams?.langCode) {
+        path = `/api/event/metadata/get/${optionalParams?.eventCode}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.eventCode] ${optionalParams?.eventCode}`,
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
 
 /**
  * Event 상세 화면 조회 for User Front

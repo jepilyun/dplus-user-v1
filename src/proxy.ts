@@ -13,6 +13,7 @@ const SUPPORTED_PATH_PREFIXES = new Set([
   "search",
   "nearby",
   "category",
+  "place",
 ]);
 
 const ALLOWED_COUNTRIES = ["AA", "KR"];

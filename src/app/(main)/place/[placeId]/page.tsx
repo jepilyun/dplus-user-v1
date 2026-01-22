@@ -4,58 +4,58 @@ export const revalidate = 86400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetFolderDetail } from "@/actions/req-folder";
-import CompFolderDetailPage from "@/components/comp-folder/comp-folder-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";
+import { reqGetPlaceDetail } from "@/actions/req-place";
+import CompPlaceDetailPage from "@/components/comp-place/comp-place-detail-page";
 
 /**
- * Generate metadata for the page
+ * Generate metadata
  */
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ folderCode: string }>;
+  params: Promise<{ placeId: string }>;
 }): Promise<Metadata> {
-  const { folderCode } = await params;
+  const { placeId } = await params;
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetFolderDetail(folderCode, langCode, 0, 36).catch(
+  const response = await reqGetPlaceDetail(placeId, langCode, 0, 36).catch(
     () => null
   );
-  const folderDetail = response?.dbResponse?.folderDetail ?? null;
+  const placeDetail = response?.dbResponse?.placeDetail ?? null;
 
   return generateDetailMetadata({
     langCode,
-    routePath: "folder",
-    code: folderCode,
-    detailName: folderDetail?.folderInfo?.title,
-    metadata: folderDetail?.metadata,
-    imageBucket: "folders",
+    routePath: "place",
+    code: placeId,
+    detailName: placeDetail?.name_en,
+    metadata: null,
+    imageBucket: undefined,
   });
 }
 
 /**
- * 폴더 상세 페이지
- * @param params - 이벤트 ID
+ * Place 상세 페이지
+ * @param params - PLACE ID
  * @param searchParams - 검색 파라미터
  * @returns 이벤트 상세 페이지
  */
-export default async function FolderDetailPage({
+export default async function PlaceDetailPage({
   params,
   // searchParams,
 }: {
-  params: Promise<{ folderCode: string }>;
+  params: Promise<{ placeId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { folderCode } = await params;
+  const { placeId } = await params;
   const { fullLocale, langCode } = await getRequestLocale();
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-    const response = await reqGetFolderDetail(
-      folderCode, 
+    const response = await reqGetPlaceDetail(
+      placeId, 
       langCode, 
       0, 
       LIST_LIMIT.default
@@ -69,13 +69,13 @@ export default async function FolderDetailPage({
       (typeof initialData === "object" && !Array.isArray(initialData) && Object.keys(initialData).length === 0);
 
     // ✅ 응답이 없거나 실패한 경우 404
-    if (!response?.success || isEmptyObj || !initialData?.folderDetail) {
+    if (!response?.success || isEmptyObj || !initialData?.placeDetail) {
       notFound();
     }
 
     return (
-      <CompFolderDetailPage
-        folderCode={folderCode}
+      <CompPlaceDetailPage
+        placeId={placeId}
         fullLocale={fullLocale}
         langCode={langCode}
         initialData={initialData}

@@ -36,7 +36,10 @@ export async function generateMetadata({
   });
 }
 
-// ✅ 항상 배열을 반환하도록 방어 코딩
+/*
+ * Build 시점에 생성하고자 하는 페이지들의 parameter 반환
+ * 항상 배열을 반환하도록 방어 코딩
+ */
 export async function generateStaticParams() {
   try {
     const res = await reqGetGroupCodes();

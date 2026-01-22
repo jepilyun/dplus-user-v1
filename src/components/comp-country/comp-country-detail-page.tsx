@@ -73,8 +73,6 @@ export default function CompCountryDetailPage({
     )
   );
 
-  console.log("folders:::", initialData?.mapCountryFolder?.items)
-
   const [events, setEvents] = useState<TMapCountryEventWithEventInfo[]>(
     initialData?.mapCountryEvent?.items ?? []
   );

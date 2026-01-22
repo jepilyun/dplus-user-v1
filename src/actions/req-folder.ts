@@ -1,5 +1,93 @@
 import { DplusGetListDataResponse, ResponseDplusAPI, ResponseFolderDetailForUserFront, ResponseMetadataForUserFront, TMapFolderEventWithEventInfo } from "dplus_common_v1";
-import { apiUrlFolder } from "./api-url";
+import { APIUrlOptionalParams } from "./api-url";
+
+
+/**
+ * API Routes: Folder Detail 경로 생성
+ * @param type 경로 타입
+ * @param optionalParams { folderId, langCode }
+ * @returns 경로
+ */
+const apiUrlFolder = (
+  type: "detailGet" | "eventsGet" | "recentCodeListGet" | "metadataGet",
+  optionalParams?: APIUrlOptionalParams,
+) => {
+  let path = "";
+
+  switch (type) {
+    case "detailGet":
+      if (
+        optionalParams?.folderCode &&
+        optionalParams?.langCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/folder/detail/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
+        );
+      }
+      break;
+    case "eventsGet":
+      if (
+        optionalParams?.folderCode &&
+        optionalParams?.langCode &&
+        typeof optionalParams?.start === "number" &&
+        typeof optionalParams?.limit === "number"
+      ) {
+        path = `/api/folder/events/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}/${optionalParams?.start}/${optionalParams?.limit}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
+        );
+      }
+      break;
+    case "recentCodeListGet":
+      const qp = new URLSearchParams();
+
+      // limit: 숫자면 추가 (원하면 clampInt로 범위 제한)
+      if (
+        typeof optionalParams?.limit === "number" &&
+        Number.isFinite(optionalParams.limit)
+      ) {
+        // const lim = clampInt(optionalParams.limit, 100, 1, 1000); // 범위 제한이 필요하면 사용
+        qp.set("limit", String(optionalParams.limit));
+      }
+
+      // countryCode: 2자 대문자만 허용
+      if (typeof optionalParams?.countryCode === "string") {
+        const cc = optionalParams.countryCode.trim().toUpperCase();
+        if (/^[A-Z]{2}$/.test(cc)) qp.set("countryCode", cc);
+      }
+
+      // cityCode: 공백 아닌 문자열만
+      if (typeof optionalParams?.cityCode === "string") {
+        const city = optionalParams.cityCode.trim();
+        if (city) qp.set("cityCode", city);
+      }
+
+      const qs = qp.toString();
+      path = `/api/folder/get/codes/recent${qs ? `?${qs}` : ""}`;
+      break;
+    case "metadataGet":
+      if (optionalParams?.folderCode && optionalParams?.langCode) {
+        path = `/api/folder/metadata/get/${encodeURIComponent(optionalParams?.folderCode)}/${optionalParams?.langCode}`;
+      } else {
+        console.error(
+          `Invalid optional params: [optionalParams?.folderCode] ${optionalParams?.folderCode}`,
+          `Invalid optional params: [optionalParams?.langCode] ${optionalParams?.langCode}`,
+        );
+      }
+      break;
+    default:
+      console.error(`Invalid route: ${type}`);
+      break;
+  }
+
+  return `${process.env.NEXT_PUBLIC_DEV_API_URL}${path}`;
+};
+
 
 /**
  * Folder 상세 화면 조회 for User Front

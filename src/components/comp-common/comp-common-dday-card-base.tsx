@@ -13,8 +13,8 @@ import { ArrowRight } from "lucide-react";
 
 // ✅ 다국어 종료 라벨
 const END_DATE_LABELS: Record<string, string> = {
-  en: "End",
-  ko: "종료",
+  en: "End Date",
+  ko: "종료일",
   ja: "終了",
   es: "Fin",
   zh: "结束",
@@ -187,10 +187,12 @@ export default function CompCommonDdayItemCardBase({
   // ✅ D-Day 뱃지 텍스트 길이에 따른 폰트 크기 결정
   const getBadgeFontSize = (label: string): string => {
     const length = label.length;
-    if (length <= 3) return 'text-lg'; // "D-1", "오늘" 등
-    if (length <= 5) return 'text-base'; // "D-10", "내일" 등
-    if (length <= 7) return 'text-sm'; // "Today" 등
-    return 'text-xs'; // "Tomorrow" 등 긴 텍스트
+    if (length <= 3) return 'text-xl'; // "D-1", "오늘" 등 - 더 크게
+    // if (length <= 4) return 'text-lg'; // "D-10", "내일" 등
+    if (length <= 6) return 'text-lg'; // "D-100" 등
+    if (length <= 8) return 'text-base'; // "Today", "Tomorrow" 등
+    if (length <= 10) return 'text-sm'; // "D-10000" 등
+    return 'text-[0.625rem]'; // "D-99999" 등 매우 긴 텍스트 - 더 작게
   };
   const badgeFontSize = getBadgeFontSize(ddayLabel);
 
