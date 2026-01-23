@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Monoton, Noto_Sans, Noto_Sans_KR, Poppins, Rubik, Gamja_Flower } from "next/font/google";
 import Script from "next/script";
-import { ScrollRestorationProvider } from "@/contexts/scroll-restoration-context";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -95,11 +94,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </noscript>
 
         {/* ✅ 전역 스크롤/페이지 상태 복원 Provider (앱 전역 래퍼) */}
-        <ScrollRestorationProvider>
-          {children}
-          <Analytics />
-          <SpeedInsights />
-        </ScrollRestorationProvider>
+        {children}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

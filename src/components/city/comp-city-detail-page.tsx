@@ -9,24 +9,15 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { getCityDetailImageUrls } from "@/utils/set-image-urls";
-import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
 import { HeroImageBackgroundCarouselCity } from "../image/hero-background-carousel-city";
-import { useCityPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCityViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";
 import { CompNetworkError } from "../common/comp-network-error";
-
-type CityPageState = {
-  events: TMapCityEventWithEventInfo[];
-  eventsStart: number;
-  eventsHasMore: boolean;
-  seenEventCodes: string[];
-};
 
 export default function CompCityDetailPage({
   cityCode,
@@ -39,11 +30,7 @@ export default function CompCityDetailPage({
   fullLocale: string;
   initialData: ResponseCityDetailForUserFront | null;
 }) {
-  const router = useRouter();
-  const { save, restore } = useCityPageRestoration(cityCode);
-
   const viewCountIncrementedRef = useRef(false);
-  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
@@ -248,125 +235,6 @@ export default function CompCityDetailPage({
         });
     }
   }, [cityCode]);
-
-  // ✅ 초기 마운트 시 복원 시도
-  useEffect(() => {
-    if (restorationAttemptedRef.current) return;
-    restorationAttemptedRef.current = true;
-
-    console.log('[City Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[City Mount] Current data version:', dataVersion);
-    
-    const saved = restore<CityPageState>(dataVersion);
-    
-    console.log('[City Mount] Restored data:', {
-      hasSaved: !!saved,
-      eventsCount: saved?.events?.length || 0,
-    });
-    
-    if (saved && saved.events && saved.events.length > 0) {
-      console.log('[City Mount] ✅ Restoring state with', saved.events.length, 'events');
-      
-      setEvents(saved.events);
-      setEventsStart(saved.eventsStart ?? 0);
-      setEventsHasMore(Boolean(saved.eventsHasMore));
-      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
-      
-      // ✅ 더보기를 했던 경우에만 백그라운드 병합
-      if (saved.events.length > LIST_LIMIT.default) {
-        console.log('[City Mount] 📡 Fetching server data for merge...');
-        fetchAndMergeData(saved.events);
-      }
-    } else {
-      console.log('[City Mount] ⚠️ No valid saved data found');
-      if (!initialData) {
-        fetchAndMergeData();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cityCode]);
-
-  // ✅ 클릭 이벤트 감지하여 저장
-  useEffect(() => {
-    const saveCurrentState = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY === 0) {
-        console.log('[City Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
-        return;
-      }
-      
-      console.log('[City Save] 💾 현재 상태 저장:', {
-        scrollY: currentScrollY,
-        eventsCount: events.length,
-        dataVersion,
-      });
-
-      const state: CityPageState = {
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      };
-
-      save<CityPageState>(state, dataVersion);
-    };
-
-    // ✅ 모든 네비게이션 요소 클릭 감지
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      
-      const eventCard = target.closest('[data-event-code]');
-      const link = target.closest('a');
-      const button = target.closest('button, [role="button"]');
-      
-      if (eventCard || link || button) {
-        if (link) {
-          const href = link.getAttribute('href') || '';
-          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
-            return;
-          }
-        }
-        
-        console.log('[City Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
-        saveCurrentState();
-      }
-    };
-
-    document.addEventListener("click", handleClick, true);
-    
-    return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
-
-  // ✅ 새로고침/탭 숨김 시 저장
-  useEffect(() => {
-    const persist = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY === 0) return;
-      
-      save<CityPageState>({
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      }, dataVersion);
-    };
-
-    window.addEventListener("beforeunload", persist);
-    
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
   // ================= 렌더 =================
 

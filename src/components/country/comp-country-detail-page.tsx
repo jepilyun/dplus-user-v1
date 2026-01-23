@@ -6,12 +6,9 @@ import {
   ResponseCountryDetailForUserFront,
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { CompLoadMore } from "../button/comp-load-more";
-import { useCountryPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementCountryViewCount } from "@/utils/increment-count";
-import { NavigationSaveContext } from "@/contexts/navigation-save-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import { CompCountryCategoryItem } from "./comp-country-category-item";
 import { CompCountryCityItem } from "./comp-country-city-item";
@@ -19,13 +16,6 @@ import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";
 import { CompNetworkError } from "../common/comp-network-error";
-
-type CountryPageState = {
-  events: TMapCountryEventWithEventInfo[];
-  eventsStart: number;
-  eventsHasMore: boolean;
-  seenEventCodes: string[];
-};
 
 export default function CompCountryDetailPage({
   countryCode,
@@ -38,11 +28,7 @@ export default function CompCountryDetailPage({
   langCode: string;
   initialData: ResponseCountryDetailForUserFront | null;
 }) {
-  const router = useRouter();
-  const { save, restore } = useCountryPageRestoration(countryCode);
-
   const viewCountIncrementedRef = useRef(false);
-  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
@@ -248,25 +234,6 @@ export default function CompCountryDetailPage({
     }
   };
 
-  // ✅ 저장 함수 생성
-  const saveStateBeforeNavigation = useCallback(() => {
-    const currentScrollY = window.scrollY;
-    
-    console.log('[BeforeNav] 💾 네비게이션 전 저장:', {
-      scrollY: currentScrollY,
-      eventsCount: events.length,
-    });
-
-    const state: CountryPageState = {
-      events,
-      eventsStart,
-      eventsHasMore,
-      seenEventCodes: Array.from(seenEventCodesRef.current),
-    };
-
-    save<CountryPageState>(state, dataVersion);
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
-
   // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
     if (!viewCountIncrementedRef.current && countryCode) {
@@ -277,101 +244,6 @@ export default function CompCountryDetailPage({
         });
     }
   }, [countryCode]);
-
-  // ✅ 초기 마운트 시 복원 시도
-  useEffect(() => {
-    if (restorationAttemptedRef.current) return;
-    restorationAttemptedRef.current = true;
-
-    console.log('[Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[Mount] Current data version:', dataVersion);
-    
-    // ✅ 현재 버전과 함께 복원 시도
-    const saved = restore<CountryPageState>(dataVersion);
-
-    console.log('[Mount] Restored data:', {
-      hasSaved: !!saved,
-      eventsCount: saved?.events?.length || 0,
-    });
-    
-    if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Mount] ✅ Restoring state with', saved.events.length, 'events');
-      
-      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 보존)
-      setEvents(saved.events);
-      setEventsStart(saved.eventsStart ?? 0);
-      setEventsHasMore(Boolean(saved.eventsHasMore));
-      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
-      
-      // ✅ 더보기를 했던 경우에만 백그라운드 병합
-      if (saved.events.length > LIST_LIMIT.default) {
-        console.log('[Mount] 📡 Fetching server data for merge...');
-        fetchAndMergeData(saved.events);
-      }
-    } else {
-      console.log('[Mount] ⚠️ No valid saved data found (version mismatch or expired)');
-      if (!initialData) {
-        fetchAndMergeData();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countryCode]);
-
-  // ✅ 링크 클릭 시 저장 (버전 포함)
-  useEffect(() => {
-    const handleLinkClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest("a") as HTMLAnchorElement | null;
-      
-      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) {
-        return;
-      }
-
-      console.log('[Click] 💾 Saving state:', {
-        scrollY: window.scrollY,
-        eventsCount: events.length,
-        dataVersion,
-      });
-
-      const state: CountryPageState = {
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      };
-
-      // ✅ 버전과 함께 저장
-      save<CountryPageState>(state, dataVersion);
-    };
-
-    document.addEventListener("click", handleLinkClick, true);
-    return () => document.removeEventListener("click", handleLinkClick, true);
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
-
-  // ✅ 새로고침/탭 숨김 시 저장
-  useEffect(() => {
-    const persist = () => {
-      save<CountryPageState>({
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      }, dataVersion);
-    };
-
-    window.addEventListener("beforeunload", persist);
-    
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
   // 나머지 렌더링 로직은 동일...
   if (loading) {
@@ -403,50 +275,48 @@ export default function CompCountryDetailPage({
   }
 
   return (
-    <NavigationSaveContext.Provider value={saveStateBeforeNavigation}>
-      <div className="p-4 flex flex-col gap-8" data-view-count={viewCount}>
-        {hasCategories && (
-          <div className="mx-auto w-full max-w-[1440px]">
-            <div className="flex justify-center gap-2 flex-wrap">
-              {countryDetail?.categories?.items.map((item) => (
-                <CompCountryCategoryItem key={item.category_code} category={item} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {hasCities && (
-          <div className="mx-auto w-full max-w-[1440px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
-              {countryDetail?.cities?.items.map((item) => (
-                <CompCountryCityItem key={item.city_code} city={item} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {events?.length ? (
-          <>
-          <div className="mx-auto w-full max-w-[1440px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {events.map(item => (
-              <CompCommonDdayCard 
-                key={item.event_info?.event_code} 
-                event={item} 
-                fullLocale={fullLocale}
-                langCode={langCode}
-              />
+    <div className="p-4 flex flex-col gap-8" data-view-count={viewCount}>
+      {hasCategories && (
+        <div className="mx-auto w-full max-w-[1440px]">
+          <div className="flex justify-center gap-2 flex-wrap">
+            {countryDetail?.categories?.items.map((item) => (
+              <CompCountryCategoryItem key={item.category_code} category={item} />
             ))}
           </div>
-          {eventsHasMore && (
-            <CompLoadMore 
-              onLoadMore={loadMoreEvents} 
-              loading={eventsLoading} 
-              locale={langCode}
+        </div>
+      )}
+
+      {hasCities && (
+        <div className="mx-auto w-full max-w-[1440px]">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 min-h-[120px]">
+            {countryDetail?.cities?.items.map((item) => (
+              <CompCountryCityItem key={item.city_code} city={item} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {events?.length ? (
+        <>
+        <div className="mx-auto w-full max-w-[1440px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {events.map(item => (
+            <CompCommonDdayCard 
+              key={item.event_info?.event_code} 
+              event={item} 
+              fullLocale={fullLocale}
+              langCode={langCode}
             />
-          )}
-          </>
-        ) : null}
-      </div>
-    </NavigationSaveContext.Provider>
+          ))}
+        </div>
+        {eventsHasMore && (
+          <CompLoadMore 
+            onLoadMore={loadMoreEvents} 
+            loading={eventsLoading} 
+            locale={langCode}
+          />
+        )}
+        </>
+      ) : null}
+    </div>
   );
 }

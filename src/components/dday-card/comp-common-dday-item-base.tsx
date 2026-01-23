@@ -9,7 +9,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { generateStorageImageUrl } from "@/utils/generate-image-url";
 import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
-import { useNavigationSave } from "@/contexts/navigation-save-context";
 import { MapPin, Calendar } from "lucide-react";
 import {
   END_DATE_LABELS,
@@ -61,7 +60,6 @@ export default function CompCommonDdayItemBase({
   useClientWrapper = true,
 }: DdayItemBaseProps) {
   const router = useRouter();
-  const saveBeforeNav = useNavigationSave();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -127,13 +125,11 @@ export default function CompCommonDdayItemBase({
     const target = e.target as HTMLElement;
     if (target.closest('a[data-tag-link]') || target.closest('a[data-place-link]')) return;
 
-    saveBeforeNav?.();
     router.push(`/event/${eventCode}`);
   };
 
   const handlePlaceClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    saveBeforeNav?.();
     router.push(`/place/${placeId}`);
   };
 

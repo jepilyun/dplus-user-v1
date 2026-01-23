@@ -14,22 +14,13 @@ import CompLabelCount01 from "@/components/common/comp-label-count-01";
 import { getFolderDetailImageUrls } from "@/utils/set-image-urls";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
-import { useFolderPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
-import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";
 import { CompNetworkError } from "../common/comp-network-error";
 import { CompFolderActionButtons } from "./comp-folder-action-buttons";
 import ShareModal from "../share/comp-share-modal";
-
-type FolderPageState = {
-  events: TMapFolderEventWithEventInfo[];
-  eventsStart: number;
-  eventsHasMore: boolean;
-  seenEventCodes: string[];
-};
 
 export default function CompFolderDetailPage({
   folderCode,
@@ -43,10 +34,7 @@ export default function CompFolderDetailPage({
   initialData: ResponseFolderDetailForUserFront | null;
 }) {
   // const router = useRouter();
-  const { save, restore } = useFolderPageRestoration(folderCode);
-
   const viewCountIncrementedRef = useRef(false);
-  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
@@ -56,9 +44,6 @@ export default function CompFolderDetailPage({
   const [folderDetail, setFolderDetail] = useState<ResponseFolderDetailForUserFront | null>(
     initialData ?? null
   );
-  
-  // ✅ 데이터 버전: 2시간 블록
-  const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
     initialData ? getFolderDetailImageUrls(initialData.folderDetail?.folderInfo) : []
@@ -113,10 +98,6 @@ export default function CompFolderDetailPage({
       setSharedCount(db?.folderDetail?.folderInfo?.shared_count ?? 0);
 
       const serverEvents = db?.folderEvent?.items ?? [];
-      
-      // ✅ 새 데이터 버전 업데이트
-      const newVersion = getSessionDataVersion();
-      setDataVersion(newVersion);
       
       // console.log('[Folder Merge] 📊 Data versions:', {
       //   new: newVersion,
@@ -262,124 +243,6 @@ export default function CompFolderDetailPage({
       });
     }
   }, [folderCode]);
-
-  // ✅ 초기 마운트 시 복원 시도
-  useEffect(() => {
-    if (restorationAttemptedRef.current) return;
-    restorationAttemptedRef.current = true;
-
-    console.log('[Folder Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[Folder Mount] Current data version:', dataVersion);
-    
-    const saved = restore<FolderPageState>(dataVersion);
-    
-    console.log('[Folder Mount] Restored data:', {
-      hasSaved: !!saved,
-      eventsCount: saved?.events?.length || 0,
-    });
-    
-    if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Folder Mount] ✅ Restoring state with', saved.events.length, 'events');
-      
-      setEvents(saved.events);
-      setEventsStart(saved.eventsStart ?? 0);
-      setEventsHasMore(Boolean(saved.eventsHasMore));
-      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
-      
-      // ✅ 더보기를 했던 경우에만 백그라운드 병합
-      if (saved.events.length > LIST_LIMIT.default) {
-        console.log('[Folder Mount] 📡 Fetching server data for merge...');
-        fetchAndMergeData(saved.events);
-      }
-    } else {
-      console.log('[Folder Mount] ⚠️ No valid saved data found');
-      if (!initialData) {
-        fetchAndMergeData();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folderCode]);
-
-  // ✅ 클릭 이벤트 감지하여 저장
-  useEffect(() => {
-    const saveCurrentState = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY === 0) {
-        console.log('[Folder Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
-        return;
-      }
-      
-      // console.log('[Folder Save] 💾 현재 상태 저장:', {
-      //   scrollY: currentScrollY,
-      //   eventsCount: events.length,
-      //   dataVersion,
-      // });
-
-      const state: FolderPageState = {
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      };
-
-      save<FolderPageState>(state, dataVersion);
-    };
-
-    // ✅ 모든 네비게이션 요소 클릭 감지
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      
-      const eventCard = target.closest('[data-event-code]');
-      const link = target.closest('a');
-      const button = target.closest('button, [role="button"]');
-      
-      if (eventCard || link || button) {
-        if (link) {
-          const href = link.getAttribute('href') || '';
-          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
-            return;
-          }
-        }
-        
-        saveCurrentState();
-      }
-    };
-
-    document.addEventListener("click", handleClick, true);
-    
-    return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
-
-  // ✅ 새로고침/탭 숨김 시 저장
-  useEffect(() => {
-    const persist = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY === 0) return;
-      
-      save<FolderPageState>({
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      }, dataVersion);
-    };
-
-    window.addEventListener("beforeunload", persist);
-    
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
   // ================= 렌더 =================
 

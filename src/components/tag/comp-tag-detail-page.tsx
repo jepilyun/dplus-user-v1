@@ -7,22 +7,13 @@ import {
   TMapTagEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
-import { useTagPageRestoration } from "@/contexts/scroll-restoration-context"; // ✅ 변경
 import { incrementTagViewCount } from "@/utils/increment-count";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";
 import { CompNetworkError } from "../common/comp-network-error";
-
-type TagPageState = {
-  events: TMapTagEventWithEventInfo[];
-  eventsStart: number;
-  eventsHasMore: boolean;
-  seenEventCodes: string[];
-};
 
 export default function CompTagDetailPage({
   tagCode,
@@ -33,11 +24,6 @@ export default function CompTagDetailPage({
   langCode: string;
   fullLocale: string;
 }) {
-  const router = useRouter();
-
-  // ✅ 변경: 전용 hook 사용
-  const { save, restore } = useTagPageRestoration(tagCode);
-
   // ✅ 조회수 증가 여부 추적
   const viewCountIncrementedRef = useRef(false);
 
@@ -52,7 +38,6 @@ export default function CompTagDetailPage({
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(new Set());
-  const hydratedFromRestoreRef = useRef(false);
 
   // ✅ 로컬 카운트 상태 (낙관적 업데이트용)
   const [viewCount, setViewCount] = useState(tagDetail?.tag?.view_count ?? 0);
@@ -214,80 +199,6 @@ export default function CompTagDetailPage({
       });
     }
   }, [tagCode]);
-
-  useEffect(() => {
-    console.log('[Tag Mount] Component mounted, attempting restore...');
-    const saved = restore<TagPageState>();
-    
-    console.log('[Tag Mount] Restored data:', {
-      hasSaved: !!saved,
-      eventsCount: saved?.events?.length || 0,
-    });
-    
-    if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Tag Mount] Restoring state with', saved.events.length, 'events');
-      hydratedFromRestoreRef.current = true;
-      
-      // ✅ 복원 데이터로 먼저 화면 표시 (스크롤 위치 복원을 위해)
-      setEvents(saved.events);
-      setEventsStart(saved.eventsStart ?? 0);
-      setEventsHasMore(Boolean(saved.eventsHasMore));
-      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
-      
-      // ✅ 백그라운드에서 서버 데이터 가져와서 업데이트
-      fetchTagDetail(saved.events);
-    } else {
-      console.log('[Tag Mount] No valid saved data found');
-      fetchTagDetail();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tagCode]);
-
-  // 라우팅 직전 저장
-  useEffect(() => {
-    const onPointerDown = (e: PointerEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest("a") as HTMLAnchorElement | null;
-      if (!link || link.target === "_blank" || link.href.startsWith("mailto:")) return;
-
-      console.log('[Tag Save] Saving state:', {
-        eventsCount: events.length,
-        eventsStart,
-        eventsHasMore,
-      });
-
-      save<TagPageState>({
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [events, eventsStart, eventsHasMore, save]);
-
-  // 새로고침/탭 숨김 시 저장
-  useEffect(() => {
-    const persist = () =>
-      save<TagPageState>({
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      });
-
-    window.addEventListener("beforeunload", persist);
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      document.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [events, eventsStart, eventsHasMore, save]);
 
   // ================= 렌더 =================
 

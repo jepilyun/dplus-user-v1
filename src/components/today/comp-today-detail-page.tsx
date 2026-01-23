@@ -3,7 +3,6 @@
 import { reqGetTodayList } from "@/req/req-today";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { CompLoadMore } from "../button/comp-load-more";
 import CompCommonDdayItemForDate from "../dday-card/comp-common-dday-item-for-date";
 import {
@@ -13,7 +12,6 @@ import {
   Tz,
   detectBrowserLanguage,
 } from "@/utils/date-ymd";
-import { useTodayPageRestoration } from "@/contexts/scroll-restoration-context";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCardForDate from "../dday-card/comp-common-dday-card-for-date";
 import { CompLoading } from "../common/comp-loading";
@@ -36,16 +34,6 @@ type EventWithSection = TEventCardForDateDetail & {
   section: { key: string; label: string; sub: string };
 };
 
-// ✅ 저장/복원용 상태 (섹션은 복원 시 재계산하므로 raw만 저장)
-type TodayPageState = {
-  rawEvents: TEventCardForDateDetail[];
-  eventsStart: number;
-  eventsHasMore: boolean;
-  seenEventCodes: string[];
-  tz: Tz;
-  lang: "en" | "ko";
-};
-
 export default function CompTodayDetailPage({
   countryCode,
   langCode,
@@ -59,9 +47,6 @@ export default function CompTodayDetailPage({
   initialData: DplusGetListDataResponse<TEventCardForDateDetail> | null;
   defaultTz?: Tz;
 }) {
-  const router = useRouter();
-  const { save, restore } = useTodayPageRestoration(countryCode);
-
   // 브라우저 TZ & 언어 감지
   const [tz, setTz] = useState<Tz>(defaultTz);
   const [lang, setLang] = useState<"en" | "ko">("en");
@@ -86,7 +71,6 @@ export default function CompTodayDetailPage({
   );
   const requestIdRef = useRef(0);
   const nowYmdRef = useRef<string>("");
-  const restorationAttemptedRef = useRef(false);
 
   // ✅ 렌더용(섹션 포함) 상태
   const [eventsWithSections, setEventsWithSections] = useState<EventWithSection[]>(
@@ -259,158 +243,6 @@ export default function CompTodayDetailPage({
       if (reqId === requestIdRef.current) setEventsLoading(false);
     }
   };
-
-  // ✅ 초기 마운트 시 복원 시도
-  useEffect(() => {
-    if (restorationAttemptedRef.current) return;
-    restorationAttemptedRef.current = true;
-
-    console.log('[Today Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[Today Mount] Current data version:', dataVersion);
-    
-    const saved = restore<TodayPageState>(dataVersion);
-    
-    console.log('[Today Mount] Restored data:', {
-      hasSaved: !!saved,
-      eventsCount: saved?.rawEvents?.length || 0,
-    });
-    
-    if (saved && saved.rawEvents && saved.rawEvents.length > 0) {
-      console.log('[Today Mount] ✅ Restoring state with', saved.rawEvents.length, 'events');
-      
-      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      
-      setEventsWithSections(attachSections(saved.rawEvents));
-      setEventsStart(saved.eventsStart ?? 0);
-      setEventsHasMore(Boolean(saved.eventsHasMore));
-  
-      if (saved.tz) setTz(saved.tz);
-      if (saved.lang) setLang(saved.lang);
-      setLoading(false);
-      
-      // ✅ 더보기를 했던 경우에만 백그라운드 병합
-      if (saved.rawEvents.length > LIST_LIMIT.default) {
-        console.log('[Today Mount] 📡 Fetching server data for merge...');
-        fetchAndMergeData(saved.rawEvents);
-      }
-    } else {
-      console.log('[Today Mount] ⚠️ No valid saved data found');
-      if (!initialData) {
-        fetchAndMergeData();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countryCode]);
-
-  // ✅ 클릭 이벤트 감지하여 저장
-  useEffect(() => {
-    const saveCurrentState = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY === 0) {
-        console.log('[Today Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
-        return;
-      }
-      
-      console.log('[Today Save] 💾 현재 상태 저장:', {
-        scrollY: currentScrollY,
-        eventsCount: eventsWithSections.length,
-        dataVersion,
-      });
-
-      // 저장은 raw 기준으로(섹션은 복원 시 재계산)
-      const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
-        const { section, ...rest } = it;
-        console.log("section", section);
-        return rest;
-      });
-
-      const state: TodayPageState = {
-        rawEvents,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-        tz,
-        lang,
-      };
-
-      save<TodayPageState>(state, dataVersion);
-    };
-
-    // ✅ 모든 네비게이션 요소 클릭 감지
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      
-      const eventCard = target.closest('[data-event-code]');
-      const link = target.closest('a');
-      const button = target.closest('button, [role="button"]');
-      
-      if (eventCard || link || button) {
-        if (link) {
-          const href = link.getAttribute('href') || '';
-          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
-            return;
-          }
-        }
-        
-        console.log('[Today Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
-        saveCurrentState();
-      }
-    };
-
-    document.addEventListener("click", handleClick, true);
-    
-    return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, dataVersion, save]);
-
-  // ✅ 새로고침/탭 숨김 시 저장
-  useEffect(() => {
-    const persist = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY === 0) return;
-      
-      const rawEvents: TEventCardForDateDetail[] = eventsWithSections.map((it) => {
-        const { section, ...rest } = it;
-        console.log("section", section);
-        return rest;
-      });
-      
-      save<TodayPageState>({
-        rawEvents,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-        tz,
-        lang,
-      }, dataVersion);
-    };
-
-    window.addEventListener("beforeunload", persist);
-    
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      window.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [eventsWithSections, eventsStart, eventsHasMore, tz, lang, dataVersion, save]);
-
-  // ✅ TZ/Lang이 변하면 섹션만 재계산하여 화면 업데이트
-  useEffect(() => {
-    if (!eventsWithSections.length) return;
-    setEventsWithSections((prev) =>
-      attachSections(prev.map(({ section, ...raw }) => {
-        console.log("section", section);
-        return raw;
-      }))
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tz, lang]);
 
   // ===== 렌더 =====
 

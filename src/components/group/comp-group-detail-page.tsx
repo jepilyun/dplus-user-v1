@@ -9,24 +9,15 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { getGroupDetailImageUrls } from "@/utils/set-image-urls";
-import { useRouter } from "next/navigation";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
 import { HeroImageBackgroundCarouselGroup } from "../image/hero-background-carousel-group";
-import { useGroupPageRestoration } from "@/contexts/scroll-restoration-context";
 import { incrementGroupViewCount } from "@/utils/increment-count";
 import { getSessionDataVersion } from "@/utils/get-session-data-version";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";
 import { CompNetworkError } from "../common/comp-network-error";
-
-type GroupPageState = {
-  events: TMapGroupEventWithEventInfo[];
-  eventsStart: number;
-  eventsHasMore: boolean;
-  seenEventCodes: string[];
-};
 
 export default function CompGroupDetailPage({
   groupCode,
@@ -39,11 +30,7 @@ export default function CompGroupDetailPage({
   fullLocale: string;
   initialData: ResponseGroupDetailForUserFront | null;
 }) {
-  const router = useRouter();
-  const { save, restore } = useGroupPageRestoration(groupCode);
-
   const viewCountIncrementedRef = useRef(false);
-  const restorationAttemptedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
@@ -255,125 +242,6 @@ export default function CompGroupDetailPage({
       });
     }
   }, [groupCode]);
-
-  // ✅ 초기 마운트 시 복원 시도
-  useEffect(() => {
-    if (restorationAttemptedRef.current) return;
-    restorationAttemptedRef.current = true;
-
-    console.log('[Group Mount] 🚀 Component mounted, attempting restore...');
-    console.log('[Group Mount] Current data version:', dataVersion);
-    
-    const saved = restore<GroupPageState>(dataVersion);
-    
-    console.log('[Group Mount] Restored data:', {
-      hasSaved: !!saved,
-      eventsCount: saved?.events?.length || 0,
-    });
-    
-    if (saved && saved.events && saved.events.length > 0) {
-      console.log('[Group Mount] ✅ Restoring state with', saved.events.length, 'events');
-      
-      setEvents(saved.events);
-      setEventsStart(saved.eventsStart ?? 0);
-      setEventsHasMore(Boolean(saved.eventsHasMore));
-      seenEventCodesRef.current = new Set(saved.seenEventCodes ?? []);
-      setLoading(false);
-      
-      // ✅ 더보기를 했던 경우에만 백그라운드 병합
-      if (saved.events.length > LIST_LIMIT.default) {
-        console.log('[Group Mount] 📡 Fetching server data for merge...');
-        fetchAndMergeData(saved.events);
-      }
-    } else {
-      console.log('[Group Mount] ⚠️ No valid saved data found');
-      if (!initialData) {
-        fetchAndMergeData();
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [groupCode]);
-
-  // ✅ 클릭 이벤트 감지하여 저장
-  useEffect(() => {
-    const saveCurrentState = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY === 0) {
-        console.log('[Group Save] ⚠️ 스크롤이 0이므로 저장 건너뜀');
-        return;
-      }
-      
-      console.log('[Group Save] 💾 현재 상태 저장:', {
-        scrollY: currentScrollY,
-        eventsCount: events.length,
-        dataVersion,
-      });
-
-      const state: GroupPageState = {
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      };
-
-      save<GroupPageState>(state, dataVersion);
-    };
-
-    // ✅ 모든 네비게이션 요소 클릭 감지
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      
-      const eventCard = target.closest('[data-event-code]');
-      const link = target.closest('a');
-      const button = target.closest('button, [role="button"]');
-      
-      if (eventCard || link || button) {
-        if (link) {
-          const href = link.getAttribute('href') || '';
-          if (link.getAttribute('target') === '_blank' || href.startsWith('mailto:')) {
-            return;
-          }
-        }
-        
-        console.log('[Group Click] 🎯 네비게이션 요소 클릭 감지, 저장 실행');
-        saveCurrentState();
-      }
-    };
-
-    document.addEventListener("click", handleClick, true);
-    
-    return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
-
-  // ✅ 새로고침/탭 숨김 시 저장
-  useEffect(() => {
-    const persist = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY === 0) return;
-      
-      save<GroupPageState>({
-        events,
-        eventsStart,
-        eventsHasMore,
-        seenEventCodes: Array.from(seenEventCodesRef.current),
-      }, dataVersion);
-    };
-
-    window.addEventListener("beforeunload", persist);
-    
-    const onVisibility = () => {
-      if (document.visibilityState === "hidden") persist();
-    };
-    document.addEventListener("visibilitychange", onVisibility);
-    
-    return () => {
-      window.removeEventListener("beforeunload", persist);
-      window.removeEventListener("visibilitychange", onVisibility);
-    };
-  }, [events, eventsStart, eventsHasMore, dataVersion, save]);
 
   // ================= 렌더 =================
 
