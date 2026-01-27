@@ -1,3 +1,4 @@
+// Korean
 export const dplusI18nKO = {
   repeat_annually: "매년 반복",
   load_more: "더보기",

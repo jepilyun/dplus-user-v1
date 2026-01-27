@@ -5,7 +5,7 @@ import { InfoItem } from "@/components/info-item";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { Phone, Home, Mail, Ticket, Globe, ShoppingBag, Info, Tv, BadgeCheck } from "lucide-react";
-import { IconYoutube } from "@/icons/IconYouTube";
+import { IconYouTube } from "@/icons/IconYouTube";
 import { IconInstagram } from "@/icons/IconInstagram";
 import { TEventDescription } from "dplus_common_v1";
 
@@ -93,7 +93,7 @@ export default function CompEventContactLinks({
     if (eventDescription.youtube_ch_id) {
       items.push({
         key: "youtube",
-        icon: <IconYoutube className="h-5 w-5" />,
+        icon: <IconYouTube className="h-5 w-5" />,
         text: i18n.labels.youtube,
         href: toYoutubeChannelUrl(eventDescription.youtube_ch_id),
       });
