@@ -56,7 +56,7 @@ export async function generateStaticParams() {
  * Group 상세 페이지
  * @param params - Group Code
  * @param searchParams - 검색 파라미터
- * @returns 이벤트 상세 페이지
+ * @returns Group 상세 페이지
  */
 export default async function GroupDetailPage({
   params,

@@ -38,9 +38,9 @@ export async function generateMetadata({
 
 /**
  * 폴더 상세 페이지
- * @param params - 이벤트 ID
+ * @param params - Folder Code
  * @param searchParams - 검색 파라미터
- * @returns 이벤트 상세 페이지
+ * @returns Folder 상세 페이지
  */
 export default async function FolderDetailPage({
   params,

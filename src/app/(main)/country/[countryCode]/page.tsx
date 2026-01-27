@@ -55,7 +55,7 @@ export async function generateStaticParams() {
 
 /**
  * Country 상세 페이지
- * @param params - 이벤트 ID
+ * @param params - Country Code
  * @param searchParams - 검색 파라미터
  * @returns Country 상세 페이지
  */

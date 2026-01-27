@@ -69,7 +69,7 @@ export async function generateStaticParams() {
  * Category 상세 페이지
  * @param params - Category Code
  * @param searchParams - 검색 파라미터
- * @returns 이벤트 상세 페이지
+ * @returns Category 상세 페이지
  */
 export default async function CategoryDetailPage({
   params,

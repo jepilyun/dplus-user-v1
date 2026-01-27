@@ -38,9 +38,9 @@ export async function generateMetadata({
 
 /**
  * Place 상세 페이지
- * @param params - PLACE ID
+ * @param params - Place ID
  * @param searchParams - 검색 파라미터
- * @returns 이벤트 상세 페이지
+ * @returns Place 상세 페이지
  */
 export default async function PlaceDetailPage({
   params,
@@ -83,7 +83,7 @@ export default async function PlaceDetailPage({
     );
   } catch (error) {
     // ✅ 네트워크 에러나 예상치 못한 에러도 404로 처리
-    console.error('Failed to fetch folder detail:', error);
+    console.error('Failed to fetch place detail:', error);
     notFound();
   }
 }

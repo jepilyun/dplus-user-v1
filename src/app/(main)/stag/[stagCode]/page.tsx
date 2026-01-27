@@ -40,7 +40,7 @@ export async function generateMetadata({
  * Stag 상세 페이지
  * @param params - Stag Code
  * @param searchParams - 검색 파라미터
- * @returns 이벤트 상세 페이지
+ * @returns Stag 상세 페이지
  */
 export default async function StagDetailPage({
   params,

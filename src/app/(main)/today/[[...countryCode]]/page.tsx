@@ -30,7 +30,7 @@ export async function generateMetadata({
 /**
  * Today 상세 페이지
  * @param searchParams - 검색 파라미터
- * @returns 이벤트 상세 페이지
+ * @returns Today 상세 페이지
  */
 export default async function TodayPage({
   params,
@@ -43,15 +43,29 @@ export default async function TodayPage({
   const { fullLocale, langCode } = await getRequestLocale();
   const resolvedCountryCode = countryCode ?? "KR";
 
-  const response = await fetchGetTodayList(resolvedCountryCode, 0, LIST_LIMIT.default).catch(() => null);
-  const initialData = response?.dbResponse ?? null;
+  try {
+    // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
+    const response = await fetchGetTodayList(resolvedCountryCode, 0, LIST_LIMIT.default);
+    const initialData = response?.dbResponse ?? null;
 
-  return (
-    <CompTodayDetailPage 
-      countryCode={resolvedCountryCode}
-      fullLocale={fullLocale}
-      langCode={langCode}
-      initialData={initialData}
-    />
-  );
+    return (
+      <CompTodayDetailPage
+        countryCode={resolvedCountryCode}
+        fullLocale={fullLocale}
+        langCode={langCode}
+        initialData={initialData}
+      />
+    );
+  } catch (error) {
+    // ✅ 에러 발생 시에도 빈 데이터로 페이지 렌더링
+    console.error('Failed to fetch today list:', error);
+    return (
+      <CompTodayDetailPage
+        countryCode={resolvedCountryCode}
+        fullLocale={fullLocale}
+        langCode={langCode}
+        initialData={null}
+      />
+    );
+  }
 }
