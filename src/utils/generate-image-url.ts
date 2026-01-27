@@ -1,5 +1,5 @@
 // utils/generate-image-url.ts
-import { SUPABASE_URL } from "@/lib/supabase-config";
+import { SUPABASE_URL } from "@/lib/supabaseClient";
 
 /**
  * 이미지 경로를 절대 URL로 변환 (헬퍼)
