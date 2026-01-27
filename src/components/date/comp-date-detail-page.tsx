@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetDateList } from "@/req/req-date";
+import { reqGetDateList } from "@/api/req-date";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useRef, useState } from "react";
 import { CompLoadMore } from "../button/comp-load-more";

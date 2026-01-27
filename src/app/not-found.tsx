@@ -1,4 +1,4 @@
-import { DplusLogo } from "@/resources/dplus-logo";
+import { DplusLogo } from "@/resources/DplusLogo";
 import Link from "next/link";
 
 // 이 라우트 기본 재생성 주기: 4시간

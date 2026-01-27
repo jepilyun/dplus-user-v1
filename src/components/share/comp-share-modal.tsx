@@ -2,11 +2,11 @@
 
 import { Dialog, IconButton } from "@mui/material";
 import { openSocialShare, type SocialPlatform } from "@/utils/social-share";
-import { IconTwitter } from "@/icons/icon-twitter";
-import { IconFacebook } from "@/icons/icon-facebook";
-import { IconThreads } from "@/icons/icon-threads";
-import { IconLinkedIn } from "@/icons/icon-linkedin";
-import { IconWhatsApp } from "@/icons/icon-whatsapp";
+import { IconTwitter } from "@/icons/IconTwitter";
+import { IconFacebook } from "@/icons/IconFacebook";
+import { IconThreads } from "@/icons/IconThreads";
+import { IconLinkedIn } from "@/icons/IconLinkedIn";
+import { IconWhatsApp } from "@/icons/IconWhatsApp";
 import { SUPPORT_LANG_CODES } from "dplus_common_v1";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 

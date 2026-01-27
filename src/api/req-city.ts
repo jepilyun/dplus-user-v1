@@ -1,5 +1,5 @@
 import { DplusGetListDataResponse, ResponseCityDetailForUserFront, ResponseDplusAPI, ResponseMetadataForUserFront, TMapCityEventWithEventInfo } from "dplus_common_v1";
-import { APIUrlOptionalParams } from "./api-url";
+import { APIUrlOptionalParams } from "./apiUrl";
 
 /**
  * API Routes: City Detail 경로 생성

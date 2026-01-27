@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetGroupDetail, reqGetGroupEvents } from "@/req/req-group";
+import { reqGetGroupDetail, reqGetGroupEvents } from "@/api/req-group";
 import {
   LIST_LIMIT,
   ResponseGroupDetailForUserFront,

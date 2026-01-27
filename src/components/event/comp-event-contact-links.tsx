@@ -5,8 +5,8 @@ import { InfoItem } from "@/components/info-item";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
 import { getDplusI18n } from "@/utils/get-dplus-i18n";
 import { Phone, Home, Mail, Ticket, Globe, ShoppingBag, Info, Tv, BadgeCheck } from "lucide-react";
-import { IconYoutube } from "@/icons/icon-youtube";
-import { IconInstagram } from "@/icons/icon-instagram";
+import { IconYoutube } from "@/icons/IconYouTube";
+import { IconInstagram } from "@/icons/IconInstagram";
 import { TEventDescription } from "dplus_common_v1";
 
 type TEventMinimal = {

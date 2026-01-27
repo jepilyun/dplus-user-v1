@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetEventDetail } from "@/req/req-event";
+import { reqGetEventDetail } from "@/api/req-event";
 import { HeroImageSlider } from "@/components/image/hero-image-slider";
 import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
 import { detectDevice, DeviceType } from "@/utils/device-detector";
@@ -15,7 +15,7 @@ import { CompEventActionButtons } from "./comp-event-action-buttons";
 import { CompEventHeader } from "./comp-event-header";
 import { CompEventDetailMap } from "./comp-event-map";
 import { CompEventDescription } from "./comp-event-description";
-import { SupportedLocale } from "@/consts/const-config";
+import { SupportedLocale } from "@/constants/config.constant";
 import CompEventContactLinks from "./comp-event-contact-links";
 import { ArrowRight } from "lucide-react";
 import { CompLinkButton } from "../button/comp-link-button";

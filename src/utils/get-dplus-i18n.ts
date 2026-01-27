@@ -1,13 +1,13 @@
 import { SUPPORT_LANG_CODE_VALUE } from "dplus_common_v1";
 
-import { dplusI18nEN } from "../i18n-data/dplus-i18n-en";
-import { dplusI18nID } from "../i18n-data/dplus-i18n-id";
-import { dplusI18nJA } from "../i18n-data/dplus-i18n-ja";
-import { dplusI18nKO } from "../i18n-data/dplus-i18n-ko";
-import { dplusI18nTH } from "../i18n-data/dplus-i18n-th";
-import { dplusI18nTW } from "../i18n-data/dplus-i18n-tw";
-import { dplusI18nVI } from "../i18n-data/dplus-i18n-vi";
-import { dplusI18nZH } from "../i18n-data/dplus-i18n-zh";
+import { dplusI18nEN } from "../i18n/i18nEn";
+import { dplusI18nID } from "../i18n/i18nId";
+import { dplusI18nJA } from "../i18n/i18nJa";
+import { dplusI18nKO } from "../i18n/i18nKo";
+import { dplusI18nTH } from "../i18n/i18nTh";
+import { dplusI18nTW } from "../i18n/i18nTw";
+import { dplusI18nVI } from "../i18n/i18nVi";
+import { dplusI18nZH } from "../i18n/i18nZh";
 
 /**
  * @param locale - 언어 코드

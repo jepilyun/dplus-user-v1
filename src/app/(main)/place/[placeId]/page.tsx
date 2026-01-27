@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";
-import { reqGetPlaceDetail } from "@/req/req-place";
+import { reqGetPlaceDetail } from "@/api/req-place";
 import CompPlaceDetailPage from "@/components/place/comp-place-detail-page";
 
 /**

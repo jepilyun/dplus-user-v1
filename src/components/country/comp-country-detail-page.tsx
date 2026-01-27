@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCountryDetail, reqGetCountryEvents } from "@/req/req-country";
+import { reqGetCountryDetail, reqGetCountryEvents } from "@/api/req-country";
 import {
   LIST_LIMIT,
   ResponseCountryDetailForUserFront,

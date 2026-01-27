@@ -1,5 +1,5 @@
 import { DplusGetListDataResponse, ResponseDplusAPI, ResponseMetadataForUserFront, ResponseStagDetailForUserFront, TMapStagEventWithEventInfo } from "dplus_common_v1";
-import { APIUrlOptionalParams } from "./api-url";
+import { APIUrlOptionalParams } from "./apiUrl";
 
 
 /**

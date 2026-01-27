@@ -1,4 +1,4 @@
-import { DplusLogo } from "@/resources/dplus-logo";
+import { DplusLogo } from "@/resources/DplusLogo";
 import Link from "next/link";
 
 export default function TopNavMain() {

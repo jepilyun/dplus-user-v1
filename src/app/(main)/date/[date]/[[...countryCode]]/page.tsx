@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { reqGetDateList } from "@/req/req-date";
+import { reqGetDateList } from "@/api/req-date";
 import CompDateDetailPage from "@/components/date/comp-date-detail-page";
 import { generateSimpleMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

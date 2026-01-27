@@ -1,7 +1,7 @@
 // app/sitemap-stags.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetStagCodes } from "@/req/req-stag";
+import { reqGetStagCodes } from "@/api/req-stag";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";

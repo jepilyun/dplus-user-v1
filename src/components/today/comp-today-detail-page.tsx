@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetTodayList } from "@/req/req-today";
+import { reqGetTodayList } from "@/api/req-today";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
 import { CompLoadMore } from "../button/comp-load-more";

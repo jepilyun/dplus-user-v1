@@ -1,9 +1,9 @@
 "use client";
 
-import { IconTwitter } from "@/icons/icon-twitter";
-import { IconThreads } from "@/icons/icon-threads";
-import { IconFacebook } from "@/icons/icon-facebook";
-import { IconInstagram } from "@/icons/icon-instagram";
+import { IconTwitter } from "@/icons/IconTwitter";
+import { IconThreads } from "@/icons/IconThreads";
+import { IconFacebook } from "@/icons/IconFacebook";
+import { IconInstagram } from "@/icons/IconInstagram";
 
 const socialLinks = [
   {

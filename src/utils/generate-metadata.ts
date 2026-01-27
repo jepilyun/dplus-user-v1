@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { getMetadataByLang } from "@/consts/const-metadata";
+import { getMetadataByLang } from "@/constants/metadata.constant";
 
 import { buildKeywords, pick } from "./metadata-helper";
 import {

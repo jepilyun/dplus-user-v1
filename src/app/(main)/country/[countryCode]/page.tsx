@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetCountryCodes, reqGetCountryDetail } from "@/req/req-country";
+import { reqGetCountryCodes, reqGetCountryDetail } from "@/api/req-country";
 import CompCountryDetailPage from "@/components/country/comp-country-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";

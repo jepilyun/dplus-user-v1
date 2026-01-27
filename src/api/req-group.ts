@@ -1,5 +1,5 @@
 import { DplusGetListDataResponse, ResponseDplusAPI, ResponseGroupDetailForUserFront, ResponseMetadataForUserFront, TMapGroupEventWithEventInfo } from "dplus_common_v1";
-import { APIUrlOptionalParams } from "./api-url";
+import { APIUrlOptionalParams } from "./apiUrl";
 
 /**
  * API Routes: Group Detail 경로 생성

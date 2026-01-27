@@ -1,7 +1,7 @@
 // app/sitemap-events.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetEventCodeList } from "@/req/req-event";
+import { reqGetEventCodeList } from "@/api/req-event";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";

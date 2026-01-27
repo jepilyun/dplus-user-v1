@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetStagDetail, reqGetStagEvents } from "@/req/req-stag";
+import { reqGetStagDetail, reqGetStagEvents } from "@/api/req-stag";
 import {
   LIST_LIMIT,
   ResponseStagDetailForUserFront,

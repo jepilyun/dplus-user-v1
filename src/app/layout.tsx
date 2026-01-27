@@ -4,7 +4,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
-import { DEFAULT_METADATA_I18N } from "@/consts/const-metadata";
+import { DEFAULT_METADATA_I18N } from "@/constants/metadata.constant";
 
 // 기본 메타데이터 (현재는 한국어로)
 // TODO: 다국어 처리
