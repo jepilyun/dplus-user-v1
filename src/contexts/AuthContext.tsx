@@ -19,20 +19,26 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
    * Check authentication status on mount
    */
   const checkAuth = useCallback(async () => {
-    // If no access token, user is not authenticated
-    if (!hasAccessToken()) {
-      setUser(null);
-      setIsLoading(false);
+    // Prevent duplicate calls
+    if (isCheckingAuth && user !== null) {
       return;
     }
 
-    setIsLoading(true);
+    // If no access token, user is not authenticated
+    if (!hasAccessToken()) {
+      setUser(null);
+      setIsCheckingAuth(false);
+      return;
+    }
+
+    setIsCheckingAuth(true);
 
     try {
       const result = await authService.getCurrentUser();
@@ -46,15 +52,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error("Failed to check auth:", error);
       setUser(null);
     } finally {
-      setIsLoading(false);
+      setIsCheckingAuth(false);
     }
-  }, []);
+  }, [isCheckingAuth, user]);
 
   /**
    * Login with email and password
    */
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
+    // Prevent duplicate calls
+    if (isSubmitting) {
+      return false;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const result = await authService.login({ email, password });
@@ -70,15 +81,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error("Login error:", error);
       return false;
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }, []);
+  }, [isSubmitting]);
 
   /**
    * Login with Google
    */
   const googleLogin = useCallback(async (idToken: string): Promise<boolean> => {
-    setIsLoading(true);
+    // Prevent duplicate calls
+    if (isSubmitting) {
+      return false;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const result = await authService.googleLogin({ idToken });
@@ -94,16 +110,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error("Google login error:", error);
       return false;
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }, []);
+  }, [isSubmitting]);
 
   /**
    * Register new user
    */
   const register = useCallback(
     async (email: string, password: string, name?: string): Promise<boolean> => {
-      setIsLoading(true);
+      // Prevent duplicate calls
+      if (isSubmitting) {
+        return false;
+      }
+
+      setIsSubmitting(true);
 
       try {
         const result = await authService.register({ email, password, name });
@@ -119,17 +140,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error("Registration error:", error);
         return false;
       } finally {
-        setIsLoading(false);
+        setIsSubmitting(false);
       }
     },
-    [],
+    [isSubmitting],
   );
 
   /**
    * Logout
    */
   const logout = useCallback(async () => {
-    setIsLoading(true);
+    // Prevent duplicate calls
+    if (isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       await authService.logout();
@@ -137,9 +163,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       console.error("Logout error:", error);
     } finally {
       setUser(null);
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
-  }, []);
+  }, [isSubmitting]);
 
   /**
    * Check auth on mount
@@ -151,7 +177,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextValue = {
     user,
     isAuthenticated: !!user,
-    isLoading,
+    isLoading: isCheckingAuth || isSubmitting,
+    isCheckingAuth,
+    isSubmitting,
     login,
     googleLogin,
     register,

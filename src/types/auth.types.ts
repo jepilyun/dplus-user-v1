@@ -92,7 +92,9 @@ export interface UserTokenPayload {
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isLoading: boolean; // Combined loading state (isCheckingAuth || isSubmitting)
+  isCheckingAuth: boolean; // Loading state for checkAuth
+  isSubmitting: boolean; // Loading state for login/register/logout actions
 }
 
 /**
