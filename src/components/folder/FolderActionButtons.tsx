@@ -2,7 +2,7 @@
 import { getDplusI18n } from "@/utils/getDplusI18n"
 import { SUPPORT_LANG_CODES } from "dplus_common_v1"
 import { Share2 } from "lucide-react"
-import { CompShareFolderButton } from "../button/comp-share-folder-button";
+import { CompShareFolderButton } from "../button/ShareFolderButton";
 
 export const CompFolderActionButtons = ({
   langCode,

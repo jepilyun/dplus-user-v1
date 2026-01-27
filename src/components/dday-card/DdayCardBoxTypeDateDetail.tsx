@@ -1,9 +1,9 @@
 "use client";
 
 import { TEventCardForDateDetail } from "dplus_common_v1";
-import CompCommonDdayCardBase from "./comp-common-dday-card-base";
+import DdayCardBoxType from "./DdayCardBoxType";
 
-export default function CompCommonDdayCardForDate({
+export default function DdayCardBoxTypeDateDetail({
   event,
   fullLocale,
   langCode,
@@ -16,7 +16,7 @@ export default function CompCommonDdayCardForDate({
   const thumbnailUrl = getThumbnailUrl(event);
 
   return (
-    <CompCommonDdayCardBase
+    <DdayCardBoxType
       eventCode={code}
       date={event?.date ?? null}
       time={event?.time}

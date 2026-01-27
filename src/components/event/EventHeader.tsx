@@ -1,14 +1,14 @@
 "use client";
 
 import { getDdayLabel } from "@/utils/date/ddayLabel"
-import { CompEventCountdown } from "./comp-event-countdown"
+import { CompEventCountdown } from "./EventCountdown"
 import { calculateDaysFromToday, getLocalTimeFromUTC } from "@/utils/date/calcDates"
 import { ResponseEventDetailForUserFront } from "dplus_common_v1"
 import { computeBadgeColors } from "@/utils/color/colorGenerator"
-import { CompEventTimer } from "./comp-event-timer"
+import { CompEventTimer } from "./EventTimer"
 import { SupportedLocale } from "@/constants/config.constant"
-import { HeadlineTagsDetail } from "../headline-tags-detail"
-import { CompEventDatetime } from "./comp-event-datetime"
+import { HeadlineTagsDetail } from "../HeadlineTagsDetail"
+import { CompEventDatetime } from "./EventDatetime"
 import { useEffect, useRef, useState, useMemo } from "react"
 import Image from "next/image"
 import { generateStorageImageUrl } from "@/utils/image/generateImageUrl"

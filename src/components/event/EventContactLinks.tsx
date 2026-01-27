@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useMemo } from "react";
-import { InfoItem } from "@/components/info-item";
+import { InfoItem } from "@/components/InfoItem";
 import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basicInfoUtils";
 import { getDplusI18n } from "@/utils/getDplusI18n";
 import { Phone, Home, Mail, Ticket, Globe, ShoppingBag, Info, Tv, BadgeCheck } from "lucide-react";

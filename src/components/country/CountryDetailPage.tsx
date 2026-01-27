@@ -7,15 +7,15 @@ import {
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { CompLoadMore } from "../button/comp-load-more";
+import { CompLoadMore } from "../button/LoadMore";
 import { incrementCountryViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import { CompCountryCategoryItem } from "./comp-country-category-item";
-import { CompCountryCityItem } from "./comp-country-city-item";
-import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
-import { CompLoading } from "../common/comp-loading";
-import { CompNotFound } from "../common/comp-not-found";
-import { CompNetworkError } from "../common/comp-network-error";
+import { CompCountryCategoryItem } from "./CountryCategoryItem";
+import { CompCountryCityItem } from "./CountryCityItem";
+import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import { CompLoading } from "../common/Loading";
+import { CompNotFound } from "../common/NotFound";
+import { CompNetworkError } from "../common/NetworkError";
 
 export default function CompCountryDetailPage({
   countryCode,
@@ -300,7 +300,7 @@ export default function CompCountryDetailPage({
         <>
         <div className="mx-auto w-full max-w-[1440px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {events.map(item => (
-            <CompCommonDdayCard 
+            <DdayCardBoxTypeEventInfo 
               key={item.event_info?.event_code} 
               event={item} 
               fullLocale={fullLocale}

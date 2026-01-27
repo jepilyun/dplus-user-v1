@@ -1,41 +1,41 @@
 "use client";
 
-import { clientReqGetStagDetail, clientReqGetStagEvents } from "@/api/stag/clientReqStag";
+import { clientReqGetCityDetail, clientReqGetCityEvents } from "@/api/city/clientReqCity";
 import {
   LIST_LIMIT,
-  ResponseStagDetailForUserFront,
+  ResponseCityDetailForUserFront,
   SUPPORT_LANG_CODES,
-  TMapStagEventWithEventInfo,
+  TMapCityEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { getStagDetailImageUrls } from "@/utils/image/setImageUrls";
-import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
-import { CompLoadMore } from "../button/comp-load-more";
-import { HeroImageBackgroundCarouselStag } from "../image/hero-background-carousel-stag";
-import { incrementStagViewCount } from "@/utils/api/incrementCount";
+import { getCityDetailImageUrls } from "@/utils/image/setImageUrls";
+import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
+import { CompLoadMore } from "../button/LoadMore";
+import { HeroImageBackgroundCarouselCity } from "../image/HeroBackgroundCarouselCity";
+import { incrementCityViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
-import { CompLoading } from "../common/comp-loading";
-import { CompNotFound } from "../common/comp-not-found";
-import { CompNetworkError } from "../common/comp-network-error";
+import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import { CompLoading } from "../common/Loading";
+import { CompNotFound } from "../common/NotFound";
+import { CompNetworkError } from "../common/NetworkError";
 
-export default function CompStagDetailPage({
-  stagCode,
+export default function CompCityDetailPage({
+  cityCode,
   langCode,
   fullLocale,
   initialData,
 }: {
-  stagCode: string;
+  cityCode: string;
   langCode: string;
   fullLocale: string;
-  initialData: ResponseStagDetailForUserFront | null;
+  initialData: ResponseCityDetailForUserFront | null;
 }) {
   const viewCountIncrementedRef = useRef(false);
 
   const [error, setError] = useState<"not-found" | "network" | null>(null);
   const [loading, setLoading] = useState(!initialData);
 
-  const [stagDetail, setStagDetail] = useState<ResponseStagDetailForUserFront | null>(
+  const [cityDetail, setCityDetail] = useState<ResponseCityDetailForUserFront | null>(
     initialData ?? null
   );
   
@@ -43,41 +43,41 @@ export default function CompStagDetailPage({
   const [dataVersion, setDataVersion] = useState<string>(getSessionDataVersion);
 
   const [imageUrls, setImageUrls] = useState<string[]>(
-    initialData ? getStagDetailImageUrls(initialData.stagDetail?.stagInfo) : []
+    initialData ? getCityDetailImageUrls(initialData.cityDetail?.cityInfo) : []
   );
 
-  const [events, setEvents] = useState<TMapStagEventWithEventInfo[]>(
-    initialData?.mapStagEvent?.items ?? []
+  const [events, setEvents] = useState<TMapCityEventWithEventInfo[]>(
+    initialData?.mapCityEvent?.items ?? []
   );
   const [eventsStart, setEventsStart] = useState(
-    initialData?.mapStagEvent?.items?.length ?? 0
+    initialData?.mapCityEvent?.items?.length ?? 0
   );
   const [eventsHasMore, setEventsHasMore] = useState(
-    Boolean(initialData?.mapStagEvent?.hasMore)
+    Boolean(initialData?.mapCityEvent?.hasMore)
   );
   const [eventsLoading, setEventsLoading] = useState(false);
 
   const seenEventCodesRef = useRef<Set<string>>(
     new Set(
-      initialData?.mapStagEvent?.items
+      initialData?.mapCityEvent?.items
         ?.map(item => item?.event_info?.event_code ?? item?.event_code)
         .filter(Boolean) ?? []
     )
   );
 
-  const [viewCount, setViewCount] = useState(initialData?.stagDetail?.stagInfo?.view_count ?? 0);
+  const [viewCount, setViewCount] = useState(initialData?.cityDetail?.cityInfo?.view_count ?? 0);
 
   /**
    * ✅ 서버 데이터와 복원 데이터를 병합하는 함수
    */
-  const fetchAndMergeData = async (restoredEvents?: TMapStagEventWithEventInfo[]) => {
+  const fetchAndMergeData = async (restoredEvents?: TMapCityEventWithEventInfo[]) => {
     if (initialData && !restoredEvents) {
       setLoading(false);
       return;
     }
 
     try {
-      const res = await clientReqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
+      const res = await clientReqGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
   
       const isEmptyObj =
         !res?.dbResponse ||
@@ -85,23 +85,23 @@ export default function CompStagDetailPage({
           !Array.isArray(res?.dbResponse) &&
           Object.keys(res?.dbResponse).length === 0);
   
-      if (!res?.success || isEmptyObj || !res?.dbResponse?.stagDetail?.stagInfo) {
+      if (!res?.success || isEmptyObj || !res?.dbResponse?.cityDetail) {
         setError("not-found");
         setLoading(false);
         return;
       }
   
-      setStagDetail(res.dbResponse);
-      setImageUrls(getStagDetailImageUrls(res.dbResponse.stagDetail?.stagInfo));
-      setViewCount(res.dbResponse?.stagDetail?.stagInfo?.view_count ?? 0);
-  
-      const serverEvents = res?.dbResponse?.mapStagEvent?.items ?? [];
+      setCityDetail(res.dbResponse);
+      setImageUrls(getCityDetailImageUrls(res.dbResponse.cityDetail?.cityInfo));
+      setViewCount(res.dbResponse?.cityDetail?.cityInfo?.view_count ?? 0);
+
+      const serverEvents = res?.dbResponse?.mapCityEvent?.items ?? [];
       
       // ✅ 새 데이터 버전 업데이트
       const newVersion = getSessionDataVersion();
       setDataVersion(newVersion);
       
-      console.log('[Stag Merge] 📊 Data versions:', {
+      console.log('[City Merge] 📊 Data versions:', {
         new: newVersion,
         old: dataVersion,
         changed: newVersion !== dataVersion
@@ -109,9 +109,9 @@ export default function CompStagDetailPage({
       
       // ✅ 복원된 데이터가 있고 더보기를 했던 경우 (36개 초과)
       if (restoredEvents && restoredEvents.length > LIST_LIMIT.default) {
-        console.log('[Stag Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
-        console.log('[Stag Merge] Server events:', serverEvents.length);
-        console.log('[Stag Merge] Restored total:', restoredEvents.length);
+        console.log('[City Merge] 🔄 서버 데이터와 복원 데이터 병합 시작');
+        console.log('[City Merge] Server events:', serverEvents.length);
+        console.log('[City Merge] Restored total:', restoredEvents.length);
         
         const serverCodes = new Set(
           serverEvents.map(item => item?.event_info?.event_code ?? item?.event_code).filter(Boolean)
@@ -124,7 +124,7 @@ export default function CompStagDetailPage({
             return code && !serverCodes.has(code);
           });
         
-        console.log('[Stag Merge] Additional events from restore:', additionalEvents.length);
+        console.log('[City Merge] Additional events from restore:', additionalEvents.length);
         
         // 오늘 이후 이벤트만 필터링
         const today = new Date();
@@ -141,11 +141,11 @@ export default function CompStagDetailPage({
           return true;
         });
         
-        console.log('[Stag Merge] Future events after filter:', futureEvents.length);
+        console.log('[City Merge] Future events after filter:', futureEvents.length);
         
         const finalEvents = [...serverEvents, ...futureEvents];
         
-        console.log('[Stag Merge] ✅ Final merged:', {
+        console.log('[City Merge] ✅ Final merged:', {
           server: serverEvents.length,
           additional: futureEvents.length,
           total: finalEvents.length
@@ -160,7 +160,7 @@ export default function CompStagDetailPage({
           if (code) seenEventCodesRef.current.add(code);
         });
       } else {
-        console.log('[Stag Merge] ✅ Using server data only');
+        console.log('[City Merge] ✅ Using server data only');
         setEvents(serverEvents);
         setEventsStart(serverEvents.length);
         
@@ -171,10 +171,10 @@ export default function CompStagDetailPage({
         });
       }
       
-      setEventsHasMore(Boolean(res?.dbResponse?.mapStagEvent?.hasMore));
+      setEventsHasMore(Boolean(res?.dbResponse?.mapCityEvent?.hasMore));
       setError(null);
     } catch (e) {
-      console.error("Failed to fetch stag detail:", e);
+      console.error("Failed to fetch city detail:", e);
       setError("network");
     } finally {
       setLoading(false);
@@ -183,8 +183,8 @@ export default function CompStagDetailPage({
 
   // const handleShareClick = async () => {
   //   const shareData = {
-  //     title: stagDetail?.stagDetail?.stagInfo?.stag || "이벤트 세트 공유",
-  //     text: stagDetail?.stagDetail?.stagInfo?.stag_native || "이벤트 세트 정보를 확인해보세요!",
+  //     title: cityDetail?.cityDetail?.cityInfo?.name || "이벤트 세트 공유",
+  //     text: cityDetail?.cityDetail?.cityInfo?.name || "이벤트 세트 정보를 확인해보세요!",
   //     url: window.location.href,
   //   };
 
@@ -207,10 +207,10 @@ export default function CompStagDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await clientReqGetStagEvents(stagCode, eventsStart, LIST_LIMIT.default);
+      const res = await clientReqGetCityEvents(cityCode, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
-      const newItems = fetchedItems.filter((it: TMapStagEventWithEventInfo) => {
+      const newItems = fetchedItems.filter((it: TMapCityEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;
         if (!code || seenEventCodesRef.current.has(code)) return false;
         seenEventCodesRef.current.add(code);
@@ -227,13 +227,14 @@ export default function CompStagDetailPage({
 
   // ✅ 조회수 증가 (한 번만)
   useEffect(() => {
-    if (!viewCountIncrementedRef.current && stagCode) {
+    if (!viewCountIncrementedRef.current && cityCode) {
       viewCountIncrementedRef.current = true;
-      incrementStagViewCount(stagCode).then(newCount => {
-        if (newCount !== null) setViewCount(newCount);
-      });
+      incrementCityViewCount(cityCode)
+        .then(newCount => {
+          if (newCount !== null) setViewCount(newCount);
+        });
     }
-  }, [stagCode]);
+  }, [cityCode]);
 
   // ================= 렌더 =================
 
@@ -246,8 +247,8 @@ export default function CompStagDetailPage({
   if (error === "not-found") {
     return (
       <CompNotFound
-        title="Stag Not Found"
-        message="해당 스태그는 존재하지 않습니다."
+        title="City Not Found"
+        message="해당 도시는 존재하지 않습니다."
         returnPath={`/${langCode}`}
         returnLabel="홈 화면으로 이동"
       />
@@ -258,7 +259,7 @@ export default function CompStagDetailPage({
     return (
       <CompNetworkError
         title="ERROR"
-        message="Failed to load stag details. Please try again."
+        message="Failed to load city details. Please try again."
         onRetry={() => fetchAndMergeData()}
         retryLabel="Retry"
       />
@@ -267,20 +268,20 @@ export default function CompStagDetailPage({
 
   return (
     <div className="p-4 flex flex-col gap-4" data-view-count={viewCount}>
-      <HeroImageBackgroundCarouselStag
-        bucket="stags"
+      <HeroImageBackgroundCarouselCity
+        bucket="cities"
         imageUrls={imageUrls}
         interval={5000}
-        stagDetail={stagDetail?.stagDetail?.stagInfo || null}
+        cityDetail={cityDetail?.cityDetail?.cityInfo || null}
         langCode={langCode as (typeof SUPPORT_LANG_CODES)[number]}
       />
 
       {events?.length ? (
         <>
-          {/* 모바일: CompCommonDdayItem */}
+          {/* 모바일: DdayCardListTypeEventInfo */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCard 
+              <DdayCardBoxTypeEventInfo 
                 key={item.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
@@ -290,11 +291,11 @@ export default function CompStagDetailPage({
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>
 
-          {/* 데스크톱: CompCommonDdayItemCard */}
+          {/* 데스크톱: DdayCardListTypeEventInfoCard */}
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
+                <DdayCardListTypeEventInfo key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}

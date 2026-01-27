@@ -2,11 +2,11 @@
 
 import { TMapCategoryEventWithEventInfo, TMapCityEventWithEventInfo, TMapCountryEventWithEventInfo, TMapFolderEventWithEventInfo, TMapGroupEventWithEventInfo, TMapPlaceEventWithEventInfo, TMapStagEventWithEventInfo, TMapTagEventWithEventInfo } from "dplus_common_v1";
 import Link from "next/link";
-import CompCommonDdayCardBase from "./comp-common-dday-card-base";
+import DdayCardBoxType from "./DdayCardBoxType";
 
 type EventType = TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo | TMapPlaceEventWithEventInfo;
 
-export default function CompCommonDdayCard({
+export default function DdayCardBoxTypeEventInfo({
   event,
   fullLocale,
   langCode,
@@ -54,7 +54,7 @@ export default function CompCommonDdayCard({
   );
 
   return (
-    <CompCommonDdayCardBase
+    <DdayCardBoxType
       eventCode={code}
       date={event?.event_info?.date ?? null}
       time={event?.event_info?.time}

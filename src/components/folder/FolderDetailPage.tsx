@@ -1,7 +1,7 @@
 "use client";
 
 import { clientReqGetFolderDetail, clientReqGetFolderEvents } from "@/api/folder/clientReqFolder";
-import { HeroImageSlider } from "@/components/image/hero-image-slider";
+import { HeroImageSlider } from "@/components/image/HeroImageSlider";
 import {
   LIST_LIMIT,
   ResponseFolderDetailForUserFront,
@@ -9,18 +9,18 @@ import {
   TMapFolderEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
-import CompLabelCount01 from "@/components/common/comp-label-count-01";
+import { HeadlineTagsDetail } from "@/components/HeadlineTagsDetail";
+import CompLabelCount01 from "@/components/common/LabelCount01";
 import { getFolderDetailImageUrls } from "@/utils/image/setImageUrls";
-import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
-import { CompLoadMore } from "../button/comp-load-more";
+import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
+import { CompLoadMore } from "../button/LoadMore";
 import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/api/incrementCount";
-import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
-import { CompLoading } from "../common/comp-loading";
-import { CompNotFound } from "../common/comp-not-found";
-import { CompNetworkError } from "../common/comp-network-error";
-import { CompFolderActionButtons } from "./comp-folder-action-buttons";
-import ShareModal from "../share/comp-share-modal";
+import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import { CompLoading } from "../common/Loading";
+import { CompNotFound } from "../common/NotFound";
+import { CompNetworkError } from "../common/NetworkError";
+import { CompFolderActionButtons } from "./FolderActionButtons";
+import ShareModal from "../share/ShareModal";
 
 export default function CompFolderDetailPage({
   folderCode,
@@ -303,10 +303,10 @@ export default function CompFolderDetailPage({
 
       {events?.length ? (
         <>
-          {/* 모바일: CompCommonDdayItem */}
+          {/* 모바일: DdayCardListTypeEventInfo */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCard 
+              <DdayCardBoxTypeEventInfo 
                 key={item.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
@@ -316,11 +316,11 @@ export default function CompFolderDetailPage({
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>
 
-          {/* 데스크톱: CompCommonDdayItemCard */}
+          {/* 데스크톱: DdayCardListTypeEventInfoCard */}
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
+                <DdayCardListTypeEventInfo key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}

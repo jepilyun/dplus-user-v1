@@ -1,7 +1,7 @@
 import { TEventCardForDateDetail } from "dplus_common_v1";
-import CompCommonDdayItemBase from "./comp-common-dday-item-base";
+import DdayCardListType from "./DdayCardListType";
 
-export default function CompCommonDdayItemForDate({
+export default function DdayCardListTypeDateDetail({
   event,
   fullLocale,
   langCode,
@@ -10,7 +10,7 @@ export default function CompCommonDdayItemForDate({
   const thumbnailUrl = event?.thumbnail_square || event?.thumbnail_vertical || event?.thumbnail_horizontal;
 
   return (
-    <CompCommonDdayItemBase
+    <DdayCardListType
       eventCode={code}
       date={event?.date ?? null}
       time={event?.time}

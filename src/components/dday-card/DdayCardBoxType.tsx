@@ -37,7 +37,7 @@ interface DdayItemCardBaseProps {
   placeName?: string | null;      // ✅ Place 이름
 }
 
-export default function CompCommonDdayItemCardBase({
+export default function DdayCardBoxType({
   eventCode,
   date,
   time,

@@ -5,7 +5,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { fetchGetEventCodeList, fetchGetEventDetail } from "@/api/event/fetchEvent";
-import CompEventDetailPage from "@/components/event/comp-event-detail-page";
+import CompEventDetailPage from "@/components/event/EventDetailPage";
 import { generateDetailMetadata } from "@/utils/metadata/generateMetadata";
 import { getRequestLocale } from "@/utils/getRequestLocale";
 

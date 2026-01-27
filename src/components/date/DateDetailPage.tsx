@@ -3,14 +3,14 @@
 import { clientReqGetDateList } from "@/api/date/clientReqDate";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useRef, useState } from "react";
-import { CompLoadMore } from "../button/comp-load-more";
-import DateNavigation from "./comp-date-navigation";
-import CompCommonDdayItemForDate from "../dday-card/comp-common-dday-item-for-date";
+import { CompLoadMore } from "../button/LoadMore";
+import DateNavigation from "./DateNavigation";
+import DdayCardListTypeDateDetail from "../dday-card/DdayCardListTypeDateDetail";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import CompCommonDdayCardForDate from "../dday-card/comp-common-dday-card-for-date";
-import { CompLoading } from "../common/comp-loading";
-import { CompNotFound } from "../common/comp-not-found";
-import { CompNetworkError } from "../common/comp-network-error";
+import DdayCardBoxTypeDateDetail from "../dday-card/DdayCardBoxTypeDateDetail";
+import { CompLoading } from "../common/Loading";
+import { CompNotFound } from "../common/NotFound";
+import { CompNetworkError } from "../common/NetworkError";
 
 export default function CompDateDetailPage({
   dateString,
@@ -212,10 +212,10 @@ export default function CompDateDetailPage({
 
       {events?.length ? (
         <>
-        {/* 모바일: CompCommonDdayItem */}
+        {/* 모바일: DdayCardListTypeEventInfo */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCardForDate 
+              <DdayCardBoxTypeDateDetail 
                 key={item.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
@@ -225,11 +225,11 @@ export default function CompDateDetailPage({
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>
 
-          {/* 데스크톱: CompCommonDdayItemCard */}
+          {/* 데스크톱: DdayCardListTypeEventInfoCard */}
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <CompCommonDdayItemForDate key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
+                <DdayCardListTypeDateDetail key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}

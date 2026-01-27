@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { HeadlineTagsDetail } from "../headline-tags-detail";
+import { HeadlineTagsDetail } from "../HeadlineTagsDetail";
 import { SUPPORT_LANG_CODES, TCityDetail } from "dplus_common_v1";
 
 export function HeroImageBackgroundCarouselCity({ 

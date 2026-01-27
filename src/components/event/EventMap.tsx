@@ -1,5 +1,5 @@
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1"
-import GoogleMap from "../google-map/google-map"
+import GoogleMap from "../google-map/GoogleMap"
 import { Map, MapPin, Navigation } from "lucide-react"
 import { getDplusI18n } from "@/utils/getDplusI18n"
 

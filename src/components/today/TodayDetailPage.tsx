@@ -3,8 +3,8 @@
 import { clientReqGetTodayList } from "@/api/today/clientReqToday";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
-import { CompLoadMore } from "../button/comp-load-more";
-import CompCommonDdayItemForDate from "../dday-card/comp-common-dday-item-for-date";
+import { CompLoadMore } from "../button/LoadMore";
+import DdayCardListTypeDateDetail from "../dday-card/DdayCardListTypeDateDetail";
 import {
   todayYmdInTz,
   getSectionForDate,
@@ -13,10 +13,10 @@ import {
   detectBrowserLanguage,
 } from "@/utils/date/dateYmd";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import CompCommonDdayCardForDate from "../dday-card/comp-common-dday-card-for-date";
-import { CompLoading } from "../common/comp-loading";
-import { CompNotFound } from "../common/comp-not-found";
-import { CompNetworkError } from "../common/comp-network-error";
+import DdayCardBoxTypeDateDetail from "../dday-card/DdayCardBoxTypeDateDetail";
+import { CompLoading } from "../common/Loading";
+import { CompNotFound } from "../common/NotFound";
+import { CompNetworkError } from "../common/NetworkError";
 
 // 최소 유효성 검사
 function isValidEvent(v: unknown): v is TEventCardForDateDetail {
@@ -303,18 +303,18 @@ export default function CompTodayDetailPage({
 
               blocks.push(
                 <div key={`event-${item.event_code}`}>
-                  {/* 모바일: CompCommonDdayItemCardForDate */}
+                  {/* 모바일: DdayCardListTypeEventInfoCardForDate */}
                   <div className="md:hidden">
-                    <CompCommonDdayCardForDate 
+                    <DdayCardBoxTypeDateDetail 
                       event={item} 
                       fullLocale={fullLocale} 
                       langCode={langCode}
                     />
                   </div>
 
-                  {/* 데스크톱: CompCommonDdayItemForDate */}
+                  {/* 데스크톱: DdayCardListTypeEventInfoForDate */}
                   <div className="hidden md:block">
-                    <CompCommonDdayItemForDate event={item} fullLocale={fullLocale} langCode={langCode} />
+                    <DdayCardListTypeDateDetail event={item} fullLocale={fullLocale} langCode={langCode} />
                   </div>
                 </div>
               );

@@ -39,7 +39,7 @@ interface DdayItemBaseProps {
   useClientWrapper?: boolean;
 }
 
-export default function CompCommonDdayItemBase({
+export default function DdayCardListType({
   eventCode,
   date,
   time,

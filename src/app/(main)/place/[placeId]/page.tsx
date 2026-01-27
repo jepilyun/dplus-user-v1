@@ -8,7 +8,7 @@ import { generateDetailMetadata } from "@/utils/metadata/generateMetadata";
 import { getRequestLocale } from "@/utils/getRequestLocale";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { fetchGetPlaceDetail } from "@/api/place/fetchPlace";
-import CompPlaceDetailPage from "@/components/place/comp-place-detail-page";
+import CompPlaceDetailPage from "@/components/place/PlaceDetailPage";
 
 /**
  * Generate metadata

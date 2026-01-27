@@ -7,15 +7,15 @@ import {
   TMapPlaceEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
-import { CompLoadMore } from "../button/comp-load-more";
-import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
-import { CompLoading } from "../common/comp-loading";
-import { CompNotFound } from "../common/comp-not-found";
-import { CompNetworkError } from "../common/comp-network-error";
+import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
+import { CompLoadMore } from "../button/LoadMore";
+import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import { CompLoading } from "../common/Loading";
+import { CompNotFound } from "../common/NotFound";
+import { CompNetworkError } from "../common/NetworkError";
 import dynamic from "next/dynamic";
 
-const GoogleMap = dynamic(() => import("../google-map/google-map"), {
+const GoogleMap = dynamic(() => import("../google-map/GoogleMap"), {
   ssr: false,
   loading: () => (
     <div className="w-full h-[300px] bg-gray-200 animate-pulse flex items-center justify-center">
@@ -244,10 +244,10 @@ export default function CompPlaceDetailPage({
 
       {events?.length ? (
         <>
-          {/* 모바일: CompCommonDdayItem */}
+          {/* 모바일: DdayCardListTypeEventInfo */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <CompCommonDdayCard 
+              <DdayCardBoxTypeEventInfo 
                 key={item.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
@@ -257,11 +257,11 @@ export default function CompPlaceDetailPage({
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>
 
-          {/* 데스크톱: CompCommonDdayItemCard */}
+          {/* 데스크톱: DdayCardListTypeEventInfoCard */}
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <CompCommonDdayItem key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
+                <DdayCardListTypeEventInfo key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}
