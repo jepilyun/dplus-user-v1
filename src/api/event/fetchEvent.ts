@@ -1,7 +1,6 @@
 import {
   ResponseDplusAPI,
   ResponseEventDetailForUserFront,
-  ResponseMetadataForUserFront,
 } from "dplus_common_v1";
 
 import { apiUrlEvent } from "./apiUrlEvent";
@@ -53,24 +52,3 @@ export const fetchGetEventCodeList = async (
   return res.json();
 };
 
-/**
- * Event 메타데이터 조회 for User Front
- * @param eventCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetEventMetadata = async (
-  eventCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlEvent.metadataGet(eventCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`event-metadata-${eventCode}-${langCode}`],
-    },
-  });
-
-  return res.json();
-};

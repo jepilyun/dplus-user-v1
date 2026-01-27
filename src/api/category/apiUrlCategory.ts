@@ -25,6 +25,4 @@ export const apiUrlCategory = {
     const qs = qp.toString();
     return `${BASE_URL}/api/category/get/code/list${qs ? `?${qs}` : ""}`;
   },
-  metadataGet: (categoryCode: string, langCode: string) =>
-    `${BASE_URL}/api/category/metadata/get/${encodeURIComponent(categoryCode)}/${langCode}`,
 };

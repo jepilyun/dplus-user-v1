@@ -13,6 +13,4 @@ export const apiUrlStag = {
     const qs = qp.toString();
     return `${BASE_URL}/api/group/get/code/list${qs ? `?${qs}` : ""}`;
   },
-  metadataGet: (stagCode: string, langCode: string) =>
-    `${BASE_URL}/api/stag/metadata/get/${encodeURIComponent(stagCode)}/${langCode}`,
 };

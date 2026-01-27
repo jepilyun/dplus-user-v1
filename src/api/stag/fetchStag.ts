@@ -1,7 +1,6 @@
 import {
   DplusGetListDataResponse,
   ResponseDplusAPI,
-  ResponseMetadataForUserFront,
   ResponseStagDetailForUserFront,
   TMapStagEventWithEventInfo,
 } from "dplus_common_v1";
@@ -80,23 +79,3 @@ export const fetchGetStagEvents = async (
   return res.json();
 };
 
-/**
- * Stag 메타데이터 조회 for User Front
- * @param stagCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetStagMetadata = async (
-  stagCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlStag.metadataGet(stagCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`stag-metadata-${stagCode}-${langCode}`],
-    },
-  });
-  return res.json();
-};

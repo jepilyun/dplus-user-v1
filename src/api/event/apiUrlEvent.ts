@@ -27,6 +27,4 @@ export const apiUrlEvent = {
     const qs = qp.toString();
     return `${BASE_URL}/api/event/get/codes/upcoming${qs ? `?${qs}` : ""}`;
   },
-  metadataGet: (eventCode: string, langCode: string) =>
-    `${BASE_URL}/api/event/metadata/get/${eventCode}/${langCode}`,
 };

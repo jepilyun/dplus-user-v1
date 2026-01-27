@@ -2,7 +2,6 @@ import {
   DplusGetListDataResponse,
   ResponseDplusAPI,
   ResponseFolderDetailForUserFront,
-  ResponseMetadataForUserFront,
   TMapFolderEventWithEventInfo,
 } from "dplus_common_v1";
 
@@ -95,23 +94,3 @@ export const fetchGetFolderEvents = async (
   return res.json();
 };
 
-/**
- * Folder 메타데이터 조회 for User Front
- * @param folderCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetFolderMetadata = async (
-  folderCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlFolder.metadataGet(folderCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`folder-metadata-${folderCode}-${langCode}`],
-    },
-  });
-  return res.json();
-};

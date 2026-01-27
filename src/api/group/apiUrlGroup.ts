@@ -13,6 +13,4 @@ export const apiUrlGroup = {
     const qs = qp.toString();
     return `${BASE_URL}/api/group/get/code/list${qs ? `?${qs}` : ""}`;
   },
-  metadataGet: (groupCode: string, langCode: string) =>
-    `${BASE_URL}/api/group/metadata/get/${encodeURIComponent(groupCode)}/${langCode}`,
 };

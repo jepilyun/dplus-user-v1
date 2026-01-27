@@ -2,7 +2,6 @@ import {
   DplusGetListDataResponse,
   ResponseCityDetailForUserFront,
   ResponseDplusAPI,
-  ResponseMetadataForUserFront,
   TMapCityEventWithEventInfo,
 } from "dplus_common_v1";
 
@@ -86,23 +85,3 @@ export const fetchGetCityCodes = async (
   return res.json();
 };
 
-/**
- * City 메타데이터 조회 for User Front
- * @param cityCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetCityMetadata = async (
-  cityCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlCity.metadataGet(cityCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`city-metadata-${cityCode}-${langCode}`],
-    },
-  });
-  return res.json();
-};

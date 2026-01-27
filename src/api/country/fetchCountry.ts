@@ -2,7 +2,6 @@ import {
   DplusGetListDataResponse,
   ResponseCountryDetailForUserFront,
   ResponseDplusAPI,
-  ResponseMetadataForUserFront,
   TMapCountryEventWithEventInfo,
 } from "dplus_common_v1";
 
@@ -85,23 +84,3 @@ export const fetchGetCountryCodes = async (): Promise<
   return res.json();
 };
 
-/**
- * Country 메타데터 조회 for User Front
- * @param countryCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetCountryMetadata = async (
-  countryCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlCountry.metadataGet(countryCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`country-metadata-${countryCode}-${langCode}`],
-    },
-  });
-  return res.json();
-};

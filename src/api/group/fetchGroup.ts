@@ -2,7 +2,6 @@ import {
   DplusGetListDataResponse,
   ResponseDplusAPI,
   ResponseGroupDetailForUserFront,
-  ResponseMetadataForUserFront,
   TMapGroupEventWithEventInfo,
 } from "dplus_common_v1";
 
@@ -81,23 +80,3 @@ export const fetchGetGroupCodes = async (
   return res.json();
 };
 
-/**
- * Group 메타데이터 조회 for User Front
- * @param groupCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetGroupMetadata = async (
-  groupCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlGroup.metadataGet(groupCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`group-metadata-${groupCode}-${langCode}`],
-    },
-  });
-  return res.json();
-};

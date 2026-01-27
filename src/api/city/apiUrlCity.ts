@@ -13,6 +13,4 @@ export const apiUrlCity = {
     const qs = qp.toString();
     return `${BASE_URL}/api/city/get/code/list${qs ? `?${qs}` : ""}`;
   },
-  metadataGet: (cityCode: string, langCode: string) =>
-    `${BASE_URL}/api/city/metadata/get/${encodeURIComponent(cityCode)}/${langCode}`,
 };

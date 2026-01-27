@@ -2,7 +2,6 @@ import {
   DplusGetListDataResponse,
   ResponseCategoryDetailForUserFront,
   ResponseDplusAPI,
-  ResponseMetadataForUserFront,
   TMapCategoryEventWithEventInfo,
 } from "dplus_common_v1";
 
@@ -97,24 +96,3 @@ export const fetchGetCategoryCodes = async (
   return res.json();
 };
 
-/**
- * Category 메타데터 조회 for User Front
- * @param categoryCode
- * @param langCode
- * @returns ResponseDplusAPI<ResponseMetadataForUserFront>
- */
-export const fetchGetCategoryMetadata = async (
-  categoryCode: string,
-  langCode: string,
-): Promise<ResponseDplusAPI<ResponseMetadataForUserFront>> => {
-  const res = await fetch(apiUrlCategory.metadataGet(categoryCode, langCode), {
-    method: "GET",
-    credentials: "include",
-    next: {
-      revalidate: 86400,
-      tags: [`category-metadata-${categoryCode}-${langCode}`],
-    },
-  });
-
-  return res.json();
-};

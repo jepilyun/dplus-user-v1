@@ -25,6 +25,4 @@ export const apiUrlFolder = {
     const qs = qp.toString();
     return `${BASE_URL}/api/folder/get/codes/recent${qs ? `?${qs}` : ""}`;
   },
-  metadataGet: (folderCode: string, langCode: string) =>
-    `${BASE_URL}/api/folder/metadata/get/${encodeURIComponent(folderCode)}/${langCode}`,
 };
