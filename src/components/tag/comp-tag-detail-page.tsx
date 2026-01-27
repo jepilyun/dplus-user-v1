@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchGetTagDetail, fetchGetTagEvents } from "@/api/tag/fetchTag";
+import { clientReqGetTagDetail, clientReqGetTagEvents } from "@/api/tag/clientReqTag";
 import {
   LIST_LIMIT,
   ResponseTagDetailForUserFront,
@@ -44,7 +44,7 @@ export default function CompTagDetailPage({
 
   const fetchTagDetail = async (restoredEvents?: TMapTagEventWithEventInfo[]) => {
     try {
-      const res = await fetchGetTagDetail(tagCode, 0, LIST_LIMIT.default);
+      const res = await clientReqGetTagDetail(tagCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
   
       const isEmptyObj =
@@ -173,7 +173,7 @@ export default function CompTagDetailPage({
         return;
       }
 
-      const res = await fetchGetTagEvents(tagCode, eventsStart, LIST_LIMIT.default);
+      const res = await clientReqGetTagEvents(tagCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       const newItems = fetchedItems.filter((it: TMapTagEventWithEventInfo) => {
         const code = it?.event_info?.event_code ?? it?.event_code;

@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchGetDateList } from "@/api/date/fetchDate";
+import { clientReqGetDateList } from "@/api/date/clientReqDate";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import { useRef, useState } from "react";
 import { CompLoadMore } from "../button/comp-load-more";
@@ -58,7 +58,7 @@ export default function CompDateDetailPage({
     }
 
     try {
-      const res = await fetchGetDateList(countryCode, dateString, 0, LIST_LIMIT.default);
+      const res = await clientReqGetDateList(countryCode, dateString, 0, LIST_LIMIT.default);
   
       if (!res?.dbResponse || !res?.dbResponse?.items) {
         setError("not-found");
@@ -158,7 +158,7 @@ export default function CompDateDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await fetchGetDateList(countryCode, dateString, eventsStart, LIST_LIMIT.default);
+      const res = await clientReqGetDateList(countryCode, dateString, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TEventCardForDateDetail) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchGetEventDetail } from "@/api/event/fetchEvent";
+import { clientReqGetEventDetail } from "@/api/event/clientReqEvent";
 import { HeroImageSlider } from "@/components/image/hero-image-slider";
 import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
 import { detectDevice, DeviceType } from "@/utils/device-detector";
@@ -58,7 +58,7 @@ export default function CompEventDetailPage({ eventCode, langCode, fullLocale, i
     }
 
     try {
-      const res = await fetchGetEventDetail(eventCode, langCode);
+      const res = await clientReqGetEventDetail(eventCode, langCode);
       const db = res?.dbResponse;
 
       const isEmptyObj =

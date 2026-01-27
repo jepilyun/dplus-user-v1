@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchGetCountryDetail, fetchGetCountryEvents } from "@/api/country/fetchCountry";
+import { clientReqGetCountryDetail, clientReqGetCountryEvents } from "@/api/country/clientReqCountry";
 import {
   LIST_LIMIT,
   ResponseCountryDetailForUserFront,
@@ -85,7 +85,7 @@ export default function CompCountryDetailPage({
     }
 
     try {
-      const res = await fetchGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
+      const res = await clientReqGetCountryDetail(countryCode, langCode, 0, LIST_LIMIT.default);
 
       const isEmptyObj =
         !res?.success ||
@@ -216,7 +216,7 @@ export default function CompCountryDetailPage({
     setEventsLoading(true);
     
     try {
-      const res = await fetchGetCountryEvents(countryCode, langCode, eventsStart, LIST_LIMIT.default);
+      const res = await clientReqGetCountryEvents(countryCode, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapCountryEventWithEventInfo) => {
