@@ -4,8 +4,8 @@ export const revalidate = 86400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { generateDetailMetadata } from "@/utils/generate-metadata";
-import { getRequestLocale } from "@/utils/get-request-locale";
+import { generateDetailMetadata } from "@/utils/metadata/generateMetadata";
+import { getRequestLocale } from "@/utils/getRequestLocale";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { fetchGetPlaceDetail } from "@/api/place/fetchPlace";
 import CompPlaceDetailPage from "@/components/place/comp-place-detail-page";

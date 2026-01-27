@@ -1,6 +1,6 @@
 "use client";
 
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
+import { getDplusI18n } from "@/utils/getDplusI18n";
 import { Button, CircularProgress } from "@mui/material";
 
 interface CompLoadMoreProps {

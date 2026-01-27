@@ -1,5 +1,5 @@
 // comp-folder-action-buttons.tsx
-import { getDplusI18n } from "@/utils/get-dplus-i18n"
+import { getDplusI18n } from "@/utils/getDplusI18n"
 import { SUPPORT_LANG_CODES } from "dplus_common_v1"
 import { Share2 } from "lucide-react"
 import { CompShareFolderButton } from "../button/comp-share-folder-button";

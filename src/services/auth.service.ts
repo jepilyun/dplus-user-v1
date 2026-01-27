@@ -10,7 +10,7 @@ import type {
   RegisterInput,
   User,
 } from "@/types/auth.types";
-import { apiDelete, apiGet, apiPost, removeAccessToken, saveAccessToken } from "@/utils/api-client";
+import { apiDelete, apiGet, apiPost, removeAccessToken, saveAccessToken } from "@/utils/api/apiClient";
 
 /**
  * Register new user

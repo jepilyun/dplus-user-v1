@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 
 import { fetchGetEventCodeList, fetchGetEventDetail } from "@/api/event/fetchEvent";
 import CompEventDetailPage from "@/components/event/comp-event-detail-page";
-import { generateDetailMetadata } from "@/utils/generate-metadata";
-import { getRequestLocale } from "@/utils/get-request-locale";
+import { generateDetailMetadata } from "@/utils/metadata/generateMetadata";
+import { getRequestLocale } from "@/utils/getRequestLocale";
 
 /**
  * Generate metadata for the page

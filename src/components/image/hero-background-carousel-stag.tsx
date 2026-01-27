@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import clsx from "clsx";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { generateStorageImageUrl } from "@/utils/image/generateImageUrl";
 import { SUPPORT_LANG_CODES, TStagDetail } from "dplus_common_v1";
 
 export function HeroImageBackgroundCarouselStag({ 

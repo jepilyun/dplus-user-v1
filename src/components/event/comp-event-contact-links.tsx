@@ -2,8 +2,8 @@
 
 import { ReactNode, useMemo } from "react";
 import { InfoItem } from "@/components/info-item";
-import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basic-info-utils";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
+import { toAbsoluteUrl, toInstagramUrl, toMailUrl, toTelUrl, toYoutubeChannelUrl } from "@/utils/basicInfoUtils";
+import { getDplusI18n } from "@/utils/getDplusI18n";
 import { Phone, Home, Mail, Ticket, Globe, ShoppingBag, Info, Tv, BadgeCheck } from "lucide-react";
 import { IconYouTube } from "@/icons/IconYouTube";
 import { IconInstagram } from "@/icons/IconInstagram";

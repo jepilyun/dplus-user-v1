@@ -11,10 +11,10 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { HeadlineTagsDetail } from "@/components/headline-tags-detail";
 import CompLabelCount01 from "@/components/common/comp-label-count-01";
-import { getFolderDetailImageUrls } from "@/utils/set-image-urls";
+import { getFolderDetailImageUrls } from "@/utils/image/setImageUrls";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
-import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/increment-count";
+import { incrementFolderSharedCount, incrementFolderViewCount } from "@/utils/api/incrementCount";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";

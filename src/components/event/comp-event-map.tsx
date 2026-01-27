@@ -1,7 +1,7 @@
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1"
 import GoogleMap from "../google-map/google-map"
 import { Map, MapPin, Navigation } from "lucide-react"
-import { getDplusI18n } from "@/utils/get-dplus-i18n"
+import { getDplusI18n } from "@/utils/getDplusI18n"
 
 /**
  * 이벤트 상세 페이지 지도 컴포넌트

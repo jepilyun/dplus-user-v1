@@ -1,10 +1,10 @@
 // comp-event-action-buttons.tsx
-import { getDplusI18n } from "@/utils/get-dplus-i18n"
+import { getDplusI18n } from "@/utils/getDplusI18n"
 import { IconApple } from "@/icons/IconApple"
 import { IconGoogle } from "@/icons/IconGoogle"
 import { SUPPORT_LANG_CODES } from "dplus_common_v1"
 import { CalendarDays, Share2 } from "lucide-react"
-import { DeviceType } from "@/utils/device-detector"
+import { DeviceType } from "@/utils/deviceDetector"
 import { CompActionButton } from "@/components/button/comp-action-button"
 
 export const CompEventActionButtons = ({

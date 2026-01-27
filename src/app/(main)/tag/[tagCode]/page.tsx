@@ -1,4 +1,4 @@
-import { getRequestLocale } from "@/utils/get-request-locale";
+import { getRequestLocale } from "@/utils/getRequestLocale";
 import CompTagDetailPage from "@/components/tag/comp-tag-detail-page";
 
 

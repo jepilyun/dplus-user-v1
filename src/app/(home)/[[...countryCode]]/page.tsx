@@ -1,6 +1,6 @@
 export const revalidate = 14400; // 4 hrs
 
-import { getRequestLocale } from "@/utils/get-request-locale";
+import { getRequestLocale } from "@/utils/getRequestLocale";
 import CompCountryDetailPage from "@/components/country/comp-country-detail-page";
 import { fetchGetCountryDetail } from "@/api/country/fetchCountry";
 import { LIST_LIMIT } from "dplus_common_v1";

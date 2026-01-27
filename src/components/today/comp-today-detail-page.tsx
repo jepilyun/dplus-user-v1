@@ -11,8 +11,8 @@ import {
   detectBrowserTimeZone,
   Tz,
   detectBrowserLanguage,
-} from "@/utils/date-ymd";
-import { getSessionDataVersion } from "@/utils/get-session-data-version";
+} from "@/utils/date/dateYmd";
+import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
 import CompCommonDdayCardForDate from "../dday-card/comp-common-dday-card-for-date";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";

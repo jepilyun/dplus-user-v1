@@ -1,6 +1,6 @@
 import { TCityInfoForCountryDetail } from "dplus_common_v1";
 
-import { generateStorageImageUrl } from "./generate-image-url";
+import { generateStorageImageUrl } from "./generateImageUrl";
 
 // 우선, 우선순위대로 첫 이미지를 고르는 헬퍼
 export function getCityBgUrl(item: TCityInfoForCountryDetail): string | null {

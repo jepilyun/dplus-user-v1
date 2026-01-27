@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 
 import { fetchGetCountryCodes, fetchGetCountryDetail } from "@/api/country/fetchCountry";
 import CompCountryDetailPage from "@/components/country/comp-country-detail-page";
-import { generateDetailMetadata } from "@/utils/generate-metadata";
-import { getRequestLocale } from "@/utils/get-request-locale";
+import { generateDetailMetadata } from "@/utils/metadata/generateMetadata";
+import { getRequestLocale } from "@/utils/getRequestLocale";
 import { LIST_LIMIT } from "dplus_common_v1";
 
 /**

@@ -1,18 +1,18 @@
 "use client";
 
-import { getDdayLabel } from "@/utils/dday-label"
+import { getDdayLabel } from "@/utils/date/ddayLabel"
 import { CompEventCountdown } from "./comp-event-countdown"
-import { calculateDaysFromToday, getLocalTimeFromUTC } from "@/utils/calc-dates"
+import { calculateDaysFromToday, getLocalTimeFromUTC } from "@/utils/date/calcDates"
 import { ResponseEventDetailForUserFront } from "dplus_common_v1"
-import { computeBadgeColors } from "@/utils/color-generator"
+import { computeBadgeColors } from "@/utils/color/colorGenerator"
 import { CompEventTimer } from "./comp-event-timer"
 import { SupportedLocale } from "@/constants/config.constant"
 import { HeadlineTagsDetail } from "../headline-tags-detail"
 import { CompEventDatetime } from "./comp-event-datetime"
 import { useEffect, useRef, useState, useMemo } from "react"
 import Image from "next/image"
-import { generateStorageImageUrl } from "@/utils/generate-image-url"
-import { getEffectiveDateForDday } from "@/utils/dday-card-utils"
+import { generateStorageImageUrl } from "@/utils/image/generateImageUrl"
+import { getEffectiveDateForDday } from "@/utils/date/ddayCardUtils"
 import { MapPin } from "lucide-react"
 import Link from "next/link";
 

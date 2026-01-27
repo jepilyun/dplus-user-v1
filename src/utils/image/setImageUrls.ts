@@ -9,7 +9,7 @@ import {
   TStagDetail,
 } from "dplus_common_v1";
 
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
+import { generateStorageImageUrl } from "./generateImageUrl";
 
 /* ========================================
  * 타입 정의

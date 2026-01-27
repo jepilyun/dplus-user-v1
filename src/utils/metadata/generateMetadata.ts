@@ -2,11 +2,11 @@ import { Metadata } from "next";
 
 import { getMetadataByLang } from "@/constants/metadata.constant";
 
-import { buildKeywords, pick } from "./metadata-helper";
+import { buildKeywords, pick } from "./metadataHelper";
 import {
   ensureAbsoluteUrl,
   generateStorageImageUrl,
-} from "./generate-image-url";
+} from "../image/generateImageUrl";
 
 /**
  * 메타데이터 설정 인터페이스

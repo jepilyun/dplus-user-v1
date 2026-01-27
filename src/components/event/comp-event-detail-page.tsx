@@ -2,14 +2,14 @@
 
 import { clientReqGetEventDetail } from "@/api/event/clientReqEvent";
 import { HeroImageSlider } from "@/components/image/hero-image-slider";
-import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/save-calendar";
-import { detectDevice, DeviceType } from "@/utils/device-detector";
+import { addToCalendar, addToGoogleCalendar, generateCalendarEvent } from "@/utils/share/saveCalendar";
+import { detectDevice, DeviceType } from "@/utils/deviceDetector";
 import { ResponseEventDetailForUserFront, SUPPORT_LANG_CODES } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import CompLabelCount01 from "@/components/common/comp-label-count-01";
-import { getEventDetailImageUrls } from "@/utils/set-image-urls";
+import { getEventDetailImageUrls } from "@/utils/image/setImageUrls";
 import { useRouter } from "next/navigation";
-import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/increment-count";
+import { incrementEventViewCount, incrementEventSharedCount, incrementEventSavedCount } from "@/utils/api/incrementCount";
 import ShareModal from "../share/comp-share-modal";
 import { CompEventActionButtons } from "./comp-event-action-buttons";
 import { CompEventHeader } from "./comp-event-header";
@@ -19,7 +19,7 @@ import { SupportedLocale } from "@/constants/config.constant";
 import CompEventContactLinks from "./comp-event-contact-links";
 import { ArrowRight } from "lucide-react";
 import { CompLinkButton } from "../button/comp-link-button";
-import { getDplusI18n } from "@/utils/get-dplus-i18n";
+import { getDplusI18n } from "@/utils/getDplusI18n";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";
 import { CompNetworkError } from "../common/comp-network-error";

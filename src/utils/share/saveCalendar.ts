@@ -6,8 +6,8 @@ import {
   addMinutes,
   formatDateAllDay,
   toDate,
-} from "./date-utils";
-import { DeviceType, detectDevice } from "./device-detector";
+} from "../date/dateUtils";
+import { DeviceType, detectDevice } from "../deviceDetector";
 
 /**
  * 날짜를 Google Calendar 형식으로 변환 (YYYYMMDD 또는 YYYYMMDDTHHMMSSZ)

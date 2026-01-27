@@ -9,7 +9,7 @@ import React, { createContext, useCallback, useEffect, useState } from "react";
 
 import type { AuthContextValue, User } from "@/types/auth.types";
 import * as authService from "@/services/auth.service";
-import { hasAccessToken } from "@/utils/token.utils";
+import { hasAccessToken } from "@/utils/api/tokenUtils";
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 

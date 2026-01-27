@@ -8,12 +8,12 @@ import {
   TMapCityEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import { getCityDetailImageUrls } from "@/utils/set-image-urls";
+import { getCityDetailImageUrls } from "@/utils/image/setImageUrls";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
 import { HeroImageBackgroundCarouselCity } from "../image/hero-background-carousel-city";
-import { incrementCityViewCount } from "@/utils/increment-count";
-import { getSessionDataVersion } from "@/utils/get-session-data-version";
+import { incrementCityViewCount } from "@/utils/api/incrementCount";
+import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";

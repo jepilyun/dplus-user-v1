@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import CompCommonDdayItem from "../dday-card/comp-common-dday-item";
 import { CompLoadMore } from "../button/comp-load-more";
-import { incrementTagViewCount } from "@/utils/increment-count";
+import { incrementTagViewCount } from "@/utils/api/incrementCount";
 import CompCommonDdayCard from "../dday-card/comp-common-dday-card";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";

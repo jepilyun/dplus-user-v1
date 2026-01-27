@@ -1,4 +1,4 @@
-import { getCityBgUrl } from "@/utils/get-city-bg-image";
+import { getCityBgUrl } from "@/utils/image/getCityBgImage";
 import { TCityInfoForCountryDetail } from "dplus_common_v1";
 import Link from "next/link";
 

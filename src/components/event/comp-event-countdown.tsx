@@ -1,6 +1,6 @@
 "use client";
 
-import { isAfterStartUtc, END_DATE_LABELS } from "@/utils/dday-card-utils";
+import { isAfterStartUtc, END_DATE_LABELS } from "@/utils/date/ddayCardUtils";
 
 interface CompEventCountdownProps {
   ddayLabel?: string;

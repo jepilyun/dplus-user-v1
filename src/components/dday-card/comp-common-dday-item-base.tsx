@@ -1,14 +1,14 @@
 "use client";
 
-import { calculateDaysFromToday } from "@/utils/calc-dates";
-import { getDdayLabel, type SupportedLocale } from "@/utils/dday-label";
-import { computeBadgeColors } from "@/utils/color-generator";
+import { calculateDaysFromToday } from "@/utils/date/calcDates";
+import { getDdayLabel, type SupportedLocale } from "@/utils/date/ddayLabel";
+import { computeBadgeColors } from "@/utils/color/colorGenerator";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { generateStorageImageUrl } from "@/utils/generate-image-url";
-import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
+import { generateStorageImageUrl } from "@/utils/image/generateImageUrl";
+import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date/dateUtils";
 import { MapPin, Calendar } from "lucide-react";
 import {
   END_DATE_LABELS,
@@ -16,7 +16,7 @@ import {
   isAfterStartUtc,
   getEffectiveDateForDday,
   hasValidTime,
-} from "@/utils/dday-card-utils";
+} from "@/utils/date/ddayCardUtils";
 
 interface DdayItemBaseProps {
   eventCode: string;

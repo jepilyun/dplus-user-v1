@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { CompLoadMore } from "../button/comp-load-more";
 import DateNavigation from "./comp-date-navigation";
 import CompCommonDdayItemForDate from "../dday-card/comp-common-dday-item-for-date";
-import { getSessionDataVersion } from "@/utils/get-session-data-version";
+import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
 import CompCommonDdayCardForDate from "../dday-card/comp-common-dday-card-for-date";
 import { CompLoading } from "../common/comp-loading";
 import { CompNotFound } from "../common/comp-not-found";

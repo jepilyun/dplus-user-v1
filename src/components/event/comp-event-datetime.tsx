@@ -1,8 +1,8 @@
-import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date-utils";
+import { formatDateTime, formatTimeOnly, parseAndSetTime } from "@/utils/date/dateUtils";
 import { ResponseEventDetailForUserFront } from "dplus_common_v1";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { isAfterStartUtc } from "@/utils/dday-card-utils";
+import { isAfterStartUtc } from "@/utils/date/ddayCardUtils";
 
 
 /**

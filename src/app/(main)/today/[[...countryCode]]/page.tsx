@@ -2,8 +2,8 @@ import { Metadata } from "next";
 
 import { fetchGetTodayList } from "@/api/today/fetchToday";
 import CompTodayDetailPage from "@/components/today/comp-today-detail-page";
-import { generateSimpleMetadata } from "@/utils/generate-metadata";
-import { getRequestLocale } from "@/utils/get-request-locale";
+import { generateSimpleMetadata } from "@/utils/metadata/generateMetadata";
+import { getRequestLocale } from "@/utils/getRequestLocale";
 import { LIST_LIMIT } from "dplus_common_v1";
 
 /**

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 import CompFooter from "@/components/common/comp-footer";
 import TopNavMain from "@/components/top-nav/top-nav-main";
-import { generateLayoutMetadata } from "@/utils/generate-metadata";
+import { generateLayoutMetadata } from "@/utils/metadata/generateMetadata";
 
 /**
  * Generate metadata for the page
