@@ -9,12 +9,12 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { getCityDetailImageUrls } from "@/utils/image/setImageUrls";
-import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
+import DdayCardListTypeEventInfo from "../ddayCard/DdayCardListTypeEventInfo";
 import { CompLoadMore } from "../button/LoadMore";
 import { HeroImageBackgroundCarouselCity } from "../image/HeroBackgroundCarouselCity";
 import { incrementCityViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";

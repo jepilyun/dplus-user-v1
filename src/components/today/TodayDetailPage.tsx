@@ -4,7 +4,7 @@ import { clientReqGetTodayList } from "@/api/today/clientReqToday";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
 import { CompLoadMore } from "../button/LoadMore";
-import DdayCardListTypeDateDetail from "../dday-card/DdayCardListTypeDateDetail";
+import DdayCardListTypeDateDetail from "../ddayCard/DdayCardListTypeDateDetail";
 import {
   todayYmdInTz,
   getSectionForDate,
@@ -13,7 +13,7 @@ import {
   detectBrowserLanguage,
 } from "@/utils/date/dateYmd";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import DdayCardBoxTypeDateDetail from "../dday-card/DdayCardBoxTypeDateDetail";
+import DdayCardBoxTypeDateDetail from "../ddayCard/DdayCardBoxTypeDateDetail";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";

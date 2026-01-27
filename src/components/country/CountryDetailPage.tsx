@@ -12,7 +12,7 @@ import { incrementCountryViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
 import { CompCountryCategoryItem } from "./CountryCategoryItem";
 import { CompCountryCityItem } from "./CountryCityItem";
-import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";

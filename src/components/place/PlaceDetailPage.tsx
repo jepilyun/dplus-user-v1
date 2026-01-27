@@ -7,15 +7,15 @@ import {
   TMapPlaceEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
+import DdayCardListTypeEventInfo from "../ddayCard/DdayCardListTypeEventInfo";
 import { CompLoadMore } from "../button/LoadMore";
-import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";
 import dynamic from "next/dynamic";
 
-const GoogleMap = dynamic(() => import("../google-map/GoogleMap"), {
+const GoogleMap = dynamic(() => import("../googleMap/GoogleMap"), {
   ssr: false,
   loading: () => (
     <div className="w-full h-[300px] bg-gray-200 animate-pulse flex items-center justify-center">

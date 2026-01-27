@@ -5,9 +5,9 @@ import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "d
 import { useRef, useState } from "react";
 import { CompLoadMore } from "../button/LoadMore";
 import DateNavigation from "./DateNavigation";
-import DdayCardListTypeDateDetail from "../dday-card/DdayCardListTypeDateDetail";
+import DdayCardListTypeDateDetail from "../ddayCard/DdayCardListTypeDateDetail";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import DdayCardBoxTypeDateDetail from "../dday-card/DdayCardBoxTypeDateDetail";
+import DdayCardBoxTypeDateDetail from "../ddayCard/DdayCardBoxTypeDateDetail";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";

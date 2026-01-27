@@ -7,10 +7,10 @@ import {
   TMapTagEventWithEventInfo,
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
-import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
+import DdayCardListTypeEventInfo from "../ddayCard/DdayCardListTypeEventInfo";
 import { CompLoadMore } from "../button/LoadMore";
 import { incrementTagViewCount } from "@/utils/api/incrementCount";
-import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";

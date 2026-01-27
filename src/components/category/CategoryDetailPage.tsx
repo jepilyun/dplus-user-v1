@@ -8,8 +8,8 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { CompLoadMore } from "../button/LoadMore";
-import DdayCardListTypeEventInfo from "../dday-card/DdayCardListTypeEventInfo";
-import DdayCardBoxTypeEventInfo from "../dday-card/DdayCardBoxTypeEventInfo";
+import DdayCardListTypeEventInfo from "../ddayCard/DdayCardListTypeEventInfo";
+import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
 import { incrementCategoryViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
 import { CompLoading } from "../common/Loading";
