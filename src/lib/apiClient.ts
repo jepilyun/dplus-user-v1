@@ -152,4 +152,130 @@ apiClient.interceptors.response.use(
   }
 );
 
+// ============================================
+// Response Type (for compatibility)
+// ============================================
+export interface ApiError {
+  code: string;
+  message: string;
+}
+
+export interface ApiResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  error?: ApiError;
+  message?: string;
+}
+
+// ============================================
+// Helper Functions (for compatibility)
+// ============================================
+
+/**
+ * Save access token (alias for TokenStorage.setAccessToken)
+ */
+export const saveAccessToken = TokenStorage.setAccessToken;
+
+/**
+ * Remove access token (alias for TokenStorage.removeAccessToken)
+ */
+export const removeAccessToken = TokenStorage.removeAccessToken;
+
+/**
+ * Check if access token exists
+ */
+export const hasAccessToken = (): boolean => {
+  return TokenStorage.getAccessToken() !== null;
+};
+
+/**
+ * API GET request wrapper
+ */
+export async function apiGet<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
+  try {
+    const response = await apiClient.get<ApiResponse<T>>(endpoint);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data as ApiResponse<T>;
+    }
+    return {
+      success: false,
+      error: {
+        code: "NETWORK_ERROR",
+        message: error instanceof Error ? error.message : "Network error",
+      },
+    };
+  }
+}
+
+/**
+ * API POST request wrapper
+ */
+export async function apiPost<T = unknown>(
+  endpoint: string,
+  body?: unknown
+): Promise<ApiResponse<T>> {
+  try {
+    const response = await apiClient.post<ApiResponse<T>>(endpoint, body);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data as ApiResponse<T>;
+    }
+    return {
+      success: false,
+      error: {
+        code: "NETWORK_ERROR",
+        message: error instanceof Error ? error.message : "Network error",
+      },
+    };
+  }
+}
+
+/**
+ * API PUT request wrapper
+ */
+export async function apiPut<T = unknown>(
+  endpoint: string,
+  body?: unknown
+): Promise<ApiResponse<T>> {
+  try {
+    const response = await apiClient.put<ApiResponse<T>>(endpoint, body);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data as ApiResponse<T>;
+    }
+    return {
+      success: false,
+      error: {
+        code: "NETWORK_ERROR",
+        message: error instanceof Error ? error.message : "Network error",
+      },
+    };
+  }
+}
+
+/**
+ * API DELETE request wrapper
+ */
+export async function apiDelete<T = unknown>(endpoint: string): Promise<ApiResponse<T>> {
+  try {
+    const response = await apiClient.delete<ApiResponse<T>>(endpoint);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      return error.response.data as ApiResponse<T>;
+    }
+    return {
+      success: false,
+      error: {
+        code: "NETWORK_ERROR",
+        message: error instanceof Error ? error.message : "Network error",
+      },
+    };
+  }
+}
+
 export default apiClient;
