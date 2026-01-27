@@ -1,16 +1,22 @@
-import { TEventCardForDateDetail } from "dplus_common_v1";
-import DdayCardListType from "./DdayCardListType";
+"use client";
 
-export default function DdayCardListTypeDateDetail({
+import { TEventCardForDateDetail } from "dplus_common_v1";
+import DdayCardBoxType from "./DdayCardBoxType";
+
+export default function DdayCardBoxTypeForDatePage({
   event,
   fullLocale,
   langCode,
-}: { event: TEventCardForDateDetail; fullLocale: string; langCode: string }) {
+}: { 
+  event: TEventCardForDateDetail; 
+  fullLocale: string;
+  langCode: string;
+}) {
   const code = event?.event_code ?? "default";
-  const thumbnailUrl = event?.thumbnail_square || event?.thumbnail_vertical || event?.thumbnail_horizontal;
+  const thumbnailUrl = getThumbnailUrl(event);
 
   return (
-    <DdayCardListType
+    <DdayCardBoxType
       eventCode={code}
       date={event?.date ?? null}
       time={event?.time}
@@ -21,12 +27,15 @@ export default function DdayCardListTypeDateDetail({
       title={event?.title ?? ""}
       bgColor={event?.bg_color ?? undefined}
       fgColor={event?.fg_color ?? undefined}
-      thumbnailUrl={thumbnailUrl || null}
+      thumbnailUrl={thumbnailUrl ?? null}
       fullLocale={fullLocale}
       langCode={langCode}
       placeId={event?.place_id?.toString() ?? undefined}
       placeName={event?.place_name ?? undefined}
-      useClientWrapper={false}
     />
   );
+}
+
+function getThumbnailUrl(event: TEventCardForDateDetail) {
+  return event?.thumbnail_square || event?.thumbnail_vertical || event?.thumbnail_horizontal;
 }

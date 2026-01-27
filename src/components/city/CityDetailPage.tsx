@@ -9,12 +9,12 @@ import {
 } from "dplus_common_v1";
 import { useEffect, useRef, useState } from "react";
 import { getCityDetailImageUrls } from "@/utils/image/setImageUrls";
-import DdayCardListTypeEventInfo from "../ddayCard/DdayCardListTypeEventInfo";
+import DdayCardListTypeForDetailPage from "../ddayCard/DdayCardListTypeForDetailPage";
 import { CompLoadMore } from "../button/LoadMore";
 import { HeroImageBackgroundCarouselCity } from "../image/HeroBackgroundCarouselCity";
 import { incrementCityViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
+import DdayCardBoxTypeForDetailPage from "../ddayCard/DdayCardBoxTypeForDetailPage";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";
@@ -278,10 +278,10 @@ export default function CompCityDetailPage({
 
       {events?.length ? (
         <>
-          {/* 모바일: DdayCardListTypeEventInfo */}
+          {/* 모바일: DdayCardListTypeForDetailPage */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <DdayCardBoxTypeEventInfo 
+              <DdayCardBoxTypeForDetailPage 
                 key={item.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
@@ -291,11 +291,11 @@ export default function CompCityDetailPage({
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>
 
-          {/* 데스크톱: DdayCardListTypeEventInfoCard */}
+          {/* 데스크톱: DdayCardListTypeForDetailPageCard */}
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <DdayCardListTypeEventInfo key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
+                <DdayCardListTypeForDetailPage key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}

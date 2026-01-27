@@ -5,9 +5,9 @@ import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "d
 import { useRef, useState } from "react";
 import { CompLoadMore } from "../button/LoadMore";
 import DateNavigation from "./DateNavigation";
-import DdayCardListTypeDateDetail from "../ddayCard/DdayCardListTypeDateDetail";
+import DdayCardListTypeForDatePage from "../ddayCard/DdayCardListTypeForDatePage";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import DdayCardBoxTypeDateDetail from "../ddayCard/DdayCardBoxTypeDateDetail";
+import DdayCardBoxTypeForDatePage from "../ddayCard/DdayCardBoxTypeForDatePage";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";
@@ -212,10 +212,10 @@ export default function CompDateDetailPage({
 
       {events?.length ? (
         <>
-        {/* 모바일: DdayCardListTypeEventInfo */}
+        {/* 모바일: DdayCardListTypeForDetailPage */}
           <div className="sm:hidden mx-auto w-full max-w-[1024px] grid grid-cols-1 gap-4">
             {events.map((item) => (
-              <DdayCardBoxTypeDateDetail 
+              <DdayCardBoxTypeForDatePage 
                 key={item.event_code} 
                 event={item} 
                 fullLocale={fullLocale} 
@@ -225,11 +225,11 @@ export default function CompDateDetailPage({
             {eventsHasMore && <CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} />}
           </div>
 
-          {/* 데스크톱: DdayCardListTypeEventInfoCard */}
+          {/* 데스크톱: DdayCardListTypeForDetailPageCard */}
           <div className="hidden sm:block mx-auto w-full max-w-[1024px] px-4 lg:px-6">
             <div className="flex flex-col gap-4">
               {events.map((item) => (
-                <DdayCardListTypeDateDetail key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
+                <DdayCardListTypeForDatePage key={item.event_code} event={item} fullLocale={fullLocale} langCode={langCode} />
               ))}
             </div>
             {eventsHasMore && <div className="mt-4"><CompLoadMore onLoadMore={loadMoreEvents} loading={eventsLoading} locale={langCode} /></div>}

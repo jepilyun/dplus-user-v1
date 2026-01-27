@@ -4,7 +4,7 @@ import { clientReqGetTodayList } from "@/api/today/clientReqToday";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
 import { CompLoadMore } from "../button/LoadMore";
-import DdayCardListTypeDateDetail from "../ddayCard/DdayCardListTypeDateDetail";
+import DdayCardListTypeForDatePage from "../ddayCard/DdayCardListTypeForDatePage";
 import {
   todayYmdInTz,
   getSectionForDate,
@@ -13,7 +13,7 @@ import {
   detectBrowserLanguage,
 } from "@/utils/date/dateYmd";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
-import DdayCardBoxTypeDateDetail from "../ddayCard/DdayCardBoxTypeDateDetail";
+import DdayCardBoxTypeForDatePage from "../ddayCard/DdayCardBoxTypeForDatePage";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";
@@ -303,18 +303,18 @@ export default function CompTodayDetailPage({
 
               blocks.push(
                 <div key={`event-${item.event_code}`}>
-                  {/* 모바일: DdayCardListTypeEventInfoCardForDate */}
+                  {/* 모바일: DdayCardListTypeForDetailPageCardForDate */}
                   <div className="md:hidden">
-                    <DdayCardBoxTypeDateDetail 
+                    <DdayCardBoxTypeForDatePage 
                       event={item} 
                       fullLocale={fullLocale} 
                       langCode={langCode}
                     />
                   </div>
 
-                  {/* 데스크톱: DdayCardListTypeEventInfoForDate */}
+                  {/* 데스크톱: DdayCardListTypeForDetailPageForDate */}
                   <div className="hidden md:block">
-                    <DdayCardListTypeDateDetail event={item} fullLocale={fullLocale} langCode={langCode} />
+                    <DdayCardListTypeForDatePage event={item} fullLocale={fullLocale} langCode={langCode} />
                   </div>
                 </div>
               );

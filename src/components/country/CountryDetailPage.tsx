@@ -12,7 +12,7 @@ import { incrementCountryViewCount } from "@/utils/api/incrementCount";
 import { getSessionDataVersion } from "@/utils/getSessionDataVersion";
 import { CompCountryCategoryItem } from "./CountryCategoryItem";
 import { CompCountryCityItem } from "./CountryCityItem";
-import DdayCardBoxTypeEventInfo from "../ddayCard/DdayCardBoxTypeEventInfo";
+import DdayCardBoxTypeForDetailPage from "../ddayCard/DdayCardBoxTypeForDetailPage";
 import { CompLoading } from "../common/Loading";
 import { CompNotFound } from "../common/NotFound";
 import { CompNetworkError } from "../common/NetworkError";
@@ -300,7 +300,7 @@ export default function CompCountryDetailPage({
         <>
         <div className="mx-auto w-full max-w-[1440px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {events.map(item => (
-            <DdayCardBoxTypeEventInfo 
+            <DdayCardBoxTypeForDetailPage 
               key={item.event_info?.event_code} 
               event={item} 
               fullLocale={fullLocale}

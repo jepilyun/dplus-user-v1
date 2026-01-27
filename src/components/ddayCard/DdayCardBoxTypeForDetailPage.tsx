@@ -6,7 +6,7 @@ import DdayCardBoxType from "./DdayCardBoxType";
 
 type EventType = TMapFolderEventWithEventInfo | TMapCityEventWithEventInfo | TMapStagEventWithEventInfo | TMapGroupEventWithEventInfo | TMapTagEventWithEventInfo | TMapCategoryEventWithEventInfo | TMapCountryEventWithEventInfo | TMapPlaceEventWithEventInfo;
 
-export default function DdayCardBoxTypeEventInfo({
+export default function DdayCardBoxTypeForDetailPage({
   event,
   fullLocale,
   langCode,
