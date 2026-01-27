@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCategoryDetail, reqGetCategoryEvents } from "@/api/req-category";
+import { fetchGetCategoryDetail, fetchGetCategoryEvents } from "@/api/category/fetchCategory";
 import {
   LIST_LIMIT,
   ResponseCategoryDetailForUserFront,
@@ -68,7 +68,7 @@ export default function CompCategoryDetailPage({
     }
 
     try {
-      const res = await reqGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetCategoryDetail(countryCode, categoryCode, langCode, 0, LIST_LIMIT.default);
   
       if (!res?.dbResponse || !res?.dbResponse?.categoryDetail) {
         setError("not-found");
@@ -166,7 +166,7 @@ export default function CompCategoryDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCategoryEvents(countryCode, categoryCode, eventsStart, LIST_LIMIT.default);
+      const res = await fetchGetCategoryEvents(countryCode, categoryCode, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapCategoryEventWithEventInfo) => {

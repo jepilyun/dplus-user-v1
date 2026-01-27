@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { reqGetDateList } from "@/api/req-date";
+import { fetchGetDateList } from "@/api/date/fetchDate";
 import CompDateDetailPage from "@/components/date/comp-date-detail-page";
 import { generateSimpleMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -44,7 +44,7 @@ export default async function DateDetailPage({
   const { fullLocale, langCode } = await getRequestLocale();
 
   // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-  const response = await reqGetDateList(
+  const response = await fetchGetDateList(
     countryCode,
     date,
     0,

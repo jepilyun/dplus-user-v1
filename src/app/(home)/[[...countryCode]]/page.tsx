@@ -2,7 +2,7 @@ export const revalidate = 14400; // 4 hrs
 
 import { getRequestLocale } from "@/utils/get-request-locale";
 import CompCountryDetailPage from "@/components/country/comp-country-detail-page";
-import { reqGetCountryDetail } from "@/api/req-country";
+import { fetchGetCountryDetail } from "@/api/country/fetchCountry";
 import { LIST_LIMIT } from "dplus_common_v1";
 import { notFound } from "next/navigation";
 
@@ -17,7 +17,7 @@ export default async function DplusHomeDetail({ params }: { params: Promise<Para
   const resolvedCountryCode = countryCode ?? "KR";
 
   // API 호출
-  const response = await reqGetCountryDetail(
+  const response = await fetchGetCountryDetail(
     resolvedCountryCode,
     langCode,
     0,

@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
 import { LIST_LIMIT } from "dplus_common_v1";
-import { reqGetPlaceDetail } from "@/api/req-place";
+import { fetchGetPlaceDetail } from "@/api/place/fetchPlace";
 import CompPlaceDetailPage from "@/components/place/comp-place-detail-page";
 
 /**
@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { placeId } = await params;
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetPlaceDetail(placeId, langCode, 0, 36).catch(
+  const response = await fetchGetPlaceDetail(placeId, langCode, 0, 36).catch(
     () => null
   );
   const placeDetail = response?.dbResponse?.placeDetail ?? null;
@@ -54,7 +54,7 @@ export default async function PlaceDetailPage({
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-    const response = await reqGetPlaceDetail(
+    const response = await fetchGetPlaceDetail(
       placeId, 
       langCode, 
       0, 

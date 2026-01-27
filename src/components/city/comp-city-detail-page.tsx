@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetCityDetail, reqGetCityEvents } from "@/api/req-city";
+import { fetchGetCityDetail, fetchGetCityEvents } from "@/api/city/fetchCity";
 import {
   LIST_LIMIT,
   ResponseCityDetailForUserFront,
@@ -77,7 +77,7 @@ export default function CompCityDetailPage({
     }
 
     try {
-      const res = await reqGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetCityDetail(cityCode, langCode, 0, LIST_LIMIT.default);
   
       const isEmptyObj =
         !res?.dbResponse ||
@@ -207,7 +207,7 @@ export default function CompCityDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetCityEvents(cityCode, eventsStart, LIST_LIMIT.default, langCode);
+      const res = await fetchGetCityEvents(cityCode, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapCityEventWithEventInfo) => {

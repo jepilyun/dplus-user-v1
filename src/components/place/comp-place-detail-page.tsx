@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetPlaceDetail, reqGetPlaceEvents } from "@/api/req-place";
+import { fetchGetPlaceDetail, fetchGetPlaceEvents } from "@/api/place/fetchPlace";
 import {
   LIST_LIMIT,
   ResponsePlaceDetailForUserFront,
@@ -71,7 +71,7 @@ export default function CompPlaceDetailPage({
     }
 
     try {
-      const res = await reqGetPlaceDetail(placeId, langCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetPlaceDetail(placeId, langCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
 
       const isEmptyObj = !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
@@ -169,7 +169,7 @@ export default function CompPlaceDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetPlaceEvents(placeId, langCode, eventsStart, LIST_LIMIT.default);
+      const res = await fetchGetPlaceEvents(placeId, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapPlaceEventWithEventInfo | null) => {

@@ -1,12 +1,12 @@
 // app/sitemap-folders.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetFolderCodeList } from "@/api/req-folder";
+import { fetchGetFolderCodeList } from "@/api/folder/fetchFolder";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
 
-  const folderRes = await reqGetFolderCodeList(50000);
+  const folderRes = await fetchGetFolderCodeList(50000);
   const folderCodes = folderRes?.dbResponse ?? [];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

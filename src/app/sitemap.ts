@@ -1,11 +1,11 @@
 // app/sitemap.ts
-import { reqGetCategoryCodes } from "@/api/req-category";
-import { reqGetCityCodes } from "@/api/req-city";
-import { reqGetCountryCodes } from "@/api/req-country";
-import { reqGetEventCodeList } from "@/api/req-event";
-import { reqGetFolderCodeList } from "@/api/req-folder";
-import { reqGetGroupCodes } from "@/api/req-group";
-import { reqGetStagCodes } from "@/api/req-stag";
+import { fetchGetCategoryCodes } from "@/api/category/fetchCategory";
+import { fetchGetCityCodes } from "@/api/city/fetchCity";
+import { fetchGetCountryCodes } from "@/api/country/fetchCountry";
+import { fetchGetEventCodeList } from "@/api/event/fetchEvent";
+import { fetchGetFolderCodeList } from "@/api/folder/fetchFolder";
+import { fetchGetGroupCodes } from "@/api/group/fetchGroup";
+import { fetchGetStagCodes } from "@/api/stag/fetchStag";
 import { MetadataRoute } from "next";
 
 
@@ -29,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // 2. Country 페이지
-  const countryRes = await reqGetCountryCodes();
+  const countryRes = await fetchGetCountryCodes();
   const countryCodes = countryRes?.dbResponse ?? [];
   const countryPages: MetadataRoute.Sitemap = countryCodes.map(
     (item: { country_code: string }) => ({
@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 3. City 페이지
-  const cityRes = await reqGetCityCodes(100);
+  const cityRes = await fetchGetCityCodes(100);
   const cityCodes = cityRes?.dbResponse ?? [];
   const cityPages: MetadataRoute.Sitemap = cityCodes.map(
     (item: { city_code: string }) => ({
@@ -53,7 +53,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 4. Category 페이지 (category x country 조합)
-  const categoryRes = await reqGetCategoryCodes(200);
+  const categoryRes = await fetchGetCategoryCodes(200);
   const categoryCodes = categoryRes?.dbResponse ?? [];
   const categoryPages: MetadataRoute.Sitemap = [];
 
@@ -79,7 +79,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 6. Stag 페이지 (최근 500개)
-  const stagRes = await reqGetStagCodes(100);
+  const stagRes = await fetchGetStagCodes(100);
   const stagCodes = stagRes?.dbResponse ?? [];
   const stagPages: MetadataRoute.Sitemap = stagCodes.map(
     (item: { stag_code: string }) => ({
@@ -91,7 +91,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 7. Group 페이지 (최근 500개)
-  const groupRes = await reqGetGroupCodes(100);
+  const groupRes = await fetchGetGroupCodes(100);
   const groupCodes = groupRes?.dbResponse ?? [];
   const groupPages: MetadataRoute.Sitemap = groupCodes.map(
     (item: { group_code: string }) => ({
@@ -103,7 +103,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 8. Event 페이지 (최근 1000개만)
-  const eventRes = await reqGetEventCodeList(1000);
+  const eventRes = await fetchGetEventCodeList(1000);
   const eventCodes = eventRes?.dbResponse ?? [];
   const eventPages: MetadataRoute.Sitemap = eventCodes.map(
     (item: { event_code: string }) => ({
@@ -115,7 +115,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   );
 
   // 9. Folder 페이지 (최근 500개만)
-  const folderRes = await reqGetFolderCodeList(500);
+  const folderRes = await fetchGetFolderCodeList(500);
   const folderCodes = folderRes?.dbResponse ?? [];
   const folderPages: MetadataRoute.Sitemap = folderCodes.map(
     (item: { folder_code: string }) => ({

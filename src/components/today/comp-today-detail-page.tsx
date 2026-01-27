@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetTodayList } from "@/api/req-today";
+import { fetchGetTodayList } from "@/api/today/fetchToday";
 import { DplusGetListDataResponse, LIST_LIMIT, TEventCardForDateDetail } from "dplus_common_v1";
 import React, { useEffect, useRef, useState } from "react";
 import { CompLoadMore } from "../button/comp-load-more";
@@ -110,7 +110,7 @@ export default function CompTodayDetailPage({
 
     const reqId = ++requestIdRef.current;
     try {
-      const res = await reqGetTodayList(countryCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetTodayList(countryCode, 0, LIST_LIMIT.default);
       if (reqId !== requestIdRef.current) return;
   
       if (!res?.dbResponse || !res?.dbResponse?.items) {
@@ -220,7 +220,7 @@ export default function CompTodayDetailPage({
     const reqId = ++requestIdRef.current;
 
     try {
-      const res = await reqGetTodayList(countryCode, eventsStart, LIST_LIMIT.default);
+      const res = await fetchGetTodayList(countryCode, eventsStart, LIST_LIMIT.default);
       if (reqId !== requestIdRef.current) return;
 
       const newRaw = (res?.dbResponse?.items ?? []).filter(isValidEvent);

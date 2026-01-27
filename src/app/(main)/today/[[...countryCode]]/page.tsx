@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { reqGetTodayList } from "@/api/req-today";
+import { fetchGetTodayList } from "@/api/today/fetchToday";
 import CompTodayDetailPage from "@/components/today/comp-today-detail-page";
 import { generateSimpleMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -43,7 +43,7 @@ export default async function TodayPage({
   const { fullLocale, langCode } = await getRequestLocale();
   const resolvedCountryCode = countryCode ?? "KR";
 
-  const response = await reqGetTodayList(resolvedCountryCode, 0, LIST_LIMIT.default).catch(() => null);
+  const response = await fetchGetTodayList(resolvedCountryCode, 0, LIST_LIMIT.default).catch(() => null);
   const initialData = response?.dbResponse ?? null;
 
   return (

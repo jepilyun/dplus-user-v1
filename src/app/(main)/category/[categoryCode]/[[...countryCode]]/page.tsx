@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetCategoryCodes, reqGetCategoryDetail } from "@/api/req-category";
+import { fetchGetCategoryCodes, fetchGetCategoryDetail } from "@/api/category/fetchCategory";
 import CompCategoryDetailPage from "@/components/category/comp-category-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -24,7 +24,7 @@ export async function generateMetadata({
 
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetCategoryDetail(
+  const response = await fetchGetCategoryDetail(
     countryCode,
     categoryCode,
     langCode,
@@ -53,7 +53,7 @@ export async function generateMetadata({
  */
 export async function generateStaticParams() {
   try {
-    const res = await reqGetCategoryCodes();
+    const res = await fetchGetCategoryCodes();
     const list = res?.dbResponse ?? []; // 없으면 빈 배열
 
     return list.map((cat: { category_code: string }) => ({
@@ -85,7 +85,7 @@ export default async function CategoryDetailPage({
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-    const response = await reqGetCategoryDetail(
+    const response = await fetchGetCategoryDetail(
       resolvedCountryCode,
       categoryCode,
       langCode,

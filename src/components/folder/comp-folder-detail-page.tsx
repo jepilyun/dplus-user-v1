@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetFolderDetail, reqGetFolderEvents } from "@/api/req-folder";
+import { fetchGetFolderDetail, fetchGetFolderEvents } from "@/api/folder/fetchFolder";
 import { HeroImageSlider } from "@/components/image/hero-image-slider";
 import {
   LIST_LIMIT,
@@ -81,7 +81,7 @@ export default function CompFolderDetailPage({
     }
 
     try {
-      const res = await reqGetFolderDetail(folderCode, langCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetFolderDetail(folderCode, langCode, 0, LIST_LIMIT.default);
       const db = res?.dbResponse;
 
       const isEmptyObj = !db || (typeof db === "object" && !Array.isArray(db) && Object.keys(db).length === 0);
@@ -211,7 +211,7 @@ export default function CompFolderDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetFolderEvents(folderCode, langCode, eventsStart, LIST_LIMIT.default);
+      const res = await fetchGetFolderEvents(folderCode, langCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapFolderEventWithEventInfo) => {

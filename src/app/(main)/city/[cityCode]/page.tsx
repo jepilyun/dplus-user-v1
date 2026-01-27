@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetCityCodes, reqGetCityDetail } from "@/api/req-city";
+import { fetchGetCityCodes, fetchGetCityDetail } from "@/api/city/fetchCity";
 import CompCityDetailPage from "@/components/city/comp-city-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { cityCode } = await params;
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetCityDetail(cityCode, langCode, 0, 36).catch(
+  const response = await fetchGetCityDetail(cityCode, langCode, 0, 36).catch(
     () => null
   );
   const cityDetail = response?.dbResponse?.cityDetail ?? null;
@@ -43,7 +43,7 @@ export async function generateMetadata({
  */
 export async function generateStaticParams() {
   try {
-    const res = await reqGetCityCodes();
+    const res = await fetchGetCityCodes();
     const list = res?.dbResponse ?? []; // 없으면 빈 배열
     return list.map((cat: { city_code: string }) => ({
       cityCode: cat.city_code,
@@ -71,7 +71,7 @@ export default async function CityDetailPage({
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-    const response = await reqGetCityDetail(
+    const response = await fetchGetCityDetail(
       cityCode,
       langCode,
       0,

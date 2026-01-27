@@ -1,13 +1,13 @@
 // app/sitemap-events.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetEventCodeList } from "@/api/req-event";
+import { fetchGetEventCodeList } from "@/api/event/fetchEvent";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
 
   // 전체 이벤트 코드 가져오기 (페이지네이션 필요 시 여러번 호출)
-  const eventRes = await reqGetEventCodeList(10000);
+  const eventRes = await fetchGetEventCodeList(10000);
   const eventCodes = eventRes?.dbResponse ?? [];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

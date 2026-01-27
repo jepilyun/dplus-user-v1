@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetGroupCodes, reqGetGroupDetail } from "@/api/req-group";
+import { fetchGetGroupCodes, fetchGetGroupDetail } from "@/api/group/fetchGroup";
 import CompGroupDetailPage from "@/components/group/comp-group-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { groupCode } = await params;
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetGroupDetail(groupCode, langCode, 0, 36).catch(
+  const response = await fetchGetGroupDetail(groupCode, langCode, 0, 36).catch(
     () => null
   );
   const groupDetail = response?.dbResponse?.groupDetail ?? null;
@@ -42,7 +42,7 @@ export async function generateMetadata({
  */
 export async function generateStaticParams() {
   try {
-    const res = await reqGetGroupCodes();
+    const res = await fetchGetGroupCodes();
     const list = res?.dbResponse ?? []; // 없으면 빈 배열
     return list.map((cat: { group_code: string }) => ({
       groupCode: cat.group_code,
@@ -70,7 +70,7 @@ export default async function GroupDetailPage({
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-    const response = await reqGetGroupDetail(
+    const response = await fetchGetGroupDetail(
       groupCode,
       langCode,
       0,

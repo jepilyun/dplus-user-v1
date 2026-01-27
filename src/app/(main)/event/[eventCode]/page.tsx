@@ -4,7 +4,7 @@ export const revalidate = 14400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetEventCodeList, reqGetEventDetail } from "@/api/req-event";
+import { fetchGetEventCodeList, fetchGetEventDetail } from "@/api/event/fetchEvent";
 import CompEventDetailPage from "@/components/event/comp-event-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -20,7 +20,7 @@ export async function generateMetadata({
   const { eventCode } = await params;
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetEventDetail(eventCode, langCode).catch(
+  const response = await fetchGetEventDetail(eventCode, langCode).catch(
     () => null
   );
   const eventDetail = response?.dbResponse?.eventDetail ?? null;
@@ -41,7 +41,7 @@ export async function generateMetadata({
  */
 export async function generateStaticParams() {
   try {
-    const res = await reqGetEventCodeList(300);
+    const res = await fetchGetEventCodeList(300);
     const list = res?.dbResponse ?? []; // 없으면 빈 배열
 
     return list.map((event: { event_code: string }) => ({
@@ -69,7 +69,7 @@ export default async function EventDetailPage({
   const { fullLocale, langCode } = await getRequestLocale();
 
   try {
-    const response = await reqGetEventDetail(eventCode, langCode);
+    const response = await fetchGetEventDetail(eventCode, langCode);
     const eventDetail = response?.dbResponse ?? null;
 
     // ✅ 데이터 검증

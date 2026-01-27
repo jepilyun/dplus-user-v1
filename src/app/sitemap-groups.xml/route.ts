@@ -1,12 +1,12 @@
 // app/sitemap-groups.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetGroupCodes } from "@/api/req-group";
+import { fetchGetGroupCodes } from "@/api/group/fetchGroup";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
 
-  const groupRes = await reqGetGroupCodes(50000);
+  const groupRes = await fetchGetGroupCodes(50000);
   const groupCodes = groupRes?.dbResponse ?? [];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

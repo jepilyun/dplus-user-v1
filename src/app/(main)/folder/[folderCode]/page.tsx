@@ -4,7 +4,7 @@ export const revalidate = 86400;
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { reqGetFolderDetail } from "@/api/req-folder";
+import { fetchGetFolderDetail } from "@/api/folder/fetchFolder";
 import CompFolderDetailPage from "@/components/folder/comp-folder-detail-page";
 import { generateDetailMetadata } from "@/utils/generate-metadata";
 import { getRequestLocale } from "@/utils/get-request-locale";
@@ -21,7 +21,7 @@ export async function generateMetadata({
   const { folderCode } = await params;
   const { langCode } = await getRequestLocale();
 
-  const response = await reqGetFolderDetail(folderCode, langCode, 0, 36).catch(
+  const response = await fetchGetFolderDetail(folderCode, langCode, 0, 36).catch(
     () => null
   );
   const folderDetail = response?.dbResponse?.folderDetail ?? null;
@@ -54,7 +54,7 @@ export default async function FolderDetailPage({
 
   try {
     // ✅ 서버에서 데이터 가져오기 (캐시 적용됨)
-    const response = await reqGetFolderDetail(
+    const response = await fetchGetFolderDetail(
       folderCode, 
       langCode, 
       0, 

@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetGroupDetail, reqGetGroupEvents } from "@/api/req-group";
+import { fetchGetGroupDetail, fetchGetGroupEvents } from "@/api/group/fetchGroup";
 import {
   LIST_LIMIT,
   ResponseGroupDetailForUserFront,
@@ -78,7 +78,7 @@ export default function CompGroupDetailPage({
     } 
 
     try {
-      const res = await reqGetGroupDetail(groupCode, langCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetGroupDetail(groupCode, langCode, 0, LIST_LIMIT.default);
   
       const isEmptyObj =
         !res?.dbResponse ||
@@ -215,7 +215,7 @@ export default function CompGroupDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetGroupEvents(groupCode, eventsStart, LIST_LIMIT.default);
+      const res = await fetchGetGroupEvents(groupCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapGroupEventWithEventInfo) => {

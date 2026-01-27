@@ -1,6 +1,6 @@
 "use client";
 
-import { reqGetStagDetail, reqGetStagEvents } from "@/api/req-stag";
+import { fetchGetStagDetail, fetchGetStagEvents } from "@/api/stag/fetchStag";
 import {
   LIST_LIMIT,
   ResponseStagDetailForUserFront,
@@ -77,7 +77,7 @@ export default function CompStagDetailPage({
     }
 
     try {
-      const res = await reqGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
+      const res = await fetchGetStagDetail(stagCode, langCode, 0, LIST_LIMIT.default);
   
       const isEmptyObj =
         !res?.dbResponse ||
@@ -207,7 +207,7 @@ export default function CompStagDetailPage({
     setEventsLoading(true);
 
     try {
-      const res = await reqGetStagEvents(stagCode, eventsStart, LIST_LIMIT.default);
+      const res = await fetchGetStagEvents(stagCode, eventsStart, LIST_LIMIT.default);
       const fetchedItems = res?.dbResponse?.items ?? [];
       
       const newItems = fetchedItems.filter((it: TMapStagEventWithEventInfo) => {

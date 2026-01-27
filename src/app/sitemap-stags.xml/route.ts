@@ -1,12 +1,12 @@
 // app/sitemap-stags.xml/route.ts
 import { NextResponse } from "next/server";
 
-import { reqGetStagCodes } from "@/api/req-stag";
+import { fetchGetStagCodes } from "@/api/stag/fetchStag";
 
 export async function GET() {
   const baseUrl = "https://www.dplus.app";
 
-  const stagRes = await reqGetStagCodes(50000);
+  const stagRes = await fetchGetStagCodes(50000);
   const stagCodes = stagRes?.dbResponse ?? [];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
