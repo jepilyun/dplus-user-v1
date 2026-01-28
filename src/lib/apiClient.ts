@@ -3,20 +3,34 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
 // ============================================
+// Constants
+// ============================================
+const BASE_URL = process.env.NEXT_PUBLIC_DEV_API_URL ?? "";
+
+// ============================================
+// Refresh 요청 동기화를 위한 상태
+// ============================================
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+let lastRefreshFailed = false; // refresh 실패 시 무한 재시도 방지
+
+// ============================================
 // Token Storage Helper
 // ============================================
 export const TokenStorage = {
   getAccessToken: (): string | null => {
     if (typeof window === "undefined") return null;
-    return sessionStorage.getItem("accessToken");
+    return localStorage.getItem("dplus-access-token-user");
   },
   setAccessToken: (token: string): void => {
     if (typeof window === "undefined") return;
-    sessionStorage.setItem("accessToken", token);
+    localStorage.setItem("dplus-access-token-user", token);
+    // 토큰 설정 시 실패 플래그 초기화
+    lastRefreshFailed = false;
   },
   removeAccessToken: (): void => {
     if (typeof window === "undefined") return;
-    sessionStorage.removeItem("accessToken");
+    localStorage.removeItem("dplus-access-token-user");
   },
 };
 
@@ -29,10 +43,82 @@ export const dispatchAuthEvent = (type: "logout" | "tokenRefreshed") => {
 };
 
 // ============================================
+// 토큰 만료 확인 함수
+// ============================================
+const isTokenExpiredOrExpiring = (token: string, bufferSeconds: number = 60): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expiresAt = payload.exp * 1000;
+    // 만료 시간 - 현재 시간 < 버퍼 시간이면 만료 임박
+    return expiresAt - Date.now() < bufferSeconds * 1000;
+  } catch {
+    return true; // 파싱 실패 시 만료로 간주
+  }
+};
+
+// ============================================
+// 토큰 갱신 함수 (실제 API 호출)
+// ============================================
+const performTokenRefresh = async (): Promise<string | null> => {
+  try {
+    const response = await axios.post(
+      `${BASE_URL}/api/auth/refresh`,
+      {},
+      { withCredentials: true }
+    );
+
+    const newAccessToken = response.data?.dbResponse?.accessToken;
+
+    if (newAccessToken) {
+      TokenStorage.setAccessToken(newAccessToken);
+      dispatchAuthEvent("tokenRefreshed");
+      lastRefreshFailed = false;
+      return newAccessToken;
+    }
+
+    lastRefreshFailed = true;
+    return null;
+  } catch {
+    lastRefreshFailed = true;
+    TokenStorage.removeAccessToken();
+    return null;
+  }
+};
+
+// ============================================
+// 갱신 필요 여부 확인 및 갱신 (동시 요청 시 Promise 공유)
+// ============================================
+const refreshTokenIfNeeded = async (): Promise<string | null> => {
+  const token = TokenStorage.getAccessToken();
+
+  // 토큰이 있고 유효하면 그대로 사용
+  if (token && !isTokenExpiredOrExpiring(token)) {
+    return token;
+  }
+
+  // refresh 실패 후 토큰 없으면 재시도 방지
+  if (lastRefreshFailed && !token) {
+    return null;
+  }
+
+  // 이미 갱신 중이면 같은 Promise 공유 (핵심!)
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  // 새 갱신 시작
+  isRefreshing = true;
+  refreshPromise = performTokenRefresh().finally(() => {
+    isRefreshing = false;
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
+};
+
+// ============================================
 // Axios Instance
 // ============================================
-const BASE_URL = process.env.NEXT_PUBLIC_DEV_API_URL ?? "";
-
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 30000,
@@ -43,14 +129,20 @@ export const apiClient = axios.create({
 });
 
 // ============================================
-// Request Interceptor
+// Request Interceptor - 요청 전 토큰 갱신
 // ============================================
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const accessToken = TokenStorage.getAccessToken();
+  async (config: InternalAxiosRequestConfig) => {
+    // 인증이 필요 없는 경로들
+    const excludePaths = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/google"];
+    const isExcluded = excludePaths.some((path) => config.url?.includes(path));
 
-    if (accessToken && config.headers) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    if (!isExcluded) {
+      // 요청 전에 토큰 갱신 확인
+      const token = await refreshTokenIfNeeded();
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     return config;
@@ -61,25 +153,8 @@ apiClient.interceptors.request.use(
 );
 
 // ============================================
-// Response Interceptor
+// Response Interceptor - 401 에러 처리
 // ============================================
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value: unknown) => void;
-  reject: (reason: unknown) => void;
-}> = [];
-
-const processQueue = (error: Error | null, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
-
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
@@ -96,56 +171,37 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // 이미 토큰 갱신 중이면 대기열에 추가
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            return apiClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
+      originalRequest._retry = true;
+
+      // 다른 요청이 이미 갱신했는지 확인
+      const currentToken = TokenStorage.getAccessToken();
+      const sentToken = originalRequest.headers?.Authorization?.toString().replace("Bearer ", "");
+
+      // 토큰이 바뀌었으면 새 토큰으로 재시도
+      if (currentToken && sentToken && currentToken !== sentToken) {
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${currentToken}`;
+        }
+        return apiClient(originalRequest);
       }
 
-      originalRequest._retry = true;
-      isRefreshing = true;
-
+      // 토큰 갱신 시도
       try {
-        // 토큰 갱신 요청 (refreshToken은 httpOnly 쿠키로 자동 전송)
-        const response = await axios.post(
-          `${BASE_URL}/api/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        const newToken = await refreshTokenIfNeeded();
 
-        const newAccessToken = response.data?.dbResponse?.accessToken;
-
-        if (newAccessToken) {
-          TokenStorage.setAccessToken(newAccessToken);
-          dispatchAuthEvent("tokenRefreshed");
-
-          // 대기 중인 요청들 처리
-          processQueue(null, newAccessToken);
-
-          // 원래 요청 재시도
+        if (newToken) {
           if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
           }
           return apiClient(originalRequest);
-        } else {
-          throw new Error("Token refresh failed");
         }
-      } catch (refreshError) {
-        processQueue(refreshError as Error, null);
-        TokenStorage.removeAccessToken();
-        dispatchAuthEvent("logout");
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
+      } catch {
+        // Refresh failed
       }
+
+      // Refresh 실패 시 로그아웃
+      TokenStorage.removeAccessToken();
+      dispatchAuthEvent("logout");
     }
 
     return Promise.reject(error);
