@@ -42,8 +42,20 @@ export const generateCalendarEvent = (
 ): ICalendarEvent => {
   if (!eventDetail) throw new Error("이벤트 정보가 없습니다.");
 
+  // ✅ 여러 날 이벤트 여부 (end_date가 있으면 time 무시하고 종일 이벤트)
+  const isMultiDay = !!eventDetail.end_date;
+
+  // ✅ 종일 이벤트 결정:
+  // 1. end_date가 있으면 → 종일 이벤트 (time 무시)
+  // 2. time이 없으면 → 종일 이벤트
+  // 3. time이 있으면 → 시간 이벤트
+  const allDay = isMultiDay || !eventDetail.time;
+
   let startDate: Date;
-  if (eventDetail.time) {
+  if (isMultiDay) {
+    // 여러 날 이벤트면 time 무시
+    startDate = toDate(eventDetail.date);
+  } else if (eventDetail.time) {
     startDate = toDate(`${eventDetail.date} ${eventDetail.time}`);
   } else {
     startDate = toDate(eventDetail.date);
@@ -52,21 +64,31 @@ export const generateCalendarEvent = (
   const event: ICalendarEvent = {
     title: eventDetail.title,
     startDate: startDate,
-    allDay: !eventDetail.time,
+    allDay: allDay,
   };
 
-  if (eventDetail.duration) {
-    event.endDate = addMinutes(toDate(event.startDate), eventDetail.duration);
+  // ✅ endDate 계산
+  if (isMultiDay) {
+    // 여러 날 이벤트: end_date + 1일 (ICS 규격상 종료일은 exclusive)
+    event.endDate = addDaysToDate(toDate(eventDetail.end_date!), 1);
+  } else if (!allDay) {
+    // 시간 이벤트: duration 있으면 계산, 없으면 기본 30분
+    const duration = eventDetail.duration ?? 30;
+    event.endDate = addMinutes(startDate, duration);
   }
+  // 단일 종일 이벤트(date만 있는 경우)는 endDate 미설정 → normalizeForICS에서 +1일 자동 처리
+
+  // ✅ description 객체가 아닌 description.description 문자열 사용
+  const descriptionText = description?.description ?? "";
 
   if (eventDetail.event_code) {
     const dplusUrl = `https://dplus.app/event/${eventDetail.event_code}`;
-    const dplusLink = description
-      ? `${description}\n\n━━━━━━━━━━━━━━━━\n📱 View on DPlus: ${dplusUrl}`
+    const dplusLink = descriptionText
+      ? `${descriptionText}\n\n━━━━━━━━━━━━━━━━\n📱 View on DPlus: ${dplusUrl}`
       : `📱 View on DPlus: ${dplusUrl}`;
     event.description = dplusLink;
-  } else if (description) {
-    event.description = description.description ?? "";
+  } else if (descriptionText) {
+    event.description = descriptionText;
   }
 
   if (eventDetail.address_native) event.location = eventDetail.address_native;
